@@ -1,0 +1,418 @@
+/* Members Page Specific Styles */
+
+/* Redefine stat card colors for members page */
+.stat-card.total-members { --accent-color: #3b82f6; }
+.stat-card.active-contributors { --accent-color: #10b981; }
+.stat-card.avg-contribution { --accent-color: #f59e0b; }
+.stat-card.top-contributor { --accent-color: #8b5cf6; }
+
+.stat-icon.members { background: #dbeafe; color: #2563eb; }
+.stat-icon.active { background: #dcfce7; color: #16a34a; }
+.stat-icon.average { background: #fef3c7; color: #d97706; }
+.stat-icon.top { background: #f3e8ff; color: #7c3aed; }
+
+/* Members Grid */
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.member-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid #667eea;
+}
+
+.member-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.15);
+}
+
+/* Member Header */
+.member-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 16px;
+}
+
+.member-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.member-status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.status-active {
+    background: #10b981;
+}
+
+.status-inactive {
+    background: #ef4444;
+}
+
+.member-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.member-info h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.member-role {
+    color: #667eea;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.member-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.member-contact {
+    color: #64748b;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.member-joined {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.member-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.btn-icon:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    transform: scale(1.05);
+}
+
+/* Member Stats */
+.member-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.member-stat {
+    text-align: center;
+}
+
+.member-stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.member-stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Recent Contributions */
+.recent-contributions {
+    margin-top: 20px;
+}
+
+.contributions-header {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.contribution-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.contribution-item:last-child {
+    border-bottom: none;
+}
+
+.contribution-date {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.contribution-amount {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Form Enhancements */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    background: white;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1e293b;
+    box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Modal Enhancements for Members */
+.modal-content {
+    max-width: 600px;
+}
+
+/* Member Progress Enhancement */
+.member-progress {
+    margin-top: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+}
+
+.member-progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    transition: width 1s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Status Indicators */
+.member-card[data-status="active"] {
+    border-left-color: #10b981;
+}
+
+.member-card[data-status="inactive"] {
+    border-left-color: #ef4444;
+}
+
+.member-card[data-status="pending"] {
+    border-left-color: #f59e0b;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .members-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .members-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .member-card {
+        padding: 20px;
+    }
+    
+    .member-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .member-actions {
+        align-self: flex-end;
+    }
+    
+    .member-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .member-stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .member-header {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .member-info h3 {
+        font-size: 1.1rem;
+    }
+    
+    .member-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 12px;
+    }
+    
+    .member-stat-value {
+        font-size: 1rem;
+    }
+    
+    .member-stat-label {
+        font-size: 0.75rem;
+    }
+}
+
+/* Loading States */
+.member-card.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.member-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+
+.stat-change.negative {
+    color: #ef4444; /* red */
+}
+
+.stat-change.positive {
+    color: #10b981; /* green */
+}
+
+
+

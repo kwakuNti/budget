@@ -1,0 +1,73 @@
+
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP specific
+vendor/
+composer.lock
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Cache and session files
+cache/
+sessions/
+*.cache
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Upload directories (if any)
+uploads/
+images/uploads/
+
+# Database dumps
+*.sql.backup
+*.sql.bak
+dump.sql
+
+# Development and testing files
+test/
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Node modules (if using any frontend build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Security sensitive files
+*.pem
+*.key
+*.crt
+secrets.txt
