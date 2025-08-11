@@ -1,43 +1,14 @@
-// Budget Page JavaScript - Fixed Version
+// Budget Page JavaScript - Backend Integrated Version
 
 // Global Variables
-let budgetData = {
-    income: 4150,
-    categories: {
-        needs: {
-            planned: 2200,
-            actual: 2075,
-            items: {
-                rent: { planned: 1200, actual: 1200, icon: '🏠' },
-                groceries: { planned: 450, actual: 425, icon: '🍽️' },
-                utilities: { planned: 200, actual: 180, icon: '⚡' },
-                transport: { planned: 350, actual: 270, icon: '🚗' }
-            }
-        },
-        wants: {
-            planned: 1050,
-            actual: 950,
-            items: {
-                dining: { planned: 300, actual: 280, icon: '🍽️' },
-                entertainment: { planned: 250, actual: 270, icon: '🎬' },
-                shopping: { planned: 500, actual: 400, icon: '🛍️' }
-            }
-        },
-        savings: {
-            planned: 800,
-            actual: 850,
-            items: {
-                emergency: { planned: 400, actual: 450, icon: '🆘' },
-                vacation: { planned: 200, actual: 200, icon: '🏖️' },
-                investments: { planned: 200, actual: 200, icon: '📈' }
-            }
-        }
-    }
-};
+let budgetData = null;
+let currentEditingCategory = null;
 
-let currentCategory = '';
+// Utility Functions
+function formatCurrency(amount) {
+    return `₵${parseFloat(amount).toFixed(2)}`;
+}
 
-// Snackbar function
 function showSnackbar(message, type = '') {
     const snackbar = document.getElementById('snackbar');
     if (!snackbar) return;
@@ -57,11 +28,917 @@ function showSnackbar(message, type = '') {
     }, 3000);
 }
 
-// Core Functions
-function toggleUserMenu() {
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+// API Functions
+async function loadBudgetData() {
+    try {
+        // Load personal dashboard data for financial overview
+        const dashboardResponse = await fetch('../api/personal_dashboard_data.php');
+        const dashboardData = await dashboardResponse.json();
+        
+        // Load budget categories
+        const categoriesResponse = await fetch('../api/budget_categories.php');
+        const categoriesData = await categoriesResponse.json();
+        
+        if (dashboardData.success && categoriesData.success) {
+            // Combine data into expected format
+            budgetData = {
+                total_monthly_income: dashboardData.financial_overview?.monthly_income || 0,
+                categories: categoriesData.categories || [],
+                summary: calculateBudgetSummary(categoriesData.categories || [], dashboardData.financial_overview || {}),
+                category_type_totals: calculateCategoryTypeTotals(categoriesData.categories || [])
+            };
+            
+            updateBudgetOverview();
+            renderBudgetCategories();
+            updateBudgetSummary();
+        } else {
+            throw new Error(categoriesData.message || dashboardData.message || 'Failed to load budget data');
+        }
+    } catch (error) {
+        console.error('Error loading budget data:', error);
+        showSnackbar('Error loading budget data: ' + error.message, 'error');
+        showEmptyState();
+    }
+}
+
+// Helper function to calculate budget summary
+function calculateBudgetSummary(categories, financialOverview) {
+    const totalPlanned = categories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0);
+    const totalActual = financialOverview.monthly_expenses || 0;
+    const totalIncome = financialOverview.monthly_income || 0;
+    const remainingBudget = totalPlanned - totalActual;
+    const availableBalance = totalIncome - totalPlanned;
+    const incomeUtilization = totalIncome > 0 ? Math.round((totalPlanned / totalIncome) * 100) : 0;
+    const budgetPerformance = totalPlanned > 0 ? Math.max(0, Math.round(((totalPlanned - totalActual) / totalPlanned) * 100)) : 100;
+    const totalVariance = totalPlanned - totalActual;
+    
+    return {
+        total_planned: totalPlanned,
+        total_actual: totalActual,
+        remaining_budget: remainingBudget,
+        available_balance: availableBalance,
+        income_utilization: incomeUtilization,
+        budget_performance: budgetPerformance,
+        total_variance: totalVariance
+    };
+}
+
+// Helper function to calculate category type totals
+function calculateCategoryTypeTotals(categories) {
+    const types = ['needs', 'wants', 'savings'];
+    const totals = {};
+    
+    types.forEach(type => {
+        const typeCategories = categories.filter(cat => cat.category_type === type);
+        const planned = typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0);
+        const actual = 0; // TODO: Calculate from actual expenses
+        
+        // Get template percentage for this type if it exists
+        const templatePercentage = getTemplatePercentageForType(type);
+        const progressPercentage = templatePercentage || (planned > 0 ? Math.round((actual / planned) * 100) : 0);
+        
+        totals[type] = {
+            planned: planned,
+            actual: actual,
+            progress_percentage: progressPercentage,
+            template_percentage: templatePercentage
+        };
+    });
+    
+    return totals;
+}
+
+// Get template percentage for category type
+function getTemplatePercentageForType(type) {
+    // Check if there's a saved template allocation
+    const savedTemplate = localStorage.getItem('appliedBudgetTemplate');
+    if (savedTemplate) {
+        try {
+            const template = JSON.parse(savedTemplate);
+            return template[type] || null;
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
+
+// Get applied template information
+function getAppliedTemplateInfo() {
+    const savedTemplate = localStorage.getItem('appliedBudgetTemplate');
+    if (savedTemplate) {
+        try {
+            return JSON.parse(savedTemplate);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
+
+// Template management functions
+function selectTemplate(needsPercent, wantsPercent, savingsPercent, templateName, templateId = null) {
+    // Get monthly income from budget data instead of DOM element
+    const monthlyIncome = budgetData?.total_monthly_income || 0;
+    
+    if (monthlyIncome <= 0) {
+        showSnackbar('Please set your monthly income in your profile first', 'warning');
+        return;
+    }
+    
+    const needsAmount = Math.round((monthlyIncome * needsPercent) / 100);
+    const wantsAmount = Math.round((monthlyIncome * wantsPercent) / 100);
+    const savingsAmount = Math.round((monthlyIncome * savingsPercent) / 100);
+    
+    // Update the template preview
+    const templatePreview = document.getElementById('templatePreview');
+    if (templatePreview) {
+        templatePreview.innerHTML = `
+            <div class="template-preview-content">
+                <h4>Selected: ${templateName}</h4>
+                <p>Based on monthly income of ₵${monthlyIncome.toLocaleString()}</p>
+                <div class="template-breakdown">
+                    <div class="breakdown-item">
+                        <span class="category-label needs">Needs (${needsPercent}%)</span>
+                        <span class="amount">₵${needsAmount.toLocaleString()}</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="category-label wants">Wants (${wantsPercent}%)</span>
+                        <span class="amount">₵${wantsAmount.toLocaleString()}</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="category-label savings">Savings (${savingsPercent}%)</span>
+                        <span class="amount">₵${savingsAmount.toLocaleString()}</span>
+                    </div>
+                </div>
+                <div class="template-actions">
+                    <button onclick="applyTemplate(${needsPercent}, ${wantsPercent}, ${savingsPercent}, '${templateName}', ${templateId})" class="btn-primary apply-btn">Apply This Template</button>
+                    <button onclick="resetTemplateModal()" class="btn-secondary">Choose Different Template</button>
+                </div>
+            </div>
+        `;
+        templatePreview.style.display = 'block';
+    }
+    
+    // Hide template selection and show preview
+    const templateSelection = document.getElementById('templateSelection');
+    if (templateSelection) {
+        templateSelection.style.display = 'none';
+    }
+    
+    // Visual feedback - highlight selected card
+    document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+    if (event && event.target) {
+        event.target.closest('.template-card')?.classList.add('selected');
+    }
+}
+
+function applyTemplate(needsPercent, wantsPercent, savingsPercent, templateName, templateId = null) {
+    // Save applied template to localStorage
+    const appliedTemplate = {
+        name: templateName,
+        needs: needsPercent,
+        wants: wantsPercent,
+        savings: savingsPercent,
+        templateId: templateId,
+        appliedDate: new Date().toISOString()
+    };
+    
+    localStorage.setItem('appliedBudgetTemplate', JSON.stringify(appliedTemplate));
+    
+    // Close template modal
+    closeModal('budgetTemplateModal');
+    
+    // Refresh budget display to show template percentages
+    if (typeof loadBudgetData === 'function') {
+        loadBudgetData();
+    }
+    
+    // Show success message
+    showSnackbar(`Template "${templateName}" applied successfully!`, 'success');
+}
+
+function showTemplateModal() {
+    showModal('budgetTemplateModal');
+    loadCustomTemplates();
+}
+
+function showBudgetTemplateModal() {
+    // This function is called from the HTML button
+    showTemplateModal();
+}
+
+function resetTemplateModal() {
+    // Reset to template selection view
+    const customSection = document.getElementById('customTemplateSection');
+    const templateSelection = document.getElementById('templateSelection');
+    const templatePreview = document.getElementById('templatePreview');
+    
+    if (customSection) customSection.style.display = 'none';
+    if (templateSelection) templateSelection.style.display = 'block';
+    if (templatePreview) {
+        templatePreview.style.display = 'none';
+        templatePreview.innerHTML = '';
+    }
+    
+    // Reset button visibility
+    const backButton = document.getElementById('backToTemplates');
+    const saveButton = document.getElementById('saveCustomTemplate');
+    
+    if (backButton) backButton.style.display = 'none';
+    if (saveButton) saveButton.style.display = 'none';
+    
+    // Remove selected class from all template cards
+    document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+}
+
+function showCustomTemplate() {
+    // Reset sliders to default values
+    const needsSlider = document.getElementById('needsSlider');
+    const wantsSlider = document.getElementById('wantsSlider');
+    const savingsSlider = document.getElementById('savingsSlider');
+    
+    if (needsSlider) needsSlider.value = 50;
+    if (wantsSlider) wantsSlider.value = 30;
+    if (savingsSlider) savingsSlider.value = 20;
+    
+    // Update display
+    updateCustomTemplate();
+    
+    // Show custom template section and hide template selection
+    const customSection = document.getElementById('customTemplateSection');
+    const templateSelection = document.getElementById('templateSelection');
+    
+    if (customSection) customSection.style.display = 'block';
+    if (templateSelection) templateSelection.style.display = 'none';
+    
+    // Update button visibility
+    const backButton = document.getElementById('backToTemplates');
+    const saveButton = document.getElementById('saveCustomTemplate');
+    const applyButton = document.getElementById('applyTemplateBtn');
+    
+    if (backButton) backButton.style.display = 'inline-block';
+    if (saveButton) saveButton.style.display = 'inline-block';
+    if (applyButton) applyButton.style.display = 'none';
+}
+
+function backToTemplates() {
+    const customSection = document.getElementById('customTemplateSection');
+    const templateSelection = document.getElementById('templateSelection');
+    
+    if (customSection) customSection.style.display = 'none';
+    if (templateSelection) templateSelection.style.display = 'block';
+    
+    // Update button visibility
+    const backButton = document.getElementById('backToTemplates');
+    const saveButton = document.getElementById('saveCustomTemplate');
+    const applyButton = document.getElementById('applyTemplateBtn');
+    
+    if (backButton) backButton.style.display = 'none';
+    if (saveButton) saveButton.style.display = 'none';
+    if (applyButton) applyButton.style.display = 'none';
+}
+
+function updateCustomTemplate() {
+    const needsSlider = document.getElementById('needsSlider');
+    const wantsSlider = document.getElementById('wantsSlider');
+    const savingsSlider = document.getElementById('savingsSlider');
+    
+    const needsInput = document.getElementById('needsInput');
+    const wantsInput = document.getElementById('wantsInput');
+    const savingsInput = document.getElementById('savingsInput');
+    
+    if (!needsSlider || !wantsSlider || !savingsSlider) {
+        console.warn('Custom template sliders not found');
+        return;
+    }
+    
+    const needsPercent = parseInt(needsSlider.value);
+    const wantsPercent = parseInt(wantsSlider.value);
+    const savingsPercent = parseInt(savingsSlider.value);
+    
+    // Sync number inputs with sliders
+    if (needsInput) needsInput.value = needsPercent;
+    if (wantsInput) wantsInput.value = wantsPercent;
+    if (savingsInput) savingsInput.value = savingsPercent;
+    
+    // Update preview bars
+    const needsBar = document.getElementById('customNeedsBar');
+    const wantsBar = document.getElementById('customWantsBar');
+    const savingsBar = document.getElementById('customSavingsBar');
+    
+    if (needsBar) needsBar.style.width = needsPercent + '%';
+    if (wantsBar) wantsBar.style.width = wantsPercent + '%';
+    if (savingsBar) savingsBar.style.width = savingsPercent + '%';
+    
+    // Update preview labels
+    const needsLabel = document.getElementById('customNeedsLabel');
+    const wantsLabel = document.getElementById('customWantsLabel');
+    const savingsLabel = document.getElementById('customSavingsLabel');
+    
+    if (needsLabel) needsLabel.textContent = `${needsPercent}% Needs`;
+    if (wantsLabel) wantsLabel.textContent = `${wantsPercent}% Wants`;
+    if (savingsLabel) savingsLabel.textContent = `${savingsPercent}% Savings`;
+    
+    // Check if total equals 100%
+    const total = needsPercent + wantsPercent + savingsPercent;
+    const totalDisplay = document.getElementById('totalPercentage');
+    const saveButton = document.getElementById('saveCustomTemplate');
+    const totalStatus = document.getElementById('totalStatus');
+    
+    if (totalDisplay) {
+        totalDisplay.textContent = total + '%';
+        
+        if (total === 100) {
+            totalDisplay.style.color = '#27ae60';
+            if (totalStatus) {
+                totalStatus.textContent = '✓ Valid';
+                totalStatus.className = 'status-valid';
+            }
+        } else {
+            totalDisplay.style.color = '#e74c3c';
+            if (totalStatus) {
+                totalStatus.textContent = '✗ Invalid';
+                totalStatus.className = 'status-invalid';
+            }
+        }
+    }
+    
+    if (saveButton) {
+        if (total === 100) {
+            saveButton.disabled = false;
+            saveButton.textContent = 'Save & Apply Template';
+            saveButton.style.opacity = '1';
+        } else {
+            saveButton.disabled = true;
+            saveButton.textContent = `Total: ${total}% (Need 100%)`;
+            saveButton.style.opacity = '0.6';
+        }
+    }
+}
+
+function saveCustomTemplate() {
+    const needsPercent = parseInt(document.getElementById('needsSlider').value);
+    const wantsPercent = parseInt(document.getElementById('wantsSlider').value);
+    const savingsPercent = parseInt(document.getElementById('savingsSlider').value);
+    
+    // Validate template totals to 100%
+    if (needsPercent + wantsPercent + savingsPercent !== 100) {
+        showSnackbar('Template percentages must total exactly 100%', 'warning');
+        return;
+    }
+    
+    // Check if user has monthly income set
+    const monthlyIncome = budgetData?.total_monthly_income || 0;
+    if (monthlyIncome <= 0) {
+        showSnackbar('Please set your monthly income in your profile first', 'warning');
+        return;
+    }
+    
+    // Get existing custom templates
+    const customTemplates = JSON.parse(localStorage.getItem('customBudgetTemplates') || '[]');
+    
+    // Generate next available name
+    const nextIndex = customTemplates.length + 1;
+    const templateName = `Custom ${nextIndex}`;
+    
+    // Create new template
+    const newTemplate = {
+        id: Date.now(), // Unique ID
+        name: templateName,
+        needs: needsPercent,
+        wants: wantsPercent,
+        savings: savingsPercent,
+        created: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    customTemplates.push(newTemplate);
+    localStorage.setItem('customBudgetTemplates', JSON.stringify(customTemplates));
+    
+    // Apply the template
+    applyTemplate(needsPercent, wantsPercent, savingsPercent, templateName, newTemplate.id);
+    
+    // Refresh template grid
+    loadCustomTemplates();
+    
+    // Show success message
+    showSnackbar(`Custom template "${templateName}" created and applied successfully!`, 'success');
+}
+
+function loadCustomTemplates() {
+    const customTemplates = JSON.parse(localStorage.getItem('customBudgetTemplates') || '[]');
+    const templateGrid = document.getElementById('templateGrid');
+    
+    if (!templateGrid) return;
+    
+    // Remove existing custom template cards (except the "Create New" card)
+    const existingCustomCards = templateGrid.querySelectorAll('.custom-template-card');
+    existingCustomCards.forEach(card => card.remove());
+    
+    // Add custom templates before the "Create New" card
+    const createNewCard = templateGrid.querySelector('.custom-template');
+    
+    customTemplates.forEach(template => {
+        const templateCard = document.createElement('div');
+        templateCard.className = 'template-card custom-template-card';
+        templateCard.onclick = () => selectTemplate(template.needs, template.wants, template.savings, template.name, template.id);
+        
+        templateCard.innerHTML = `
+            <button class="delete-btn" onclick="deleteCustomTemplate(${template.id}, event)" title="Delete template">×</button>
+            <h5>${template.name}</h5>
+            <p class="template-desc">Custom allocation template</p>
+            <div class="template-preview">
+                <div class="preview-bar needs-bar" style="width: ${template.needs}%">
+                    <span>${template.needs}% Needs</span>
+                </div>
+                <div class="preview-bar wants-bar" style="width: ${template.wants}%">
+                    <span>${template.wants}% Wants</span>
+                </div>
+                <div class="preview-bar savings-bar" style="width: ${template.savings}%">
+                    <span>${template.savings}% Savings</span>
+                </div>
+            </div>
+        `;
+        
+        if (createNewCard) {
+            templateGrid.insertBefore(templateCard, createNewCard);
+        }
+    });
+}
+
+function deleteCustomTemplate(templateId, event) {
+    event.stopPropagation(); // Prevent card selection
+    
+    const confirmDelete = confirm('Are you sure you want to delete this custom template?');
+    
+    if (confirmDelete) {
+        const customTemplates = JSON.parse(localStorage.getItem('customBudgetTemplates') || '[]');
+        const templateToDelete = customTemplates.find(t => t.id === templateId);
+        const updatedTemplates = customTemplates.filter(template => template.id !== templateId);
+        localStorage.setItem('customBudgetTemplates', JSON.stringify(updatedTemplates));
+        
+        // Refresh template grid
+        loadCustomTemplates();
+        
+        // Show success message
+        showSnackbar(`Custom template "${templateToDelete?.name || 'Template'}" deleted successfully!`, 'success');
+    }
+}
+
+// Handle input changes from number inputs
+function syncSliderWithInput(inputId, sliderId) {
+    const input = document.getElementById(inputId);
+    const slider = document.getElementById(sliderId);
+    
+    if (input && slider) {
+        let value = parseInt(input.value) || 0;
+        value = Math.max(0, Math.min(100, value)); // Clamp between 0-100
+        input.value = value;
+        slider.value = value;
+        updateCustomTemplate();
+    }
+}
+
+// Initialize custom templates on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof loadCustomTemplates === 'function') {
+        loadCustomTemplates();
+    }
+});
+
+async function addCategory(categoryData) {
+    try {
+        const response = await fetch('../api/budget_categories.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(categoryData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSnackbar('Category added successfully!', 'success');
+            await loadBudgetData(); // Reload data
+            return true;
+        } else {
+            throw new Error(result.message || 'Failed to add category');
+        }
+    } catch (error) {
+        console.error('Error adding category:', error);
+        showSnackbar('Error adding category: ' + error.message, 'error');
+        return false;
+    }
+}
+
+async function editCategory(categoryId, categoryData) {
+    try {
+        const response = await fetch('../api/budget_categories.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: categoryId,
+                ...categoryData
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSnackbar('Category updated successfully!', 'success');
+            await loadBudgetData(); // Reload data
+            return true;
+        } else {
+            throw new Error(result.message || 'Failed to update category');
+        }
+    } catch (error) {
+        console.error('Error updating category:', error);
+        showSnackbar('Error updating category: ' + error.message, 'error');
+        return false;
+    }
+}
+
+async function deleteCategory(categoryId) {
+    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+        return false;
+    }
+    
+    try {
+        const response = await fetch('../api/budget_categories.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: categoryId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSnackbar(result.message || 'Category deleted successfully!', 'success');
+            await loadBudgetData(); // Reload data
+            return true;
+        } else {
+            throw new Error(result.message || 'Failed to delete category');
+        }
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        showSnackbar('Error deleting category: ' + error.message, 'error');
+        return false;
+    }
+}
+
+// UI Update Functions
+function updateBudgetOverview() {
+    if (!budgetData) return;
+
+    const totalIncomeEl = document.getElementById('totalIncome');
+    const plannedBudgetEl = document.getElementById('plannedBudget');
+    const actualSpendingEl = document.getElementById('actualSpending');
+    const budgetPerformanceEl = document.getElementById('budgetPerformance');
+    const budgetSurplusEl = document.getElementById('budgetSurplus');
+    const spendingVarianceEl = document.getElementById('spendingVariance');
+    const performanceLabelEl = document.getElementById('performanceLabel');
+
+    if (totalIncomeEl) {
+        totalIncomeEl.textContent = formatCurrency(budgetData.total_monthly_income);
+    }
+
+    if (plannedBudgetEl) {
+        plannedBudgetEl.textContent = formatCurrency(budgetData.summary.total_planned);
+    }
+
+    if (actualSpendingEl) {
+        actualSpendingEl.textContent = formatCurrency(budgetData.summary.total_actual);
+    }
+
+    if (budgetPerformanceEl) {
+        budgetPerformanceEl.textContent = budgetData.summary.budget_performance + '%';
+    }
+
+    // Update variance displays
+    const surplus = budgetData.summary.available_balance;
+    if (budgetSurplusEl) {
+        budgetSurplusEl.textContent = surplus >= 0 ? `₵${surplus.toFixed(2)} surplus` : `₵${Math.abs(surplus).toFixed(2)} deficit`;
+        budgetSurplusEl.className = surplus >= 0 ? 'change positive' : 'change negative';
+    }
+
+    const variance = budgetData.summary.total_variance;
+    if (spendingVarianceEl) {
+        spendingVarianceEl.textContent = variance >= 0 ? `₵${variance.toFixed(2)} under budget` : `₵${Math.abs(variance).toFixed(2)} over budget`;
+        spendingVarianceEl.className = variance >= 0 ? 'change positive' : 'change negative';
+    }
+
+    if (performanceLabelEl) {
+        const performance = budgetData.summary.budget_performance;
+        if (performance >= 95) {
+            performanceLabelEl.textContent = 'Excellent tracking';
+        } else if (performance >= 80) {
+            performanceLabelEl.textContent = 'Good tracking';
+        } else if (performance >= 60) {
+            performanceLabelEl.textContent = 'Fair tracking';
+        } else {
+            performanceLabelEl.textContent = 'Needs improvement';
+        }
+    }
+
+    // Show applied template information
+    updateAppliedTemplateDisplay();
+}
+
+function updateAppliedTemplateDisplay() {
+    const appliedTemplate = getAppliedTemplateInfo();
+    let templateInfoEl = document.getElementById('appliedTemplateInfo');
+    
+    // Create template info element if it doesn't exist
+    if (!templateInfoEl) {
+        templateInfoEl = document.createElement('div');
+        templateInfoEl.id = 'appliedTemplateInfo';
+        templateInfoEl.className = 'applied-template-info';
+        
+        // Insert after budget overview or at the top of the page
+        const overviewSection = document.querySelector('.budget-overview') || document.querySelector('.main-content');
+        if (overviewSection) {
+            overviewSection.appendChild(templateInfoEl);
+        }
+    }
+    
+    if (appliedTemplate) {
+        templateInfoEl.innerHTML = `
+            <div class="template-banner">
+                <div class="template-icon">📊</div>
+                <div class="template-details">
+                    <h4>Active Budget Template: ${appliedTemplate.name}</h4>
+                    <p>Applied on ${new Date(appliedTemplate.appliedDate).toLocaleDateString()}</p>
+                    <div class="template-allocations">
+                        <span class="allocation needs">Needs: ${appliedTemplate.needs}%</span>
+                        <span class="allocation wants">Wants: ${appliedTemplate.wants}%</span>
+                        <span class="allocation savings">Savings: ${appliedTemplate.savings}%</span>
+                    </div>
+                </div>
+                <button onclick="clearTemplate()" class="clear-template-btn" title="Remove template">×</button>
+            </div>
+        `;
+        templateInfoEl.style.display = 'block';
+    } else {
+        templateInfoEl.style.display = 'none';
+    }
+}
+
+function clearTemplate() {
+    // Create a confirmation modal instead of browser alert
+    const confirmClear = confirm('Are you sure you want to remove the active budget template?');
+    
+    if (confirmClear) {
+        localStorage.removeItem('appliedBudgetTemplate');
+        loadBudgetData(); // Refresh to show regular percentages
+        showSnackbar('Budget template removed successfully!', 'success');
+    }
+}
+
+function renderBudgetCategories() {
+    if (!budgetData || !budgetData.categories || budgetData.categories.length === 0) {
+        showEmptyState();
+        return;
+    }
+
+    hideLoadingState();
+    hideEmptyState();
+
+    const container = document.getElementById('budgetCategoriesContainer');
+    if (!container) return;
+
+    container.style.display = 'block';
+    container.innerHTML = '';
+
+    // Group categories by type
+    const categoryTypes = {
+        needs: { title: 'Needs (Essential)', icon: '🏠', description: 'Housing, food, utilities, transportation' },
+        wants: { title: 'Wants (Lifestyle)', icon: '🎮', description: 'Entertainment, dining out, hobbies' },
+        savings: { title: 'Savings & Investments', icon: '💰', description: 'Emergency fund, retirement, goals' }
+    };
+
+    Object.keys(categoryTypes).forEach(type => {
+        const typeCategories = budgetData.categories.filter(cat => cat.category_type === type);
+        const typeInfo = categoryTypes[type];
+        const typeTotals = budgetData.category_type_totals[type] || { planned: 0, actual: 0, progress_percentage: 0 };
+
+        const categorySection = createCategorySection(type, typeInfo, typeTotals, typeCategories);
+        container.appendChild(categorySection);
+    });
+
+    // Expand needs section by default
+    const needsSection = container.querySelector('.needs-section');
+    if (needsSection) {
+        const content = needsSection.querySelector('.category-content');
+        const header = needsSection.querySelector('.category-header');
+        const icon = needsSection.querySelector('.expand-icon');
+        
+        if (content) content.classList.add('expanded');
+        if (header) header.classList.add('expanded');
+        if (icon) icon.textContent = '▲';
+    }
+}
+
+function createCategorySection(type, typeInfo, totals, categories) {
+    const section = document.createElement('div');
+    section.className = `category-section ${type}-section`;
+    
+    // Get applied template info
+    const appliedTemplate = getAppliedTemplateInfo();
+    const templateText = totals.template_percentage ? 
+        `${totals.template_percentage}% allocated (${appliedTemplate.name || 'Template'})` : 
+        `${totals.progress_percentage}%`;
+    
+    section.innerHTML = `
+        <div class="category-header" onclick="toggleCategory('${type}')">
+            <div class="category-info">
+                <span class="category-icon">${typeInfo.icon}</span>
+                <div class="category-details">
+                    <h4>${typeInfo.title}</h4>
+                    <p>${typeInfo.description}</p>
+                </div>
+            </div>
+            <div class="category-summary">
+                <div class="category-amount">${formatCurrency(totals.actual)} / ${formatCurrency(totals.planned)}</div>
+                <div class="category-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill ${type}-progress" style="width: ${Math.min(totals.progress_percentage, 100)}%"></div>
+                    </div>
+                    <span class="progress-text">${templateText}</span>
+                </div>
+                <span class="expand-icon">▼</span>
+            </div>
+        </div>
+        <div class="category-content">
+            ${createCategoryTable(categories)}
+            <button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>
+        </div>
+    `;
+    
+    return section;
+}
+
+function createCategoryTable(categories) {
+    if (categories.length === 0) {
+        return `
+            <div class="empty-category">
+                <p>No categories added yet. Click "Add Category" to get started.</p>
+            </div>
+        `;
+    }
+
+    let tableHTML = `
+        <div class="budget-table">
+            <div class="table-header">
+                <div class="col-item">Category</div>
+                <div class="col-planned">Budget Limit</div>
+                <div class="col-actual">Spent</div>
+                <div class="col-variance">Variance</div>
+                <div class="col-status">Status</div>
+                <div class="col-actions">Actions</div>
+            </div>
+    `;
+
+    categories.forEach(category => {
+        const actualSpent = 0; // TODO: Calculate from actual expenses
+        const variance = parseFloat(category.budget_limit) - actualSpent;
+        const statusClass = getStatusClass(category.budget_limit, actualSpent);
+        const statusText = getStatusText(category.budget_limit, actualSpent);
+        const varianceClass = variance >= 0 ? 'success' : 'warning';
+        
+        tableHTML += `
+            <div class="budget-item" data-category-id="${category.id}">
+                <div class="col-item">
+                    <span class="item-icon" style="color: ${category.color}">${category.icon}</span>
+                    <div class="item-info">
+                        <h5>${category.name}</h5>
+                        <p>0 transactions this month</p>
+                    </div>
+                </div>
+                <div class="col-planned">
+                    <span class="editable-amount" onclick="makeEditable(this, ${category.id}, 'budget_limit')">${formatCurrency(category.budget_limit)}</span>
+                </div>
+                <div class="col-actual">${formatCurrency(actualSpent)}</div>
+                <div class="col-variance ${varianceClass}">${formatCurrency(variance)}</div>
+                <div class="col-status">
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                <div class="col-actions">
+                    <button class="action-btn" onclick="editBudgetCategory(${category.id})" title="Edit Category">✏️</button>
+                    <button class="action-btn" onclick="addExpenseToCategory(${category.id}, '${category.name}')" title="Add Expense">💰</button>
+                    <button class="action-btn danger" onclick="deleteCategory(${category.id})" title="Delete Category">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+
+    tableHTML += '</div>';
+    return tableHTML;
+}
+
+
+function getStatusClass(planned, actual) {
+    const variance = actual - planned;
+    const percentageVariance = planned > 0 ? Math.abs(variance / planned) * 100 : 0;
+    
+    if (actual === 0) return 'not-started';
+    if (variance === 0) return 'on-track';
+    if (variance < 0) return 'under-budget';
+    if (percentageVariance <= 10) return 'near-target';
+    if (actual > planned * 1.5) return 'exceeded';
+    return 'over-budget';
+}
+
+function getStatusText(planned, actual) {
+    const variance = actual - planned;
+    const percentageVariance = planned > 0 ? Math.abs(variance / planned) * 100 : 0;
+    
+    if (actual === 0) return 'Not Started';
+    if (variance === 0) return 'On Track';
+    if (variance < 0) return 'Under Budget';
+    if (percentageVariance <= 10) return 'Near Target';
+    if (actual > planned * 1.5) return 'Exceeded';
+    return 'Over Budget';
+}
+
+function updateBudgetSummary() {
+    if (!budgetData) return;
+
+    const summaryPlanned = document.getElementById('summaryPlanned');
+    const summaryActual = document.getElementById('summaryActual');
+    const summaryRemaining = document.getElementById('summaryRemaining');
+    const summaryAvailable = document.getElementById('summaryAvailable');
+    const summaryPlannedPercent = document.getElementById('summaryPlannedPercent');
+    const summaryActualPercent = document.getElementById('summaryActualPercent');
+    const summaryRemainingPercent = document.getElementById('summaryRemainingPercent');
+
+    const summary = budgetData.summary;
+    const income = budgetData.total_monthly_income;
+
+    if (summaryPlanned) {
+        summaryPlanned.textContent = formatCurrency(summary.total_planned);
+    }
+    if (summaryActual) {
+        summaryActual.textContent = formatCurrency(summary.total_actual);
+    }
+    if (summaryRemaining) {
+        summaryRemaining.textContent = formatCurrency(summary.remaining_budget);
+        summaryRemaining.className = summary.remaining_budget >= 0 ? 'summary-amount positive' : 'summary-amount negative';
+    }
+    if (summaryAvailable) {
+        summaryAvailable.textContent = formatCurrency(summary.available_balance);
+    }
+
+    if (summaryPlannedPercent) {
+        summaryPlannedPercent.textContent = `${summary.income_utilization}% of income`;
+    }
+    if (summaryActualPercent) {
+        const actualPercent = income > 0 ? ((summary.total_actual / income) * 100).toFixed(1) : 0;
+        summaryActualPercent.textContent = `${actualPercent}% of income`;
+    }
+    if (summaryRemainingPercent) {
+        const remainingPercent = income > 0 ? ((summary.remaining_budget / income) * 100).toFixed(1) : 0;
+        summaryRemainingPercent.textContent = `${remainingPercent}% unspent`;
+    }
+}
+
+// State Management Functions
+function showLoadingState() {
+    const loading = document.getElementById('budgetLoading');
+    if (loading) loading.style.display = 'block';
+}
+
+function hideLoadingState() {
+    const loading = document.getElementById('budgetLoading');
+    if (loading) loading.style.display = 'none';
+}
+
+function showEmptyState() {
+    hideLoadingState();
+    const container = document.getElementById('budgetCategoriesContainer');
+    const emptyState = document.getElementById('emptyBudgetState');
+    
+    if (container) container.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'block';
+}
+
+function hideEmptyState() {
+    const emptyState = document.getElementById('emptyBudgetState');
+    if (emptyState) emptyState.style.display = 'none';
+}
+
+// Modal Functions
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
     }
 }
 
@@ -72,14 +949,18 @@ function closeModal(modalId) {
     }
 }
 
-function showModal(modalId) {
-    const modal = document.getElementById(modalId);
+function showAddCategoryModal(categoryType = '') {
+    const modal = document.getElementById('addCategoryModal');
     if (modal) {
-        modal.style.display = 'flex';
+        const typeSelect = modal.querySelector('select[name="category_type"]');
+        if (typeSelect && categoryType) {
+            typeSelect.value = categoryType;
+        }
+        showModal('addCategoryModal');
     }
 }
 
-// Category Management
+// Category Management Functions
 function toggleCategory(categoryName) {
     const section = document.querySelector(`.${categoryName}-section`);
     if (!section) return;
@@ -101,6 +982,168 @@ function toggleCategory(categoryName) {
     }
 }
 
+function editBudgetCategory(categoryId) {
+    const category = budgetData.categories.find(cat => cat.id === categoryId);
+    if (!category) return;
+
+    currentEditingCategory = category;
+    
+    // Populate edit modal with category data
+    const modal = document.getElementById('addCategoryModal');
+    if (!modal) return;
+
+    const nameInput = modal.querySelector('input[name="name"]');
+    const typeSelect = modal.querySelector('select[name="category_type"]');
+    const budgetInput = modal.querySelector('input[name="budget_limit"]');
+    const iconInput = modal.querySelector('input[name="icon"]');
+    const colorInput = modal.querySelector('input[name="color"]');
+
+    if (nameInput) nameInput.value = category.name;
+    if (typeSelect) typeSelect.value = category.category_type;
+    if (budgetInput) budgetInput.value = category.budget_limit;
+    if (iconInput) iconInput.value = category.icon;
+    if (colorInput) colorInput.value = category.color;
+
+    // Update modal title
+    const modalTitle = modal.querySelector('.modal-header h3');
+    if (modalTitle) modalTitle.textContent = 'Edit Category';
+
+    // Update button text
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = 'Update Category';
+
+    showModal('addCategoryModal');
+}
+
+function addExpenseToCategory(categoryId, categoryName) {
+    showSnackbar(`Add expense functionality for "${categoryName}" coming soon`, 'info');
+}
+
+// Form Setup and Handlers
+function setupFormHandlers() {
+    const addCategoryForm = document.getElementById('addCategoryForm');
+    if (addCategoryForm) {
+        addCategoryForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            if (!submitButton) return;
+            
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Saving...';
+            submitButton.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const categoryData = {
+                    name: formData.get('name'),
+                    category_type: formData.get('category_type'),
+                    budget_limit: formData.get('budget_limit'),
+                    icon: formData.get('icon'),
+                    color: formData.get('color')
+                };
+
+                let success = false;
+                if (currentEditingCategory) {
+                    // Edit existing category
+                    success = await editCategory(currentEditingCategory.id, categoryData);
+                } else {
+                    // Add new category
+                    success = await addCategory(categoryData);
+                }
+
+                if (success) {
+                    this.reset();
+                    resetModalForm();
+                    closeModal('addCategoryModal');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showSnackbar('Error saving category', 'error');
+            } finally {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+                currentEditingCategory = null;
+            }
+        });
+    }
+}
+
+function resetModalForm() {
+    const modal = document.getElementById('addCategoryModal');
+    if (!modal) return;
+
+    // Reset title
+    const modalTitle = modal.querySelector('.modal-header h3');
+    if (modalTitle) modalTitle.textContent = 'Add New Category';
+
+    // Reset button text
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = 'Add Category';
+
+    // Reset icon selection
+    const iconOptions = modal.querySelectorAll('.icon-option');
+    iconOptions.forEach(option => option.classList.remove('selected'));
+    if (iconOptions[0]) {
+        iconOptions[0].classList.add('selected');
+        const iconInput = modal.querySelector('input[name="icon"]');
+        if (iconInput) iconInput.value = iconOptions[0].dataset.icon;
+    }
+
+    // Reset color selection
+    const colorOptions = modal.querySelectorAll('.color-option');
+    colorOptions.forEach(option => option.classList.remove('selected'));
+    if (colorOptions[0]) {
+        colorOptions[0].classList.add('selected');
+        const colorInput = modal.querySelector('input[name="color"]');
+        if (colorInput) colorInput.value = colorOptions[0].dataset.color;
+    }
+
+    currentEditingCategory = null;
+}
+
+function setupIconAndColorSelectors() {
+    // Icon selection
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('icon-option')) {
+            const container = e.target.closest('.icon-selector');
+            if (container) {
+                const options = container.querySelectorAll('.icon-option');
+                options.forEach(option => option.classList.remove('selected'));
+                e.target.classList.add('selected');
+                
+                const hiddenInput = container.parentNode.querySelector('input[name="icon"]');
+                if (hiddenInput) {
+                    hiddenInput.value = e.target.dataset.icon;
+                }
+            }
+        }
+        
+        // Color selection
+        if (e.target.classList.contains('color-option')) {
+            const container = e.target.closest('.color-selector');
+            if (container) {
+                const options = container.querySelectorAll('.color-option');
+                options.forEach(option => option.classList.remove('selected'));
+                e.target.classList.add('selected');
+                
+                const hiddenInput = container.parentNode.querySelector('input[name="color"]');
+                if (hiddenInput) {
+                    hiddenInput.value = e.target.dataset.color;
+                }
+            }
+        }
+    });
+}
+
+// Other UI Functions
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+}
+
 function switchView(viewType) {
     const buttons = document.querySelectorAll('.toggle-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
@@ -111,454 +1154,27 @@ function switchView(viewType) {
     }
     
     if (viewType === 'summary') {
-        // Hide detailed budget items, show only category summaries
-        document.querySelectorAll('.category-content').forEach(content => {
-            content.style.display = 'none';
+        document.querySelectorAll('.budget-table').forEach(table => {
+            table.style.display = 'none';
         });
         showSnackbar('Switched to summary view', 'info');
     } else {
-        // Show detailed view
-        document.querySelectorAll('.category-content').forEach(content => {
-            content.style.display = 'block';
+        document.querySelectorAll('.budget-table').forEach(table => {
+            table.style.display = 'block';
         });
         showSnackbar('Switched to detailed view', 'info');
     }
 }
 
-// Budget Item Management
-function updateBudgetItem(input, itemId, type) {
-    if (!input || !itemId || !type) return;
+// Initialize Page
+async function initializePage() {
+    showLoadingState();
     
-    const value = parseFloat(input.value) || 0;
+    // Setup event handlers
+    setupFormHandlers();
+    setupIconAndColorSelectors();
     
-    // Find the category this item belongs to
-    let categoryName = '';
-    for (const [catName, category] of Object.entries(budgetData.categories)) {
-        if (category.items[itemId]) {
-            categoryName = catName;
-            break;
-        }
-    }
-    
-    if (categoryName && type === 'planned') {
-        budgetData.categories[categoryName].items[itemId].planned = value;
-        updateCategoryTotals(categoryName);
-        updateBudgetSummary();
-        showSnackbar(`Updated ${itemId} planned amount to ₵${value.toFixed(2)}`, 'success');
-    }
-}
-
-function updateCategoryTotals(categoryName) {
-    const category = budgetData.categories[categoryName];
-    if (!category) return;
-    
-    let plannedTotal = 0;
-    let actualTotal = 0;
-    
-    for (const item of Object.values(category.items)) {
-        plannedTotal += item.planned;
-        actualTotal += item.actual;
-    }
-    
-    category.planned = plannedTotal;
-    category.actual = actualTotal;
-    
-    // Update UI
-    const section = document.querySelector(`.${categoryName}-section`);
-    if (!section) return;
-    
-    const amountElement = section.querySelector('.category-amount');
-    const progressFill = section.querySelector('.progress-fill');
-    const progressText = section.querySelector('.progress-text');
-    
-    if (amountElement) {
-        amountElement.textContent = `₵${actualTotal.toFixed(2)} / ₵${plannedTotal.toFixed(2)}`;
-    }
-    
-    if (progressFill && progressText) {
-        const percentage = plannedTotal > 0 ? Math.round((actualTotal / plannedTotal) * 100) : 0;
-        progressFill.style.width = `${Math.min(percentage, 100)}%`;
-        progressText.textContent = `${percentage}%`;
-    }
-}
-
-function updateBudgetSummary() {
-    let totalPlanned = 0;
-    let totalActual = 0;
-    
-    for (const category of Object.values(budgetData.categories)) {
-        totalPlanned += category.planned;
-        totalActual += category.actual;
-    }
-    
-    const remaining = totalPlanned - totalActual;
-    const available = budgetData.income - totalPlanned;
-    
-    // Update summary cards
-    const summaryCards = document.querySelectorAll('.summary-card');
-    if (summaryCards.length >= 4) {
-        const plannedElement = summaryCards[0].querySelector('.summary-amount');
-        const plannedDetail = summaryCards[0].querySelector('.summary-detail');
-        if (plannedElement && plannedDetail) {
-            plannedElement.textContent = `₵${totalPlanned.toFixed(2)}`;
-            plannedDetail.textContent = `${((totalPlanned/budgetData.income)*100).toFixed(1)}% of income`;
-        }
-        
-        const actualElement = summaryCards[1].querySelector('.summary-amount');
-        const actualDetail = summaryCards[1].querySelector('.summary-detail');
-        if (actualElement && actualDetail) {
-            actualElement.textContent = `₵${totalActual.toFixed(2)}`;
-            actualDetail.textContent = `${((totalActual/budgetData.income)*100).toFixed(1)}% of income`;
-        }
-        
-        const remainingElement = summaryCards[2].querySelector('.summary-amount');
-        const remainingDetail = summaryCards[2].querySelector('.summary-detail');
-        if (remainingElement && remainingDetail) {
-            remainingElement.textContent = `₵${remaining.toFixed(2)}`;
-            remainingElement.className = `summary-amount ${remaining >= 0 ? 'positive' : 'negative'}`;
-            remainingDetail.textContent = `${((remaining/budgetData.income)*100).toFixed(1)}% unspent`;
-        }
-        
-        const availableElement = summaryCards[3].querySelector('.summary-amount');
-        const availableDetail = summaryCards[3].querySelector('.summary-detail');
-        if (availableElement && availableDetail) {
-            availableElement.textContent = `₵${available.toFixed(2)}`;
-            availableDetail.textContent = available >= 0 ? 'Unallocated funds' : 'Over allocated';
-        }
-    }
-}
-
-// Modal Functions
-function showAddCategoryModal() {
-    showModal('addCategoryModal');
-}
-
-function showAddItemModal(categoryName) {
-    currentCategory = categoryName;
-    showModal('addItemModal');
-}
-
-function showBudgetTemplateModal() {
-    showModal('budgetTemplateModal');
-}
-
-function editBudgetItem(itemId) {
-    showSnackbar(`Edit functionality for ${itemId} coming soon`, 'info');
-}
-
-function addExpense(itemId) {
-    currentCategory = itemId;
-    const modal = document.getElementById('addExpenseModal');
-    if (modal) {
-        const categoryInput = modal.querySelector('input[name="expenseCategory"]');
-        if (categoryInput) {
-            categoryInput.value = itemId.charAt(0).toUpperCase() + itemId.slice(1);
-        }
-        
-        // Set today's date
-        const dateInput = modal.querySelector('input[name="expenseDate"]');
-        if (dateInput) {
-            dateInput.value = new Date().toISOString().split('T')[0];
-        }
-    }
-    
-    showModal('addExpenseModal');
-}
-
-// Budget Period Management
-function changeBudgetPeriod() {
-    const periodSelect = document.getElementById('budgetPeriod');
-    if (periodSelect) {
-        const period = periodSelect.value;
-        showSnackbar(`Switched to ${period} budget`, 'info');
-        // Here you would typically load the budget data for the selected period
-    }
-}
-
-function copyFromPreviousMonth() {
-    showSnackbar('Copied budget from previous month', 'success');
-    // Implementation would copy actual values from previous month to planned values
-    // For demo purposes, we'll just update a few values
-    setTimeout(() => {
-        updateBudgetSummary();
-    }, 500);
-}
-
-function saveBudget() {
-    const saveButton = event.target;
-    if (!saveButton) return;
-    
-    const originalText = saveButton.textContent;
-    
-    saveButton.textContent = 'Saving...';
-    saveButton.disabled = true;
-    
-    setTimeout(() => {
-        showSnackbar('Budget saved successfully!', 'success');
-        saveButton.textContent = originalText;
-        saveButton.disabled = false;
-    }, 1000);
-}
-
-function exportBudget() {
-    showSnackbar('Budget export functionality coming soon', 'info');
-    // Implementation would generate CSV/PDF export
-}
-
-// Template Functions
-function applyTemplate(templateType) {
-    const income = budgetData.income;
-    let needsPercent, wantsPercent, savingsPercent;
-    
-    switch(templateType) {
-        case '50-30-20':
-            needsPercent = 50;
-            wantsPercent = 30;
-            savingsPercent = 20;
-            break;
-        case '60-20-20':
-            needsPercent = 60;
-            wantsPercent = 20;
-            savingsPercent = 20;
-            break;
-        case '40-40-20':
-            needsPercent = 40;
-            wantsPercent = 40;
-            savingsPercent = 20;
-            break;
-        case 'aggressive-savings':
-            needsPercent = 45;
-            wantsPercent = 25;
-            savingsPercent = 30;
-            break;
-        default:
-            return;
-    }
-    
-    // Calculate new amounts
-    const needsAmount = (income * needsPercent) / 100;
-    const wantsAmount = (income * wantsPercent) / 100;
-    const savingsAmount = (income * savingsPercent) / 100;
-    
-    // Update budget data
-    budgetData.categories.needs.planned = needsAmount;
-    budgetData.categories.wants.planned = wantsAmount;
-    budgetData.categories.savings.planned = savingsAmount;
-    
-    // Distribute amounts across items proportionally
-    distributeAmountAcrossItems('needs', needsAmount);
-    distributeAmountAcrossItems('wants', wantsAmount);
-    distributeAmountAcrossItems('savings', savingsAmount);
-    
-    // Update UI
-    updateAllCategoryDisplays();
-    
-    closeModal('budgetTemplateModal');
-    showSnackbar(`Applied ${getTemplateName(templateType)} template successfully!`, 'success');
-}
-
-function getTemplateName(templateType) {
-    const names = {
-        '50-30-20': '50/30/20 Rule',
-        '60-20-20': 'Conservative',
-        '40-40-20': 'Balanced',
-        'aggressive-savings': 'Aggressive Savings'
-    };
-    return names[templateType] || templateType;
-}
-
-function distributeAmountAcrossItems(categoryName, totalAmount) {
-    const items = budgetData.categories[categoryName]?.items;
-    if (!items) return;
-    
-    const itemCount = Object.keys(items).length;
-    const amountPerItem = totalAmount / itemCount;
-    
-    for (const itemId of Object.keys(items)) {
-        items[itemId].planned = amountPerItem;
-        
-        // Update input field in UI
-        const input = document.querySelector(`input[onchange*="${itemId}"]`);
-        if (input) {
-            input.value = amountPerItem.toFixed(2);
-        }
-    }
-}
-
-function updateAllCategoryDisplays() {
-    ['needs', 'wants', 'savings'].forEach(categoryName => {
-        updateCategoryTotals(categoryName);
-    });
-    updateBudgetSummary();
-}
-
-// Icon Selection
-function selectIcon(iconElement) {
-    if (!iconElement) return;
-    
-    const container = iconElement.closest('.icon-selector');
-    if (!container) return;
-    
-    const icons = container.querySelectorAll('.icon-option');
-    const hiddenInput = container.nextElementSibling;
-    
-    icons.forEach(icon => icon.classList.remove('selected'));
-    iconElement.classList.add('selected');
-    
-    if (hiddenInput && hiddenInput.type === 'hidden') {
-        hiddenInput.value = iconElement.dataset.icon;
-    }
-}
-
-// Form Handlers
-function handleAddCategory(formData) {
-    const categoryData = {
-        name: formData.get('categoryName'),
-        type: formData.get('categoryType'),
-        icon: formData.get('categoryIcon'),
-        description: formData.get('description')
-    };
-    
-    console.log('New category:', categoryData);
-    showSnackbar(`Category "${categoryData.name}" added successfully!`, 'success');
-    
-    // Here you would add the category to the budget data and update the UI
-    // For now, we'll just close the modal
-    closeModal('addCategoryModal');
-}
-
-function handleAddItem(formData) {
-    const itemData = {
-        name: formData.get('itemName'),
-        planned: parseFloat(formData.get('plannedAmount')),
-        icon: formData.get('itemIcon'),
-        description: formData.get('description'),
-        category: currentCategory
-    };
-    
-    console.log('New budget item:', itemData);
-    showSnackbar(`Budget item "${itemData.name}" added to ${currentCategory}!`, 'success');
-    
-    // Here you would add the item to the appropriate category
-    // For now, we'll just close the modal
-    closeModal('addItemModal');
-}
-
-function handleAddExpense(formData) {
-    const expenseData = {
-        category: formData.get('expenseCategory'),
-        amount: parseFloat(formData.get('expenseAmount')),
-        date: formData.get('expenseDate'),
-        description: formData.get('expenseDescription')
-    };
-    
-    console.log('New expense:', expenseData);
-    showSnackbar(`Expense of ₵${expenseData.amount.toFixed(2)} added!`, 'success');
-    
-    // Here you would update the actual spending for the category
-    // For now, we'll just close the modal
-    closeModal('addExpenseModal');
-}
-
-// Event Listeners Setup
-function setupEventListeners() {
-    // Modal form handlers
-    const addCategoryForm = document.getElementById('addCategoryForm');
-    if (addCategoryForm) {
-        addCategoryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            if (!submitButton) return;
-            
-            const originalText = submitButton.textContent;
-            
-            submitButton.textContent = 'Adding...';
-            submitButton.disabled = true;
-            
-            setTimeout(() => {
-                handleAddCategory(formData);
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-                this.reset();
-                
-                // Reset icon selection
-                const firstIcon = this.querySelector('.icon-option');
-                if (firstIcon) {
-                    this.querySelectorAll('.icon-option').forEach(icon => icon.classList.remove('selected'));
-                    firstIcon.classList.add('selected');
-                    const hiddenInput = this.querySelector('input[name="categoryIcon"]');
-                    if (hiddenInput) {
-                        hiddenInput.value = firstIcon.dataset.icon;
-                    }
-                }
-            }, 1000);
-        });
-    }
-    
-    const addItemForm = document.getElementById('addItemForm');
-    if (addItemForm) {
-        addItemForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            if (!submitButton) return;
-            
-            const originalText = submitButton.textContent;
-            
-            submitButton.textContent = 'Adding...';
-            submitButton.disabled = true;
-            
-            setTimeout(() => {
-                handleAddItem(formData);
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-                this.reset();
-                
-                // Reset icon selection
-                const firstIcon = this.querySelector('.icon-option');
-                if (firstIcon) {
-                    this.querySelectorAll('.icon-option').forEach(icon => icon.classList.remove('selected'));
-                    firstIcon.classList.add('selected');
-                    const hiddenInput = this.querySelector('input[name="itemIcon"]');
-                    if (hiddenInput) {
-                        hiddenInput.value = firstIcon.dataset.icon;
-                    }
-                }
-            }, 1000);
-        });
-    }
-    
-    const addExpenseForm = document.getElementById('addExpenseForm');
-    if (addExpenseForm) {
-        addExpenseForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const submitButton = this.querySelector('button[type="submit"]');
-            if (!submitButton) return;
-            
-            const originalText = submitButton.textContent;
-            
-            submitButton.textContent = 'Adding...';
-            submitButton.disabled = true;
-            
-            setTimeout(() => {
-                handleAddExpense(formData);
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-                this.reset();
-            }, 1000);
-        });
-    }
-    
-    // Icon selection handlers
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('icon-option')) {
-            selectIcon(e.target);
-        }
-    });
-    
-    // Close modal when clicking outside
+    // Close modals when clicking outside
     window.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
@@ -574,29 +1190,9 @@ function setupEventListeners() {
             dropdown.style.display = 'none';
         }
     });
-}
-
-// Initialize page
-function initializePage() {
-    // Initialize budget summary
-    updateBudgetSummary();
     
-    // Initialize category states (expand needs by default)
-    const needsCategory = document.querySelector('.needs-section .category-content');
-    if (needsCategory) {
-        needsCategory.classList.add('expanded');
-        const needsHeader = document.querySelector('.needs-section .category-header');
-        if (needsHeader) {
-            needsHeader.classList.add('expanded');
-            const needsIcon = needsHeader.querySelector('.expand-icon');
-            if (needsIcon) {
-                needsIcon.textContent = '▲';
-            }
-        }
-    }
-    
-    // Setup event listeners
-    setupEventListeners();
+    // Load budget data
+    await loadBudgetData();
     
     console.log('Budget page initialized successfully');
 }
@@ -608,58 +1204,57 @@ if (document.readyState === 'loading') {
     initializePage();
 }
 
-// Utility Functions
-function formatCurrency(amount) {
-    return `₵${amount.toFixed(2)}`;
-}
-
-function calculateVariance(planned, actual) {
-    return actual - planned;
-}
-
-function getVarianceClass(variance) {
-    if (variance > 0) return 'warning'; // Over budget
-    if (variance < 0) return 'success'; // Under budget
-    return 'success'; // On target
-}
-
-function getStatusText(planned, actual) {
-    const variance = calculateVariance(planned, actual);
-    const percentageVariance = Math.abs(variance / planned) * 100;
-    
-    if (variance === 0) return 'On Track';
-    if (variance < 0) return 'Under Budget';
-    if (percentageVariance <= 10) return 'Near Target';
-    return 'Over Budget';
-}
-
-function getStatusClass(planned, actual) {
-    const variance = calculateVariance(planned, actual);
-    const percentageVariance = Math.abs(variance / planned) * 100;
-    
-    if (variance === 0) return 'on-track';
-    if (variance < 0) return 'under-budget';
-    if (variance > 0 && percentageVariance > 10) return 'over-budget';
-    if (variance > 0) return 'exceeded';
-    return 'on-track';
-}
-
-// Export functions for global access (if needed)
+// Export functions for global access
 window.budgetFunctions = {
     toggleCategory,
     switchView,
-    updateBudgetItem,
     showAddCategoryModal,
-    showAddItemModal,
-    showBudgetTemplateModal,
-    editBudgetItem,
-    addExpense,
-    changeBudgetPeriod,
-    copyFromPreviousMonth,
-    saveBudget,
-    exportBudget,
-    applyTemplate,
+    editBudgetCategory,
+    addExpenseToCategory,
+    deleteCategory,
     toggleUserMenu,
     closeModal,
-    showModal
+    showModal,
+    showTemplateModal,
+    showBudgetTemplateModal,
+    resetTemplateModal,
+    selectTemplate,
+    applyTemplate,
+    clearTemplate,
+    showCustomTemplate,
+    backToTemplates,
+    updateCustomTemplate,
+    saveCustomTemplate,
+    loadCustomTemplates,
+    deleteCustomTemplate,
+    syncSliderWithInput
 };
+
+// Make functions globally accessible for HTML onclick events
+window.showBudgetTemplateModal = showBudgetTemplateModal;
+window.resetTemplateModal = resetTemplateModal;
+window.selectTemplate = selectTemplate;
+window.applyTemplate = applyTemplate;
+window.clearTemplate = clearTemplate;
+window.showCustomTemplate = showCustomTemplate;
+window.backToTemplates = backToTemplates;
+window.updateCustomTemplate = updateCustomTemplate;
+window.saveCustomTemplate = saveCustomTemplate;
+window.deleteCustomTemplate = deleteCustomTemplate;
+window.syncSliderWithInput = syncSliderWithInput;
+
+// Additional functions needed for HTML integration
+window.showAddCategoryModal = (categoryType = '') => {
+    const modal = document.getElementById('addCategoryModal');
+    if (modal) {
+        const typeSelect = modal.querySelector('select[name="category_type"]');
+        if (typeSelect && categoryType) {
+            typeSelect.value = categoryType;
+        }
+        showModal('addCategoryModal');
+    }
+};
+
+window.closeModal = closeModal;
+window.toggleUserMenu = toggleUserMenu;
+window.switchView = switchView;

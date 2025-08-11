@@ -46,8 +46,8 @@ function setupDefaultPersonalCategories($conn, $userId) {
     return count($defaultCategories);
 }
 
-function setupDefaultBudgetAllocation($conn, $userId, $monthlySalary = 3500) {
-    // Default 50-30-20 allocation
+function setupDefaultBudgetAllocation($conn, $userId, $monthlySalary = 0) {
+    // Default 50-30-20 allocation with no preset salary
     $stmt = $conn->prepare("
         INSERT INTO personal_budget_allocation 
         (user_id, needs_percentage, wants_percentage, savings_percentage, monthly_salary) 
@@ -59,14 +59,14 @@ function setupDefaultBudgetAllocation($conn, $userId, $monthlySalary = 3500) {
 
 function setupDefaultGoals($conn, $userId) {
     $defaultGoals = [
-        ['name' => 'Emergency Fund', 'amount' => 10500, 'type' => 'emergency_fund', 'priority' => 'high'],
-        ['name' => 'Vacation Savings', 'amount' => 5000, 'type' => 'vacation', 'priority' => 'medium'],
-        ['name' => 'Car Fund', 'amount' => 15000, 'type' => 'car', 'priority' => 'medium']
+        ['name' => 'Emergency Fund', 'amount' => 5000, 'type' => 'emergency_fund', 'priority' => 'high'],
+        ['name' => 'Vacation Savings', 'amount' => 3000, 'type' => 'vacation', 'priority' => 'medium'],
+        ['name' => 'Future Goals', 'amount' => 2000, 'type' => 'other', 'priority' => 'low']
     ];
     
     $stmt = $conn->prepare("
-        INSERT INTO personal_goals (user_id, goal_name, target_amount, goal_type, priority, target_date) 
-        VALUES (?, ?, ?, ?, ?, DATE_ADD(CURDATE(), INTERVAL 12 MONTH))
+        INSERT INTO personal_goals (user_id, goal_name, target_amount, goal_type, priority, target_date, current_amount) 
+        VALUES (?, ?, ?, ?, ?, DATE_ADD(CURDATE(), INTERVAL 12 MONTH), 0)
     ");
     
     foreach ($defaultGoals as $goal) {
@@ -84,57 +84,15 @@ function setupDefaultGoals($conn, $userId) {
 }
 
 function addSampleData($conn, $userId) {
-    // Add sample salary
+    // Only add basic salary setup - no sample expenses or income
     $stmt = $conn->prepare("
         INSERT INTO salaries (user_id, monthly_salary, pay_frequency, next_pay_date) 
-        VALUES (?, 3500, 'monthly', DATE_ADD(CURDATE(), INTERVAL 1 MONTH))
+        VALUES (?, 0, 'monthly', DATE_ADD(CURDATE(), INTERVAL 1 MONTH))
     ");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     
-    // Add sample income
-    $stmt = $conn->prepare("
-        INSERT INTO personal_income (user_id, source, amount, income_date, income_type, description) 
-        VALUES (?, 'Salary Payment', 3500, CURDATE(), 'salary', 'Monthly salary deposit')
-    ");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    
-    // Add sample expenses
-    $sampleExpenses = [
-        ['category' => 'Food & Groceries', 'amount' => 245.50, 'desc' => 'Weekly groceries at MaxMart', 'days_ago' => 1],
-        ['category' => 'Transportation', 'amount' => 180.00, 'desc' => 'Fuel for the week', 'days_ago' => 2],
-        ['category' => 'Entertainment', 'amount' => 85.00, 'desc' => 'Movie night with friends', 'days_ago' => 3],
-        ['category' => 'Utilities', 'amount' => 120.00, 'desc' => 'Monthly electricity bill', 'days_ago' => 4],
-        ['category' => 'Shopping', 'amount' => 450.00, 'desc' => 'New running shoes', 'days_ago' => 5]
-    ];
-    
-    foreach ($sampleExpenses as $expense) {
-        // Get category ID
-        $categoryStmt = $conn->prepare("
-            SELECT id FROM budget_categories 
-            WHERE user_id = ? AND name = ? 
-            LIMIT 1
-        ");
-        $categoryStmt->bind_param("is", $userId, $expense['category']);
-        $categoryStmt->execute();
-        $categoryId = $categoryStmt->get_result()->fetch_assoc()['id'];
-        
-        if ($categoryId) {
-            $expenseStmt = $conn->prepare("
-                INSERT INTO personal_expenses (user_id, category_id, amount, description, expense_date, payment_method) 
-                VALUES (?, ?, ?, ?, DATE_SUB(CURDATE(), INTERVAL ? DAY), 'card')
-            ");
-            $expenseStmt->bind_param("iidsi", 
-                $userId, 
-                $categoryId, 
-                $expense['amount'], 
-                $expense['desc'], 
-                $expense['days_ago']
-            );
-            $expenseStmt->execute();
-        }
-    }
+    // No sample expenses or income - user starts with clean slate
 }
 
 // Function to check if user needs setup

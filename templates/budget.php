@@ -1,10 +1,23 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Get user information from session
+$user_first_name = $_SESSION['first_name'] ?? 'User';
+$user_full_name = $_SESSION['full_name'] ?? 'User';
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Planning - Nkansah Budget Manager</title>
-    <link rel="stylesheet" href="../public/css/salary.css">
+    <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/budget.css">
 </head>
 <body>
@@ -14,7 +27,7 @@
             <div class="logo">
                 <div class="logo-icon">💰</div>
                 <div class="logo-text">
-                    <h1>Nkansah</h1>
+                    <h1><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Personal Finance</p>
                 </div>
             </div>
@@ -30,7 +43,9 @@
             </nav>
 
             <div class="user-menu">
-                <div class="user-avatar" onclick="toggleUserMenu()">JD</div>
+                <div class="user-avatar" onclick="toggleUserMenu()"><?php 
+                    echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
+                ?></div>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="profile.php">Profile Settings</a>
                     <a href="income-sources.php">Income Sources</a>
@@ -76,7 +91,7 @@
                         <span class="card-icon">💰</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">₵4,150.00</div>
+                        <div class="amount" id="totalIncome">₵0.00</div>
                         <div class="change">Available for budgeting</div>
                     </div>
                 </div>
@@ -87,8 +102,8 @@
                         <span class="card-icon">📊</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">₵4,050.00</div>
-                        <div class="change positive">₵100 surplus</div>
+                        <div class="amount" id="plannedBudget">₵0.00</div>
+                        <div class="change" id="budgetSurplus">₵0 surplus</div>
                     </div>
                 </div>
 
@@ -98,8 +113,8 @@
                         <span class="card-icon">💸</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">₵3,875.00</div>
-                        <div class="change positive">₵175 under budget</div>
+                        <div class="amount" id="actualSpending">₵0.00</div>
+                        <div class="change" id="spendingVariance">₵0 under budget</div>
                     </div>
                 </div>
 
@@ -109,8 +124,8 @@
                         <span class="card-icon">🎯</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">96%</div>
-                        <div class="change">Excellent tracking</div>
+                        <div class="amount" id="budgetPerformance">0%</div>
+                        <div class="change" id="performanceLabel">Starting tracking</div>
                     </div>
                 </div>
             </section>
@@ -141,335 +156,23 @@
                     </div>
                 </div>
 
-                <!-- Needs Category -->
-                <div class="category-section needs-section">
-                    <div class="category-header" onclick="toggleCategory('needs')">
-                        <div class="category-info">
-                            <span class="category-icon">🏠</span>
-                            <div class="category-details">
-                                <h4>Needs (Essential)</h4>
-                                <p>Housing, food, utilities, transportation</p>
-                            </div>
-                        </div>
-                        <div class="category-summary">
-                            <div class="category-amount">₵2,075.00 / ₵2,200.00</div>
-                            <div class="category-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill needs-progress" style="width: 94%"></div>
-                                </div>
-                                <span class="progress-text">94%</span>
-                            </div>
-                            <span class="expand-icon">▼</span>
-                        </div>
-                    </div>
-                    
-                    <div class="category-content expanded">
-                        <div class="budget-table">
-                            <div class="table-header">
-                                <div class="col-item">Item</div>
-                                <div class="col-planned">Planned</div>
-                                <div class="col-actual">Actual</div>
-                                <div class="col-variance">Variance</div>
-                                <div class="col-status">Status</div>
-                                <div class="col-actions">Actions</div>
-                            </div>
-                            
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🏠</span>
-                                    <div class="item-info">
-                                        <h5>Rent/Mortgage</h5>
-                                        <p>Monthly housing cost</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="1200" step="0.01" onchange="updateBudgetItem(this, 'rent', 'planned')">
-                                </div>
-                                <div class="col-actual">₵1,200.00</div>
-                                <div class="col-variance success">₵0.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge on-track">On Track</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('rent')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('rent')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🍽️</span>
-                                    <div class="item-info">
-                                        <h5>Groceries</h5>
-                                        <p>Food and household items</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="450" step="0.01" onchange="updateBudgetItem(this, 'groceries', 'planned')">
-                                </div>
-                                <div class="col-actual">₵425.00</div>
-                                <div class="col-variance success">₵25.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge under-budget">Under Budget</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('groceries')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('groceries')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">⚡</span>
-                                    <div class="item-info">
-                                        <h5>Utilities</h5>
-                                        <p>Electricity, water, internet</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="200" step="0.01" onchange="updateBudgetItem(this, 'utilities', 'planned')">
-                                </div>
-                                <div class="col-actual">₵180.00</div>
-                                <div class="col-variance success">₵20.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge under-budget">Under Budget</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('utilities')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('utilities')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🚗</span>
-                                    <div class="item-info">
-                                        <h5>Transportation</h5>
-                                        <p>Fuel, maintenance, public transport</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="350" step="0.01" onchange="updateBudgetItem(this, 'transport', 'planned')">
-                                </div>
-                                <div class="col-actual">₵270.00</div>
-                                <div class="col-variance success">₵80.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge under-budget">Under Budget</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('transport')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('transport')">💰</button>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="add-item-btn" onclick="showAddItemModal('needs')">+ Add Item</button>
-                    </div>
+                <!-- Loading State -->
+                <div id="budgetLoading" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading budget categories...</p>
                 </div>
 
-                <!-- Wants Category -->
-                <div class="category-section wants-section">
-                    <div class="category-header" onclick="toggleCategory('wants')">
-                        <div class="category-info">
-                            <span class="category-icon">🎮</span>
-                            <div class="category-details">
-                                <h4>Wants (Lifestyle)</h4>
-                                <p>Entertainment, dining out, hobbies</p>
-                            </div>
-                        </div>
-                        <div class="category-summary">
-                            <div class="category-amount">₵950.00 / ₵1,050.00</div>
-                            <div class="category-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill wants-progress" style="width: 90%"></div>
-                                </div>
-                                <span class="progress-text">90%</span>
-                            </div>
-                            <span class="expand-icon">▼</span>
-                        </div>
-                    </div>
-                    
-                    <div class="category-content">
-                        <div class="budget-table">
-                            <div class="table-header">
-                                <div class="col-item">Item</div>
-                                <div class="col-planned">Planned</div>
-                                <div class="col-actual">Actual</div>
-                                <div class="col-variance">Variance</div>
-                                <div class="col-status">Status</div>
-                                <div class="col-actions">Actions</div>
-                            </div>
-                            
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🍽️</span>
-                                    <div class="item-info">
-                                        <h5>Dining Out</h5>
-                                        <p>Restaurants, takeout</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="300" step="0.01" onchange="updateBudgetItem(this, 'dining', 'planned')">
-                                </div>
-                                <div class="col-actual">₵280.00</div>
-                                <div class="col-variance success">₵20.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge under-budget">Under Budget</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('dining')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('dining')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🎬</span>
-                                    <div class="item-info">
-                                        <h5>Entertainment</h5>
-                                        <p>Movies, games, subscriptions</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="250" step="0.01" onchange="updateBudgetItem(this, 'entertainment', 'planned')">
-                                </div>
-                                <div class="col-actual">₵270.00</div>
-                                <div class="col-variance warning">-₵20.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge over-budget">Over Budget</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('entertainment')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('entertainment')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🛍️</span>
-                                    <div class="item-info">
-                                        <h5>Shopping</h5>
-                                        <p>Clothes, personal items</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="500" step="0.01" onchange="updateBudgetItem(this, 'shopping', 'planned')">
-                                </div>
-                                <div class="col-actual">₵400.00</div>
-                                <div class="col-variance success">₵100.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge under-budget">Under Budget</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('shopping')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('shopping')">💰</button>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="add-item-btn" onclick="showAddItemModal('wants')">+ Add Item</button>
-                    </div>
+                <!-- Dynamic Categories Container -->
+                <div id="budgetCategoriesContainer" style="display: none;">
+                    <!-- Categories will be dynamically loaded here -->
                 </div>
 
-                <!-- Savings & Investments -->
-                <div class="category-section savings-section">
-                    <div class="category-header" onclick="toggleCategory('savings')">
-                        <div class="category-info">
-                            <span class="category-icon">💰</span>
-                            <div class="category-details">
-                                <h4>Savings & Investments</h4>
-                                <p>Emergency fund, retirement, goals</p>
-                            </div>
-                        </div>
-                        <div class="category-summary">
-                            <div class="category-amount">₵850.00 / ₵800.00</div>
-                            <div class="category-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill savings-progress" style="width: 106%"></div>
-                                </div>
-                                <span class="progress-text">106%</span>
-                            </div>
-                            <span class="expand-icon">▼</span>
-                        </div>
-                    </div>
-                    
-                    <div class="category-content">
-                        <div class="budget-table">
-                            <div class="table-header">
-                                <div class="col-item">Item</div>
-                                <div class="col-planned">Planned</div>
-                                <div class="col-actual">Actual</div>
-                                <div class="col-variance">Variance</div>
-                                <div class="col-status">Status</div>
-                                <div class="col-actions">Actions</div>
-                            </div>
-                            
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🆘</span>
-                                    <div class="item-info">
-                                        <h5>Emergency Fund</h5>
-                                        <p>3-6 months expenses</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="400" step="0.01" onchange="updateBudgetItem(this, 'emergency', 'planned')">
-                                </div>
-                                <div class="col-actual">₵450.00</div>
-                                <div class="col-variance success">-₵50.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge exceeded">Exceeded Target</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('emergency')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('emergency')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">🏖️</span>
-                                    <div class="item-info">
-                                        <h5>Vacation Fund</h5>
-                                        <p>Holiday savings</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="200" step="0.01" onchange="updateBudgetItem(this, 'vacation', 'planned')">
-                                </div>
-                                <div class="col-actual">₵200.00</div>
-                                <div class="col-variance success">₵0.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge on-track">On Track</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('vacation')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('vacation')">💰</button>
-                                </div>
-                            </div>
-
-                            <div class="budget-item">
-                                <div class="col-item">
-                                    <span class="item-icon">📈</span>
-                                    <div class="item-info">
-                                        <h5>Investments</h5>
-                                        <p>Stocks, bonds, mutual funds</p>
-                                    </div>
-                                </div>
-                                <div class="col-planned">
-                                    <input type="number" value="200" step="0.01" onchange="updateBudgetItem(this, 'investments', 'planned')">
-                                </div>
-                                <div class="col-actual">₵200.00</div>
-                                <div class="col-variance success">₵0.00</div>
-                                <div class="col-status">
-                                    <span class="status-badge on-track">On Track</span>
-                                </div>
-                                <div class="col-actions">
-                                    <button class="action-btn" onclick="editBudgetItem('investments')">✏️</button>
-                                    <button class="action-btn" onclick="addExpense('investments')">💰</button>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="add-item-btn" onclick="showAddItemModal('savings')">+ Add Item</button>
-                    </div>
+                <!-- Empty State -->
+                <div id="emptyBudgetState" class="empty-state" style="display: none;">
+                    <div class="empty-icon">�</div>
+                    <h3>No Budget Categories Yet</h3>
+                    <p>Get started by adding your first budget category</p>
+                    <button class="btn-primary" onclick="showAddCategoryModal()">Add Your First Category</button>
                 </div>
             </section>
 
@@ -478,22 +181,22 @@
                 <div class="summary-cards">
                     <div class="summary-card">
                         <h4>Total Planned</h4>
-                        <div class="summary-amount">₵4,050.00</div>
-                        <div class="summary-detail">97.6% of income</div>
+                        <div class="summary-amount" id="summaryPlanned">₵0.00</div>
+                        <div class="summary-detail" id="summaryPlannedPercent">0% of income</div>
                     </div>
                     <div class="summary-card">
                         <h4>Total Actual</h4>
-                        <div class="summary-amount">₵3,875.00</div>
-                        <div class="summary-detail">93.4% of income</div>
+                        <div class="summary-amount" id="summaryActual">₵0.00</div>
+                        <div class="summary-detail" id="summaryActualPercent">0% of income</div>
                     </div>
                     <div class="summary-card">
                         <h4>Remaining Budget</h4>
-                        <div class="summary-amount positive">₵275.00</div>
-                        <div class="summary-detail">6.6% unspent</div>
+                        <div class="summary-amount" id="summaryRemaining">₵0.00</div>
+                        <div class="summary-detail" id="summaryRemainingPercent">0% unspent</div>
                     </div>
                     <div class="summary-card">
                         <h4>Available Balance</h4>
-                        <div class="summary-amount">₵100.00</div>
+                        <div class="summary-amount" id="summaryAvailable">₵0.00</div>
                         <div class="summary-detail">Unallocated funds</div>
                     </div>
                 </div>
@@ -502,27 +205,30 @@
     </main>
 
     <!-- Add Category Modal -->
-    <div id="addCategoryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <div id="addCategoryModal" class="budget-modal">
+        <div class="budget-modal-content">
+            <div class="budget-modal-header">
                 <h3>Add New Category</h3>
-                <span class="close" onclick="closeModal('addCategoryModal')">&times;</span>
+                <span class="budget-modal-close" onclick="closeModal('addCategoryModal')">&times;</span>
             </div>
-            <form class="modal-form" id="addCategoryForm">
+            <form class="budget-modal-form" id="addCategoryForm">
                 <div class="form-section">
                     <div class="form-group">
                         <label>Category Name</label>
-                        <input type="text" name="categoryName" placeholder="e.g., Healthcare" required>
+                        <input type="text" name="name" placeholder="e.g., Healthcare" required>
                     </div>
                     <div class="form-group">
                         <label>Category Type</label>
-                        <select name="categoryType" required>
+                        <select name="category_type" required>
                             <option value="">Select type</option>
                             <option value="needs">Needs (Essential)</option>
                             <option value="wants">Wants (Lifestyle)</option>
                             <option value="savings">Savings & Investments</option>
-                            <option value="debt">Debt Payments</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Budget Limit (₵)</label>
+                        <input type="number" name="budget_limit" step="0.01" placeholder="0.00" min="0" required>
                     </div>
                     <div class="form-group">
                         <label>Icon</label>
@@ -533,15 +239,25 @@
                             <div class="icon-option" data-icon="📚">📚</div>
                             <div class="icon-option" data-icon="🎯">🎯</div>
                             <div class="icon-option" data-icon="💳">💳</div>
+                            <div class="icon-option" data-icon="🏠">🏠</div>
+                            <div class="icon-option" data-icon="🍽️">🍽️</div>
                         </div>
-                        <input type="hidden" name="categoryIcon" value="🏥">
+                        <input type="hidden" name="icon" value="🏥">
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea name="description" placeholder="Brief description of this category"></textarea>
+                        <label>Color</label>
+                        <div class="color-selector">
+                            <div class="color-option selected" data-color="#007bff" style="background-color: #007bff;"></div>
+                            <div class="color-option" data-color="#28a745" style="background-color: #28a745;"></div>
+                            <div class="color-option" data-color="#dc3545" style="background-color: #dc3545;"></div>
+                            <div class="color-option" data-color="#ffc107" style="background-color: #ffc107;"></div>
+                            <div class="color-option" data-color="#6f42c1" style="background-color: #6f42c1;"></div>
+                            <div class="color-option" data-color="#fd7e14" style="background-color: #fd7e14;"></div>
+                        </div>
+                        <input type="hidden" name="color" value="#007bff">
                     </div>
                 </div>
-                <div class="modal-actions">
+                <div class="budget-modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeModal('addCategoryModal')">Cancel</button>
                     <button type="submit" class="btn-primary">Add Category</button>
                 </div>
@@ -592,50 +308,175 @@
     </div>
 
     <!-- Budget Template Modal -->
-    <div id="budgetTemplateModal" class="modal">
-        <div class="modal-content large">
-            <div class="modal-header">
+    <div id="budgetTemplateModal" class="budget-modal">
+        <div class="budget-modal-content large">
+            <div class="budget-modal-header">
                 <h3>Budget Templates</h3>
-                <span class="close" onclick="closeModal('budgetTemplateModal')">&times;</span>
+                <span class="budget-modal-close" onclick="closeModal('budgetTemplateModal')">&times;</span>
             </div>
-            <div class="modal-form">
-                <div class="template-grid">
-                    <div class="template-card" onclick="applyTemplate('50-30-20')">
-                        <h4>50/30/20 Rule</h4>
-                        <p>50% Needs, 30% Wants, 20% Savings</p>
-                        <div class="template-preview">
-                            <div class="preview-bar needs-bar" style="width: 50%"></div>
-                            <div class="preview-bar wants-bar" style="width: 30%"></div>
-                            <div class="preview-bar savings-bar" style="width: 20%"></div>
+            <div class="budget-modal-form">
+                <div class="template-section" id="templateSelection">
+                    <h4>Popular Budget Templates</h4>
+                    <p>Choose a proven budgeting strategy or create your own custom allocation</p>
+                    
+                    <div class="template-grid" id="templateGrid">
+                        <div class="template-card" onclick="selectTemplate(50, 30, 20, '50/30/20 Rule')">
+                            <h5>50/30/20 Rule</h5>
+                            <p class="template-desc">Most popular balanced approach</p>
+                            <div class="template-preview">
+                                <div class="preview-bar needs-bar" style="width: 50%">
+                                    <span>50% Needs</span>
+                                </div>
+                                <div class="preview-bar wants-bar" style="width: 30%">
+                                    <span>30% Wants</span>
+                                </div>
+                                <div class="preview-bar savings-bar" style="width: 20%">
+                                    <span>20% Savings</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="selectTemplate(80, 10, 10, 'Minimalist Budget')">
+                            <h5>80/10/10 Minimalist</h5>
+                            <p class="template-desc">Focus on essentials only</p>
+                            <div class="template-preview">
+                                <div class="preview-bar needs-bar" style="width: 80%">
+                                    <span>80% Needs</span>
+                                </div>
+                                <div class="preview-bar wants-bar" style="width: 10%">
+                                    <span>10% Wants</span>
+                                </div>
+                                <div class="preview-bar savings-bar" style="width: 10%">
+                                    <span>10% Savings</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="selectTemplate(60, 20, 20, 'Conservative Budget')">
+                            <h5>60/20/20 Conservative</h5>
+                            <p class="template-desc">Higher focus on necessities</p>
+                            <div class="template-preview">
+                                <div class="preview-bar needs-bar" style="width: 60%">
+                                    <span>60% Needs</span>
+                                </div>
+                                <div class="preview-bar wants-bar" style="width: 20%">
+                                    <span>20% Wants</span>
+                                </div>
+                                <div class="preview-bar savings-bar" style="width: 20%">
+                                    <span>20% Savings</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="selectTemplate(40, 30, 30, 'Aggressive Saver')">
+                            <h5>40/30/30 Aggressive</h5>
+                            <p class="template-desc">Maximum savings focus</p>
+                            <div class="template-preview">
+                                <div class="preview-bar needs-bar" style="width: 40%">
+                                    <span>40% Needs</span>
+                                </div>
+                                <div class="preview-bar wants-bar" style="width: 30%">
+                                    <span>30% Wants</span>
+                                </div>
+                                <div class="preview-bar savings-bar" style="width: 30%">
+                                    <span>30% Savings</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="selectTemplate(70, 20, 10, 'Debt Payoff Focus')">
+                            <h5>70/20/10 Debt Focus</h5>
+                            <p class="template-desc">Prioritize debt elimination</p>
+                            <div class="template-preview">
+                                <div class="preview-bar needs-bar" style="width: 70%">
+                                    <span>70% Needs</span>
+                                </div>
+                                <div class="preview-bar wants-bar" style="width: 20%">
+                                    <span>20% Wants</span>
+                                </div>
+                                <div class="preview-bar savings-bar" style="width: 10%">
+                                    <span>10% Savings</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card custom-template" onclick="showCustomTemplate()">
+                            <h5>🎯 Custom Template</h5>
+                            <p class="template-desc">Create your own allocation</p>
+                            <div class="custom-icon">
+                                <span>✏️</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="template-card" onclick="applyTemplate('60-20-20')">
-                        <h4>Conservative</h4>
-                        <p>60% Needs, 20% Wants, 20% Savings</p>
-                        <div class="template-preview">
-                            <div class="preview-bar needs-bar" style="width: 60%"></div>
-                            <div class="preview-bar wants-bar" style="width: 20%"></div>
-                            <div class="preview-bar savings-bar" style="width: 20%"></div>
+                </div>
+                
+                <!-- Custom Template Section -->
+                <div id="customTemplateSection" class="custom-section" style="display: none;">
+                    <h4>Create Custom Budget Template</h4>
+                    <p>Adjust the percentages to match your financial goals. Total must equal 100%.</p>
+                    
+                    <div class="custom-controls">
+                        <div class="percentage-control">
+                            <label>Needs (Essential expenses)</label>
+                            <div class="percentage-input">
+                                <input type="range" id="needsSlider" min="0" max="100" value="50" oninput="updateCustomTemplate()">
+                                <input type="number" id="needsInput" min="0" max="100" value="50" oninput="updateCustomTemplate()">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="percentage-control">
+                            <label>Wants (Lifestyle & entertainment)</label>
+                            <div class="percentage-input">
+                                <input type="range" id="wantsSlider" min="0" max="100" value="30" oninput="updateCustomTemplate()">
+                                <input type="number" id="wantsInput" min="0" max="100" value="30" oninput="updateCustomTemplate()">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="percentage-control">
+                            <label>Savings & Investments</label>
+                            <div class="percentage-input">
+                                <input type="range" id="savingsSlider" min="0" max="100" value="20" oninput="updateCustomTemplate()">
+                                <input type="number" id="savingsInput" min="0" max="100" value="20" oninput="updateCustomTemplate()">
+                                <span>%</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="template-card" onclick="applyTemplate('40-40-20')">
-                        <h4>Balanced</h4>
-                        <p>40% Needs, 40% Wants, 20% Savings</p>
-                        <div class="template-preview">
-                            <div class="preview-bar needs-bar" style="width: 40%"></div>
-                            <div class="preview-bar wants-bar" style="width: 40%"></div>
-                            <div class="preview-bar savings-bar" style="width: 20%"></div>
+                    
+                    <div class="custom-preview">
+                        <div class="total-check">
+                            <span id="totalPercentage">100%</span>
+                            <span id="totalStatus" class="status-valid">✓ Valid</span>
+                        </div>
+                        <div class="custom-template-preview">
+                            <div id="customNeedsBar" class="preview-bar needs-bar" style="width: 50%">
+                                <span id="customNeedsLabel">50% Needs</span>
+                            </div>
+                            <div id="customWantsBar" class="preview-bar wants-bar" style="width: 30%">
+                                <span id="customWantsLabel">30% Wants</span>
+                            </div>
+                            <div id="customSavingsBar" class="preview-bar savings-bar" style="width: 20%">
+                                <span id="customSavingsLabel">20% Savings</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="template-card" onclick="applyTemplate('aggressive-savings')">
-                        <h4>Aggressive Savings</h4>
-                        <p>45% Needs, 25% Wants, 30% Savings</p>
-                        <div class="template-preview">
-                            <div class="preview-bar needs-bar" style="width: 45%"></div>
-                            <div class="preview-bar wants-bar" style="width: 25%"></div>
-                            <div class="preview-bar savings-bar" style="width: 30%"></div>
-                        </div>
-                    </div>
+                </div>
+                
+                <!-- Template Preview -->
+                <div id="templatePreviewSection" class="preview-section" style="display: none;">
+                    <h4>Template Preview</h4>
+                    <div id="selectedTemplateName" class="template-name"></div>
+                    <div id="templateCalculations" class="template-calculations"></div>
+                </div>
+                
+                <!-- Template Preview Section -->
+                <div id="templatePreview" class="template-preview-section"></div>
+                
+                <div class="budget-modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('budgetTemplateModal')">Cancel</button>
+                    <button type="button" class="btn-secondary" id="backToTemplates" onclick="backToTemplates()" style="display: none;">Back to Templates</button>
+                    <button type="button" class="btn-primary" id="saveCustomTemplate" onclick="saveCustomTemplate()" style="display: none;">Save & Apply Template</button>
                 </div>
             </div>
         </div>
@@ -678,6 +519,13 @@
     <!-- Snackbar -->
     <div id="snackbar"></div>
 
+    <script>
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('personalTheme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
     <script src="../public/js/budget.js"></script>
 </body>
 </html>

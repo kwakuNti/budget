@@ -291,11 +291,13 @@ try {
             $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
             
-            if ($familyIdForLog) {
-                $logStmt->bind_param("iiss", $user['id'], $familyIdForLog, $ipAddress, $userAgent);
-            } else {
-                $logStmt->bind_param("isis", $user['id'], null, $ipAddress, $userAgent);
-            }
+// Assign family_id to a variable that can be passed by reference
+            $familyIdForLog = isset($_SESSION['family_id']) ? $_SESSION['family_id'] : null;
+            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+
+            // Use the variable instead of direct null
+            $logStmt->bind_param("iiss", $user['id'], $familyIdForLog, $ipAddress, $userAgent);
             
             $logStmt->execute();
             $logStmt->close();

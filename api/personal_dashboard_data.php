@@ -213,6 +213,46 @@ try {
     
     $recentTransactions = array_slice($allTransactions, 0, 10);
     
+    // Get Personal Savings Goals
+    $stmt = $conn->prepare("
+        SELECT 
+            id,
+            goal_name,
+            target_amount,
+            current_amount,
+            target_date,
+            goal_type,
+            priority,
+            is_completed,
+            created_at
+        FROM personal_goals 
+        WHERE user_id = ? 
+        AND is_completed = FALSE
+        ORDER BY priority DESC, target_date ASC
+        LIMIT 10
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $goalsResult = $stmt->get_result();
+    
+    $savingsGoals = [];
+    while ($row = $goalsResult->fetch_assoc()) {
+        $progressPercentage = $row['target_amount'] > 0 ? 
+            min(100, ($row['current_amount'] / $row['target_amount']) * 100) : 0;
+            
+        $savingsGoals[] = [
+            'id' => intval($row['id']),
+            'goal_name' => $row['goal_name'],
+            'target_amount' => floatval($row['target_amount']),
+            'current_amount' => floatval($row['current_amount']),
+            'target_date' => $row['target_date'],
+            'goal_type' => $row['goal_type'],
+            'priority' => $row['priority'],
+            'progress_percentage' => round($progressPercentage, 1),
+            'is_on_track' => $progressPercentage >= 50 // Simple heuristic
+        ];
+    }
+    
     // Response Construction with CORRECTED CONFIRMED INCOME LOGIC
     $responseData = [
         'success' => true,
@@ -235,7 +275,8 @@ try {
             'income_sources_count' => count($incomeSources),
             'confirmed_income_count' => count($confirmedIncomeList)
         ],
-        'recent_transactions' => $recentTransactions
+        'recent_transactions' => $recentTransactions,
+        'savings_goals' => $savingsGoals
     ];
     
     echo json_encode($responseData);

@@ -1,5 +1,18 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Get user information from session
+$user_first_name = $_SESSION['first_name'] ?? 'User';
+$user_full_name = $_SESSION['full_name'] ?? 'User';
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -763,7 +776,7 @@
             <div class="logo">
                 <div class="logo-icon">💰</div>
                 <div class="logo-text">
-                    <h1 id="logoUserName">Personal</h1>
+                    <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Finance Dashboard</p>
                 </div>
             </div>
@@ -840,7 +853,9 @@
             </div>
 
             <div class="user-menu">
-                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar">--</div>
+                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php 
+                    echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
+                ?></div>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="profile.php">Profile Settings</a>
                     <a href="income-sources.php">Income Sources</a>
@@ -989,7 +1004,7 @@
                 <div class="section-header">
                     <h3 id="salaryAllocationTitle">Budget Allocation & Preview</h3>
                     <div class="preview-totals">
-                        <span>Based on: <strong id="previewBasedOnSalary">₵0.00</strong></span>
+                        <span>Based on: <strong id="previewBasedOnSalary">₵0.00</strong> total income</span>
                         <span>Total: <strong id="previewTotalAllocated">0%</strong></span>
                     </div>
                 </div>
@@ -1240,7 +1255,7 @@
             <div class="modal-form">
                 <div class="form-section">
                     <h4>Income Summary</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                         <div style="text-align: center; padding: 16px; background: #e3f2fd; border-radius: 8px;">
                             <div style="font-size: 24px; font-weight: bold; color: #1976d2;" id="previewTotalIncome">₵0.00</div>
                             <div style="color: #424242; font-size: 14px;">Total Monthly Income</div>
@@ -1248,6 +1263,10 @@
                         <div style="text-align: center; padding: 16px; background: #f3e5f5; border-radius: 8px;">
                             <div style="font-size: 24px; font-weight: bold; color: #7b1fa2;" id="previewSalaryIncome">₵0.00</div>
                             <div style="color: #424242; font-size: 14px;">Primary Salary</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: #e8f5e8; border-radius: 8px;">
+                            <div style="font-size: 24px; font-weight: bold; color: #2e7d32;" id="previewAdditionalIncome">₵0.00</div>
+                            <div style="color: #424242; font-size: 14px;">Additional Income</div>
                         </div>
                     </div>
                 </div>
@@ -2252,13 +2271,35 @@
         // Salary setup specific JavaScript
         function updateBudgetPreview() {
             const salary = parseFloat(document.getElementById('salaryAmount').value) || 0;
-            updateAllocationAmounts(salary);
+            
+            // Get additional income from the displayed value
+            const additionalIncomeElement = document.getElementById('additionalIncome');
+            let additionalIncome = 0;
+            if (additionalIncomeElement) {
+                const additionalText = additionalIncomeElement.textContent.replace('₵', '').replace(',', '');
+                additionalIncome = parseFloat(additionalText) || 0;
+            }
+            
+            // Calculate total income (salary + additional income)
+            const totalIncome = salary + additionalIncome;
+            
+            updateAllocationAmounts(totalIncome);
             updateTotalAllocation();
             
             // Update the allocation total display
             const allocationTotal = document.getElementById('allocationTotal');
             if (allocationTotal) {
-                allocationTotal.textContent = `Based on ₵${salary.toFixed(2)} salary`;
+                if (additionalIncome > 0) {
+                    allocationTotal.textContent = `Based on ₵${salary.toFixed(2)} salary + ₵${additionalIncome.toFixed(2)} additional income = ₵${totalIncome.toFixed(2)} total`;
+                } else {
+                    allocationTotal.textContent = `Based on ₵${salary.toFixed(2)} salary`;
+                }
+            }
+            
+            // Update the preview section displays
+            const previewBasedOnSalary = document.getElementById('previewBasedOnSalary');
+            if (previewBasedOnSalary) {
+                previewBasedOnSalary.textContent = `₵${totalIncome.toLocaleString()}`;
             }
         }
 
@@ -2612,6 +2653,17 @@
         function updatePreviewBudgetData() {
             const salaryAmount = parseFloat(document.getElementById('salaryAmount').value) || 0;
             
+            // Get additional income from the displayed value
+            const additionalIncomeElement = document.getElementById('additionalIncome');
+            let additionalIncome = 0;
+            if (additionalIncomeElement) {
+                const additionalText = additionalIncomeElement.textContent.replace('₵', '').replace(',', '');
+                additionalIncome = parseFloat(additionalText) || 0;
+            }
+            
+            // Calculate total income (salary + additional income)
+            const totalIncome = salaryAmount + additionalIncome;
+            
             // Try data-category approach first, then fallback to ID approach
             let needsSlider = document.querySelector('[data-category="needs"]');
             let wantsSlider = document.querySelector('[data-category="wants"]');
@@ -2625,13 +2677,15 @@
             const wantsPercent = wantsSlider ? parseInt(wantsSlider.value) : 30;
             const savingsPercent = savingsSlider ? parseInt(savingsSlider.value) : 20;
             
-            const needsAmount = (salaryAmount * needsPercent) / 100;
-            const wantsAmount = (salaryAmount * wantsPercent) / 100;
-            const savingsAmount = (salaryAmount * savingsPercent) / 100;
+            // Calculate allocations based on total income (not just salary)
+            const needsAmount = (totalIncome * needsPercent) / 100;
+            const wantsAmount = (totalIncome * wantsPercent) / 100;
+            const savingsAmount = (totalIncome * savingsPercent) / 100;
             
-            // Update preview modal
-            document.getElementById('previewTotalIncome').textContent = `₵${salaryAmount.toFixed(2)}`;
+            // Update preview modal with total income and breakdown
+            document.getElementById('previewTotalIncome').textContent = `₵${totalIncome.toFixed(2)}`;
             document.getElementById('previewSalaryIncome').textContent = `₵${salaryAmount.toFixed(2)}`;
+            document.getElementById('previewAdditionalIncome').textContent = `₵${additionalIncome.toFixed(2)}`;
             
             document.getElementById('previewNeedsAmount').textContent = `₵${needsAmount.toFixed(2)}`;
             document.getElementById('previewNeedsPercent').textContent = `${needsPercent}%`;

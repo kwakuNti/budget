@@ -1,3 +1,4 @@
+/*personal.css*/
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -19,7 +20,8 @@
     --card-background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     --text-primary: #1e293b;
     --text-secondary: #64748b;
-    --border-color: rgba(255, 255, 255, 0.2);
+    --border-color: #e2e8f0;
+    --hover-color: #f1f5f9;
     --shadow-color: rgba(59, 130, 246, 0.15);
     --theme-name: 'Ocean Blue';
 }
@@ -35,6 +37,10 @@
     --accent-dark: #10b981;
     --background-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f8fafc 100%);
     --card-background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #d1fae5;
+    --hover-color: #ecfdf5;
     --shadow-color: rgba(5, 150, 105, 0.15);
     --theme-name: 'Forest Green';
 }
@@ -101,6 +107,10 @@
     --accent-dark: #f59e0b;
     --background-gradient: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #f8fafc 100%);
     --card-background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #fde68a;
+    --hover-color: #fefce8;
     --shadow-color: rgba(245, 158, 11, 0.15);
     --theme-name: 'Sunset Orange';
 }
@@ -116,6 +126,10 @@
     --accent-dark: #a855f7;
     --background-gradient: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #f8fafc 100%);
     --card-background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e9d5ff;
+    --hover-color: #faf5ff;
     --shadow-color: rgba(139, 92, 246, 0.15);
     --theme-name: 'Royal Purple';
 }
@@ -131,6 +145,10 @@
     --accent-dark: #fb7185;
     --background-gradient: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #f8fafc 100%);
     --card-background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #fce7f3;
+    --hover-color: #fdf2f8;
     --shadow-color: rgba(244, 63, 94, 0.15);
     --theme-name: 'Rose Pink';
 }
@@ -148,7 +166,8 @@
     --card-background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
     --text-primary: #f9fafb;
     --text-secondary: #d1d5db;
-    --border-color: rgba(75, 85, 99, 0.3);
+    --border-color: #4b5563;
+    --hover-color: #374151;
     --shadow-color: rgba(0, 0, 0, 0.25);
     --theme-name: 'Dark Mode';
 }
@@ -881,7 +900,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--border-color);
     border: 1px solid var(--border-color);
-    margin-bottom: 2rem;
+    margin-bottom: 4rem;
 }
 
 .insights-grid {
@@ -965,6 +984,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 2rem;
+    margin-bottom: 60px;
 }
 
 .dashboard-section {
@@ -2119,3 +2139,6 @@ body {
     line-height: 1.5;
     margin-bottom: 24px;
 }
+
+
+
