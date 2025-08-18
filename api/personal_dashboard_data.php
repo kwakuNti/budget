@@ -92,7 +92,29 @@ try {
     ");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
-    $budgetAllocation = $stmt->get_result()->fetch_assoc();
+    $budgetAllocationRaw = $stmt->get_result()->fetch_assoc();
+    
+    // Transform budget allocation into array format expected by frontend
+    $budgetAllocation = [];
+    if ($budgetAllocationRaw) {
+        $budgetAllocation = [
+            [
+                'category_type' => 'needs',
+                'percentage' => intval($budgetAllocationRaw['needs_percentage']),
+                'allocated_amount' => floatval($budgetAllocationRaw['needs_amount'])
+            ],
+            [
+                'category_type' => 'wants',
+                'percentage' => intval($budgetAllocationRaw['wants_percentage']),
+                'allocated_amount' => floatval($budgetAllocationRaw['wants_amount'])
+            ],
+            [
+                'category_type' => 'savings',
+                'percentage' => intval($budgetAllocationRaw['savings_percentage']),
+                'allocated_amount' => floatval($budgetAllocationRaw['savings_amount'])
+            ]
+        ];
+    }
     
     // CONFIRMED RECEIVED INCOME - This is the key change!
     $currentMonth = date('Y-m');

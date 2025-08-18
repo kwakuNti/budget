@@ -166,7 +166,7 @@
                     </div>
 
                     <!-- Personal account specific fields -->
-                    <div id="personalFields" style="display: none;">
+                    <!-- <div id="personalFields" style="display: none;">
                         <div class="form-group">
                             <label for="monthlySalary">Monthly Income (₵)</label>
                             <div class="input-wrapper">
@@ -180,7 +180,7 @@
                             </div>
                             <small class="field-help">Optional: Enter your monthly income to help with budget planning</small>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Step 3: Account Security -->

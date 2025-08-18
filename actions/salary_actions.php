@@ -510,22 +510,13 @@ function createDefaultCategories($conn, $userId) {
     $defaultCategories = [
         // Needs categories
         ['Food & Groceries', 'needs', '🍔', '#e74c3c'],
-        ['Rent/Housing', 'needs', '🏠', '#e67e22'],
         ['Utilities', 'needs', '💡', '#f39c12'],
-        ['Transportation', 'needs', '🚗', '#3498db'],
-        ['Healthcare', 'needs', '🏥', '#9b59b6'],
-        ['Insurance', 'needs', '🛡️', '#34495e'],
         
         // Wants categories
         ['Entertainment', 'wants', '🎮', '#1abc9c'],
-        ['Dining Out', 'wants', '🍽️', '#e74c3c'],
-        ['Shopping', 'wants', '🛍️', '#f1c40f'],
-        ['Hobbies', 'wants', '🎨', '#9b59b6'],
         ['Subscription Services', 'wants', '📱', '#3498db'],
         
         // Savings categories
-        ['Emergency Fund', 'savings', '🆘', '#27ae60'],
-        ['Retirement', 'savings', '👴', '#2980b9'],
         ['Vacation Fund', 'savings', '✈️', '#e67e22'],
         ['Investment', 'savings', '📈', '#8e44ad']
     ];

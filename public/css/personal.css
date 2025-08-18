@@ -24,6 +24,34 @@
     --hover-color: #f1f5f9;
     --shadow-color: rgba(59, 130, 246, 0.15);
     --theme-name: 'Ocean Blue';
+    
+    /* Gradient Variables */
+    --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --secondary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Additional Variables */
+    --input-background: #ffffff;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+    --card-shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --button-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --primary-shadow: rgba(59, 130, 246, 0.1);
+    --danger-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    --warning-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    --secondary-background: #f1f5f9;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --accent-background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    --accent-border: rgba(59, 130, 246, 0.2);
+    --primary-light: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    --success-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --warning-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --accent-light: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
 }
 
 /* Forest Green Theme */
@@ -43,6 +71,34 @@
     --hover-color: #ecfdf5;
     --shadow-color: rgba(5, 150, 105, 0.15);
     --theme-name: 'Forest Green';
+    
+    /* Gradient Variables for Forest Theme */
+    --primary-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
+    --secondary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --accent-gradient: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Additional Variables */
+    --input-background: #ffffff;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px rgba(5, 150, 105, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+    --card-shadow-sm: 0 4px 15px rgba(5, 150, 105, 0.05);
+    --hover-shadow: 0 20px 40px rgba(5, 150, 105, 0.15);
+    --button-shadow: 0 2px 8px rgba(5, 150, 105, 0.1);
+    --primary-shadow: rgba(5, 150, 105, 0.1);
+    --danger-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    --warning-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    --secondary-background: #ecfdf5;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --accent-background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --accent-border: rgba(5, 150, 105, 0.2);
+    --primary-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --success-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --warning-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --accent-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
 }
 
 /* Snackbar Notification Styles */
@@ -113,6 +169,34 @@
     --hover-color: #fefce8;
     --shadow-color: rgba(245, 158, 11, 0.15);
     --theme-name: 'Sunset Orange';
+    
+    /* Gradient Variables for Sunset Theme */
+    --primary-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --secondary-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    --accent-gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Additional Variables */
+    --input-background: #ffffff;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px rgba(245, 158, 11, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+    --card-shadow-sm: 0 4px 15px rgba(245, 158, 11, 0.05);
+    --hover-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
+    --button-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+    --primary-shadow: rgba(245, 158, 11, 0.1);
+    --danger-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    --warning-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    --secondary-background: #fefce8;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --accent-background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --accent-border: rgba(245, 158, 11, 0.2);
+    --primary-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --success-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --warning-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --accent-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
 }
 
 /* Royal Purple Theme */
@@ -132,6 +216,34 @@
     --hover-color: #faf5ff;
     --shadow-color: rgba(139, 92, 246, 0.15);
     --theme-name: 'Royal Purple';
+    
+    /* Gradient Variables for Purple Theme */
+    --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    --secondary-gradient: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    --accent-gradient: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Additional Variables */
+    --input-background: #ffffff;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px rgba(139, 92, 246, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+    --card-shadow-sm: 0 4px 15px rgba(139, 92, 246, 0.05);
+    --hover-shadow: 0 20px 40px rgba(139, 92, 246, 0.15);
+    --button-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+    --primary-shadow: rgba(139, 92, 246, 0.1);
+    --danger-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    --warning-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    --secondary-background: #faf5ff;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --accent-background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    --accent-border: rgba(139, 92, 246, 0.2);
+    --primary-light: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    --success-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --warning-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --accent-light: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
 }
 
 /* Rose Pink Theme */
@@ -151,6 +263,34 @@
     --hover-color: #fdf2f8;
     --shadow-color: rgba(244, 63, 94, 0.15);
     --theme-name: 'Rose Pink';
+    
+    /* Gradient Variables for Rose Theme */
+    --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    --secondary-gradient: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+    --accent-gradient: linear-gradient(135deg, #fda4af 0%, #fb7185 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Additional Variables */
+    --input-background: #ffffff;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px rgba(244, 63, 94, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+    --card-shadow-sm: 0 4px 15px rgba(244, 63, 94, 0.05);
+    --hover-shadow: 0 20px 40px rgba(244, 63, 94, 0.15);
+    --button-shadow: 0 2px 8px rgba(244, 63, 94, 0.1);
+    --primary-shadow: rgba(244, 63, 94, 0.1);
+    --danger-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    --warning-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    --secondary-background: #fdf2f8;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --accent-background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    --accent-border: rgba(244, 63, 94, 0.2);
+    --primary-light: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    --success-light: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --warning-light: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    --accent-light: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
 }
 
 /* Dark Mode Theme */
@@ -170,6 +310,34 @@
     --hover-color: #374151;
     --shadow-color: rgba(0, 0, 0, 0.25);
     --theme-name: 'Dark Mode';
+    
+    /* Gradient Variables for Dark Theme */
+    --primary-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    --secondary-gradient: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    --accent-gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    /* Additional Variables */
+    --input-background: #374151;
+    --text-muted: #9ca3af;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    --card-shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.2);
+    --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    --button-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --primary-shadow: rgba(96, 165, 250, 0.1);
+    --danger-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    --warning-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    --secondary-background: #374151;
+    --success-color: #10b981;
+    --warning-color: #fbbf24;
+    --accent-background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    --accent-border: rgba(96, 165, 250, 0.2);
+    --primary-light: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    --success-light: linear-gradient(135deg, #065f46 0%, #047857 100%);
+    --warning-light: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+    --accent-light: linear-gradient(135deg, #374151 0%, #4b5563 100%);
 }
 
 body {

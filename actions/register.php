@@ -490,7 +490,6 @@ try {
 
             // Create default budget categories for personal account
             $defaultCategories = [
-                ['Groceries', 'needs', '🛒', '#e74c3c'],
                 ['Utilities', 'needs', '⚡', '#f39c12'],
                 ['Transportation', 'needs', '🚗', '#3498db'],
                 ['Entertainment', 'wants', '🎬', '#9b59b6'],
@@ -559,7 +558,7 @@ try {
         debugLog("Session variables set");
 
         // Determine redirect URL
-        $redirectUrl = ($accountType === 'family') ? '../templates/dashboard' : '../templates/personal-dashboard';
+        $redirectUrl = ($accountType === 'family') ? '../templates/dashboard' : '../templates/login';
 
         // Send success response
         sendResponse(true, "Account created successfully! Redirecting to your dashboard...", [

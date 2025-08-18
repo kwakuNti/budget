@@ -4,26 +4,18 @@
  */
 
 function setupDefaultPersonalCategories($conn, $userId) {
-    // Default categories with icons and colors
+    // Default categories with icons and colors - only 2 per section
     $defaultCategories = [
         // NEEDS
         ['name' => 'Food & Groceries', 'type' => 'needs', 'icon' => '🛒', 'color' => '#e74c3c'],
         ['name' => 'Transportation', 'type' => 'needs', 'icon' => '⛽', 'color' => '#3498db'],
-        ['name' => 'Utilities', 'type' => 'needs', 'icon' => '💡', 'color' => '#f39c12'],
-        ['name' => 'Rent/Housing', 'type' => 'needs', 'icon' => '🏠', 'color' => '#2ecc71'],
-        ['name' => 'Healthcare', 'type' => 'needs', 'icon' => '🏥', 'color' => '#e67e22'],
-        ['name' => 'Insurance', 'type' => 'needs', 'icon' => '🛡️', 'color' => '#9b59b6'],
         
         // WANTS
         ['name' => 'Entertainment', 'type' => 'wants', 'icon' => '🎬', 'color' => '#1abc9c'],
-        ['name' => 'Shopping', 'type' => 'wants', 'icon' => '🛍️', 'color' => '#e91e63'],
         ['name' => 'Dining Out', 'type' => 'wants', 'icon' => '🍽️', 'color' => '#ff5722'],
-        ['name' => 'Hobbies', 'type' => 'wants', 'icon' => '🎮', 'color' => '#795548'],
-        ['name' => 'Travel', 'type' => 'wants', 'icon' => '✈️', 'color' => '#607d8b'],
         
         // SAVINGS
         ['name' => 'Emergency Fund', 'type' => 'savings', 'icon' => '🚨', 'color' => '#ff9800'],
-        ['name' => 'Investments', 'type' => 'savings', 'icon' => '📈', 'color' => '#4caf50'],
         ['name' => 'Future Goals', 'type' => 'savings', 'icon' => '🎯', 'color' => '#2196f3']
     ];
     

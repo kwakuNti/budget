@@ -1017,7 +1017,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <div class="allocation-info">
                                 <h4>Needs</h4>
                                 <div class="allocation-display">
-                                    <span class="allocation-percent" id="previewNeedsPercent">50%</span>
+                                    <span class="allocation-percent" id="previewNeedsPercent">%</span>
                                 </div>
                             </div>
                         </div>
@@ -1036,7 +1036,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <div class="allocation-info">
                                 <h4>Wants</h4>
                                 <div class="allocation-display">
-                                    <span class="allocation-percent" id="previewWantsPercent">30%</span>
+                                    <span class="allocation-percent" id="previewWantsPercent">%</span>
                                 </div>
                             </div>
                         </div>
@@ -1054,7 +1054,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <div class="allocation-info">
                                 <h4>Savings</h4>
                                 <div class="allocation-display">
-                                    <span class="allocation-percent" id="previewSavingsPercent">20%</span>
+                                    <span class="allocation-percent" id="previewSavingsPercent">%</span>
                                 </div>
                             </div>
                         </div>
@@ -1070,7 +1070,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <span>Total Allocated:</span>
                         <strong id="totalAllocated">100%</strong>
                     </div>
-                    <button class="btn-primary" onclick="saveBudgetAllocation()">Save Allocation</button>
+                    <!-- <button class="btn-primary" onclick="saveBudgetAllocation()">Save Allocation</button> -->
                 </div>
             </section>
 
@@ -1727,6 +1727,58 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 document.getElementById('salaryAmount').value = salaryData.monthly_salary;
                 updateBudgetPreview();
             }
+            
+            // Update budget allocation preview with backend data
+            if (data.budget_allocation && Array.isArray(data.budget_allocation) && data.budget_allocation.length > 0) {
+                updateBudgetAllocationPreview(data.budget_allocation, parseFloat(data.financial_overview?.monthly_income || 0));
+            }
+        }
+        
+        function updateBudgetAllocationPreview(allocations, totalIncome) {
+            console.log('Updating budget allocation preview:', allocations, totalIncome);
+            
+            if (!allocations || allocations.length === 0) {
+                console.log('No allocation data to display');
+                return;
+            }
+            
+            // Update the "Based on" total income display
+            const previewBasedOnSalary = document.getElementById('previewBasedOnSalary');
+            if (previewBasedOnSalary && totalIncome > 0) {
+                previewBasedOnSalary.textContent = `₵${totalIncome.toLocaleString()}`;
+            }
+            
+            // Calculate total percentage
+            let totalPercentage = 0;
+            
+            // Update each category
+            allocations.forEach(allocation => {
+                const categoryType = allocation.category_type;
+                const percentage = allocation.percentage || 0;
+                const amount = allocation.allocated_amount || 0;
+                
+                totalPercentage += percentage;
+                
+                // Update percentage display
+                const percentElement = document.getElementById(`preview${categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}Percent`);
+                if (percentElement) {
+                    percentElement.textContent = `${percentage}%`;
+                }
+                
+                // Update amount display
+                const amountElement = document.getElementById(`preview${categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}Amount`);
+                if (amountElement) {
+                    amountElement.textContent = `₵${amount.toLocaleString()}`;
+                }
+            });
+            
+            // Update total percentage display
+            const previewTotalAllocated = document.getElementById('previewTotalAllocated');
+            if (previewTotalAllocated) {
+                previewTotalAllocated.textContent = `${totalPercentage}%`;
+            }
+            
+            console.log('Budget allocation preview updated successfully');
         }
 
         function updateSalarySpecificData(data) {

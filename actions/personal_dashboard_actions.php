@@ -335,10 +335,7 @@ function getOrCreateCategory($conn, $userId, $categoryKey) {
     $categoryMap = [
         // Needs
         'needs-food' => ['Food & Groceries', 'needs', '🍔'],
-        'needs-transport' => ['Transportation', 'needs', '🚗'],
         'needs-utilities' => ['Utilities', 'needs', '💡'],
-        'needs-rent' => ['Rent/Housing', 'needs', '🏠'],
-        'needs-healthcare' => ['Healthcare', 'needs', '🏥'],
         
         // Wants
         'wants-entertainment' => ['Entertainment', 'wants', '🎮'],
@@ -385,20 +382,12 @@ function getOrCreateCategory($conn, $userId, $categoryKey) {
 function createDefaultBudgetCategories($conn, $userId) {
     $categories = [
         // Needs
-        ['Food & Groceries', 'needs', '🍔', '#e74c3c'],
-        ['Rent/Housing', 'needs', '🏠', '#e67e22'],
         ['Utilities', 'needs', '💡', '#f39c12'],
-        ['Transportation', 'needs', '🚗', '#3498db'],
-        ['Healthcare', 'needs', '🏥', '#9b59b6'],
         
         // Wants
         ['Entertainment', 'wants', '🎮', '#1abc9c'],
-        ['Dining Out', 'wants', '🍽️', '#e74c3c'],
-        ['Shopping', 'wants', '🛍️', '#f1c40f'],
-        ['Hobbies', 'wants', '🎨', '#9b59b6'],
         
         // Savings
-        ['Emergency Fund', 'savings', '🆘', '#27ae60'],
         ['Investment', 'savings', '📈', '#8e44ad']
     ];
     

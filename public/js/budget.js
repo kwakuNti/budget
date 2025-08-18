@@ -1,31 +1,600 @@
-// Budget Page JavaScript - Backend Integrated Version
+// Budget Page JavaScript - Enhanced with Allocation Logic
 
 // Global Variables
 let budgetData = null;
 let currentEditingCategory = null;
+let budgetAllocation = null; // Store current budget allocation (80/10/10 etc.)
+let currentBudgetPeriod = {
+    month: 8, // August
+    year: 2025
+};
 
 // Utility Functions
 function formatCurrency(amount) {
-    return `₵${parseFloat(amount).toFixed(2)}`;
+    // Handle null, undefined, NaN, or invalid values
+    if (amount === null || amount === undefined || isNaN(amount) || amount === '') {
+        return '₵0.00';
+    }
+    
+    // Convert to number and ensure it's valid
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+        return '₵0.00';
+    }
+    
+    return `₵${numAmount.toFixed(2)}`;
+}
+
+function formatPercent(value) {
+    // Handle null, undefined, NaN, or invalid values
+    if (value === null || value === undefined || isNaN(value) || value === '') {
+        return '0.0%';
+    }
+    
+    // Convert to number and ensure it's valid
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+        return '0.0%';
+    }
+    
+    return `${numValue.toFixed(1)}%`;
 }
 
 function showSnackbar(message, type = '') {
-    const snackbar = document.getElementById('snackbar');
-    if (!snackbar) return;
-    
-    snackbar.textContent = message;
-    snackbar.className = 'show';
-    
-    if (type) {
-        snackbar.classList.add(type);
+    showNotification(message, type);
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element if it doesn't exist
+    let notification = document.getElementById('budgetNotification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'budgetNotification';
+        notification.className = 'notification';
+        document.body.appendChild(notification);
     }
     
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.display = 'block';
+    
+    // Auto-hide after 3 seconds
     setTimeout(() => {
-        snackbar.className = snackbar.className.replace('show', '');
-        if (type) {
-            snackbar.classList.remove(type);
-        }
+        notification.style.display = 'none';
     }, 3000);
+}
+
+// Budget input type toggle
+function toggleBudgetInputType() {
+    const amountRadio = document.getElementById('budgetAmount');
+    const percentageRadio = document.getElementById('budgetPercentage');
+    const amountInput = document.getElementById('amountInput');
+    const percentageInput = document.getElementById('percentageInput');
+    const percentageInfo = document.querySelector('.percentage-info');
+    
+    if (amountRadio.checked) {
+        amountInput.style.display = 'flex';
+        percentageInput.style.display = 'none';
+        if (percentageInfo) percentageInfo.classList.remove('show');
+        // Make amount input required, remove from percentage
+        amountInput.querySelector('input').required = true;
+        percentageInput.querySelector('input').required = false;
+    } else {
+        amountInput.style.display = 'none';
+        percentageInput.style.display = 'flex';
+        if (percentageInfo) percentageInfo.classList.add('show');
+        // Make percentage input required, remove from amount
+        amountInput.querySelector('input').required = false;
+        percentageInput.querySelector('input').required = true;
+        
+        // Update percentage calculation display
+        updatePercentageCalculation();
+    }
+}
+
+// Update percentage calculation display
+function updatePercentageCalculation() {
+    const categoryTypeSelect = document.querySelector('select[name="category_type"]');
+    const percentageCalculation = document.getElementById('percentageCalculation');
+    const percentageInput = document.querySelector('input[name="budget_percentage"]');
+    
+    if (!categoryTypeSelect.value || !budgetAllocation) {
+        percentageCalculation.textContent = 'Select category type first';
+        return;
+    }
+    
+    const categoryType = categoryTypeSelect.value;
+    let allocationAmount = 0;
+    let sectionName = '';
+    
+    switch(categoryType) {
+        case 'needs':
+            allocationAmount = parseFloat(budgetAllocation.needs_amount) || 0;
+            sectionName = 'Needs';
+            break;
+        case 'wants':
+            allocationAmount = parseFloat(budgetAllocation.wants_amount) || 0;
+            sectionName = 'Wants';
+            break;
+        case 'savings':
+            allocationAmount = parseFloat(budgetAllocation.savings_amount) || 0;
+            sectionName = 'Savings';
+            break;
+    }
+    
+    const percentage = parseFloat(percentageInput.value) || 0;
+    const calculatedAmount = (allocationAmount * percentage) / 100;
+    
+    if (allocationAmount > 0) {
+        percentageCalculation.innerHTML = `${percentage}% of ${sectionName} allocation (${formatCurrency(calculatedAmount)} of ${formatCurrency(allocationAmount)})`;
+    } else {
+        percentageCalculation.textContent = `of ${sectionName} allocation (no allocation set)`;
+    }
+}
+
+// Enhanced add category form submission
+function enhancedSubmitAddCategory(formData) {
+    const budgetInputType = document.querySelector('input[name="budget_input_type"]:checked').value;
+    const categoryType = formData.get('category_type');
+    
+    let finalBudgetLimit = 0;
+    
+    if (budgetInputType === 'amount') {
+        finalBudgetLimit = parseFloat(formData.get('budget_limit')) || 0;
+    } else {
+        // Calculate from percentage
+        const percentage = parseFloat(formData.get('budget_percentage')) || 0;
+        let allocationAmount = 0;
+        
+        if (budgetAllocation) {
+            switch(categoryType) {
+                case 'needs':
+                    allocationAmount = parseFloat(budgetAllocation.needs_amount) || 0;
+                    break;
+                case 'wants':
+                    allocationAmount = parseFloat(budgetAllocation.wants_amount) || 0;
+                    break;
+                case 'savings':
+                    allocationAmount = parseFloat(budgetAllocation.savings_amount) || 0;
+                    break;
+            }
+        }
+        
+        finalBudgetLimit = (allocationAmount * percentage) / 100;
+        
+        // Ensure we don't get NaN
+        if (isNaN(finalBudgetLimit)) {
+            finalBudgetLimit = 0;
+        }
+    }
+    
+    // Update the form data with calculated amount
+    formData.set('budget_limit', finalBudgetLimit.toFixed(2));
+    
+    return finalBudgetLimit;
+}
+
+// Budget Period Management
+function changeBudgetPeriod(month, year) {
+    currentBudgetPeriod = { month, year };
+    
+    // Update period display
+    const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+    const periodDisplay = document.getElementById('currentPeriodDisplay');
+    if (periodDisplay) {
+        periodDisplay.textContent = `${monthName} ${year}`;
+    }
+    
+    // Reload budget data for the new period
+    loadBudgetDataForPeriod(month, year);
+    showSnackbar(`Switched to ${monthName} ${year}`, 'success');
+}
+
+function formatPeriodName(period) {
+    if (typeof period === 'object') {
+        const monthName = new Date(period.year, period.month - 1).toLocaleString('default', { month: 'long' });
+        return `${monthName} ${period.year}`;
+    }
+    
+    const parts = period.split('-');
+    if (parts.length === 2) {
+        const month = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        const year = parts[1];
+        return `${month} ${year}`;
+    }
+    return period;
+}
+
+function copyFromPreviousMonth() {
+    const currentMonth = currentBudgetPeriod.month;
+    const currentYear = currentBudgetPeriod.year;
+    
+    let previousMonth = currentMonth - 1;
+    let previousYear = currentYear;
+    
+    if (previousMonth === 0) {
+        previousMonth = 12;
+        previousYear--;
+    }
+    
+    const monthName = getMonthName(previousMonth);
+    
+    if (confirm(`Copy budget categories from ${monthName} ${previousYear}?`)) {
+        copyBudgetFromPeriod(previousMonth, previousYear, currentMonth, currentYear);
+    }
+}
+
+function copyBudgetFromPeriod(fromMonth, fromYear, toMonth, toYear) {
+    const formData = new FormData();
+    formData.append('from_month', fromMonth);
+    formData.append('from_year', fromYear);
+    formData.append('to_month', toMonth);
+    formData.append('to_year', toYear);
+    
+    fetch('../api/budget_period.php?action=copy_budget', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar(`Successfully copied budget from ${getMonthName(fromMonth)} ${fromYear}`, 'success');
+            loadBudgetDataForPeriod(toMonth, toYear);
+        } else {
+            showSnackbar('Error copying budget: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error copying budget:', error);
+        showSnackbar('Error copying budget. Please try again.', 'error');
+    });
+}
+
+function loadBudgetDataForPeriod(month, year) {
+    // Show loading indicator
+    const loadingElement = document.getElementById('budgetLoadingIndicator');
+    if (loadingElement) {
+        loadingElement.style.display = 'block';
+    }
+    
+    fetch(`../api/budget_period.php?action=get_period_data&month=${month}&year=${year}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateBudgetDisplay(data.data);
+        } else {
+            showSnackbar('Error loading period data: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading period data:', error);
+        showSnackbar('Error loading period data. Please try again.', 'error');
+    })
+    .finally(() => {
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
+    });
+}
+
+function updateBudgetDisplay(data) {
+    // Update categories display
+    if (data.categories) {
+        updateCategoriesTable(data.categories);
+    }
+    
+    // Update allocation display
+    if (data.allocation) {
+        updateAllocationDisplay(data.allocation);
+    }
+    
+    // Update period indicator
+    if (data.period) {
+        const periodDisplay = document.getElementById('currentPeriodDisplay');
+        if (periodDisplay) {
+            periodDisplay.textContent = `${data.period.month_name} ${data.period.year}`;
+        }
+    }
+    
+    // Update summary statistics
+    updateBudgetSummary(data);
+}
+
+function updateCategoriesTable(categories) {
+    const tableBody = document.querySelector('#budgetCategoriesTable tbody');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    categories.forEach(category => {
+        const row = document.createElement('tr');
+        const budgetAmount = category.budget_amount || 0;
+        const spentAmount = category.spent_amount || 0;
+        const variance = budgetAmount - spentAmount;
+        const varianceClass = variance >= 0 ? 'positive' : 'negative';
+        
+        row.innerHTML = `
+            <td>${category.category_name}</td>
+            <td><span class="badge badge-${category.category_type}">${category.category_type}</span></td>
+            <td>${formatCurrency(budgetAmount)}</td>
+            <td>${formatCurrency(spentAmount)}</td>
+            <td class="variance ${varianceClass}">${formatCurrency(Math.abs(variance))}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editBudgetCategory(${category.category_id})">Edit</button>
+                <button class="btn btn-sm btn-secondary" onclick="viewCategoryExpenses(${category.category_id})">View</button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+function updateAllocationDisplay(allocation) {
+    const elements = {
+        'monthly_salary': allocation.monthly_salary || 0,
+        'needs_amount': allocation.needs_amount || 0,
+        'wants_amount': allocation.wants_amount || 0,
+        'savings_amount': allocation.savings_amount || 0
+    };
+    
+    Object.keys(elements).forEach(key => {
+        const element = document.getElementById(key + 'Display');
+        if (element) {
+            element.textContent = formatCurrency(elements[key]);
+        }
+    });
+}
+
+function updateBudgetSummary(data) {
+    let totalBudgeted = 0;
+    let totalSpent = 0;
+    
+    if (data && data.categories) {
+        data.categories.forEach(category => {
+            totalBudgeted += category.budget_amount || 0;
+            totalSpent += category.spent_amount || 0;
+        });
+    }
+    
+    const summaryElements = {
+        'totalBudgeted': totalBudgeted,
+        'totalSpent': totalSpent,
+        'totalVariance': totalBudgeted - totalSpent
+    };
+    
+    Object.keys(summaryElements).forEach(key => {
+        const element = document.getElementById(key + 'Display');
+        if (element) {
+            element.textContent = formatCurrency(summaryElements[key]);
+        }
+    });
+    
+    // Also update the main budget summary if budgetData is available
+    if (budgetData) {
+        updateMainBudgetSummary();
+    }
+}
+
+function updateMainBudgetSummary() {
+    if (!budgetData) return;
+
+    const summaryPlanned = document.getElementById('summaryPlanned');
+    const summaryActual = document.getElementById('summaryActual');
+    const summaryRemaining = document.getElementById('summaryRemaining');
+    const summaryAvailable = document.getElementById('summaryAvailable');
+    const summaryPlannedPercent = document.getElementById('summaryPlannedPercent');
+    const summaryActualPercent = document.getElementById('summaryActualPercent');
+    const summaryRemainingPercent = document.getElementById('summaryRemainingPercent');
+
+    const summary = budgetData.summary || {};
+    const income = budgetData.total_monthly_income || 0;
+
+    if (summaryPlanned) {
+        summaryPlanned.textContent = formatCurrency(summary.total_planned || 0);
+    }
+    if (summaryActual) {
+        summaryActual.textContent = formatCurrency(summary.total_actual || 0);
+    }
+    if (summaryRemaining) {
+        const remainingBudget = summary.remaining_budget || 0;
+        summaryRemaining.textContent = formatCurrency(remainingBudget);
+        summaryRemaining.className = remainingBudget >= 0 ? 'summary-amount positive' : 'summary-amount negative';
+    }
+    if (summaryAvailable) {
+        summaryAvailable.textContent = formatCurrency(summary.available_balance || 0);
+    }
+
+    if (summaryPlannedPercent) {
+        const plannedPercent = income > 0 && summary.total_planned ? 
+            ((summary.total_planned / income) * 100).toFixed(1) : 0;
+        const validPlannedPercent = isNaN(plannedPercent) ? 0 : plannedPercent;
+        summaryPlannedPercent.textContent = `${validPlannedPercent}% of income`;
+    }
+    if (summaryActualPercent) {
+        const actualPercent = income > 0 && summary.total_actual ? 
+            ((summary.total_actual / income) * 100).toFixed(1) : 0;
+        const validActualPercent = isNaN(actualPercent) ? 0 : actualPercent;
+        summaryActualPercent.textContent = `${validActualPercent}% of income`;
+    }
+    if (summaryRemainingPercent) {
+        const remainingPercent = income > 0 && summary.remaining_budget ? 
+            ((summary.remaining_budget / income) * 100).toFixed(1) : 0;
+        const validRemainingPercent = isNaN(remainingPercent) ? 0 : remainingPercent;
+        summaryRemainingPercent.textContent = `${validRemainingPercent}% unspent`;
+    }
+}
+
+function getMonthName(month) {
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+}
+
+function loadAvailablePeriods() {
+    // Generate periods for the current year and some previous months
+    const currentDate = new Date();
+    const periods = [];
+    
+    // Generate last 12 months from current date
+    for (let i = 0; i < 12; i++) {
+        const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        periods.push({
+            month: date.getMonth() + 1,
+            year: date.getFullYear(),
+            month_name: date.toLocaleString('default', { month: 'long' }),
+            period_key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+            display_name: `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`
+        });
+    }
+    
+    // Also fetch from API to get periods with actual data
+    fetch('../api/budget_period.php?action=get_available_periods')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.data && data.data.length > 0) {
+            // Merge API periods with generated periods
+            const apiPeriods = data.data;
+            const mergedPeriods = [];
+            const seenKeys = new Set();
+            
+            // Add generated periods first (to ensure current period is included)
+            periods.forEach(period => {
+                if (!seenKeys.has(period.period_key)) {
+                    mergedPeriods.push(period);
+                    seenKeys.add(period.period_key);
+                }
+            });
+            
+            // Add API periods that aren't already included
+            apiPeriods.forEach(period => {
+                // Generate period_key if it doesn't exist
+                if (!period.period_key) {
+                    period.period_key = period.year + '-' + String(period.month).padStart(2, '0');
+                }
+                if (!seenKeys.has(period.period_key)) {
+                    mergedPeriods.push(period);
+                }
+            });
+            
+            populatePeriodSelector(mergedPeriods);
+        } else {
+            // Use generated periods if API fails
+            populatePeriodSelector(periods);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading available periods:', error);
+        // Fallback to generated periods
+        populatePeriodSelector(periods);
+    });
+}
+
+function populatePeriodSelector(periods) {
+    const selector = document.getElementById('budgetPeriodSelector');
+    if (!selector) return;
+    
+    selector.innerHTML = '';
+    
+    // Sort periods by date (newest first)
+    periods.sort((a, b) => {
+        const aKey = `${a.year}-${String(a.month).padStart(2, '0')}`;
+        const bKey = `${b.year}-${String(b.month).padStart(2, '0')}`;
+        return bKey.localeCompare(aKey);
+    });
+    
+    periods.forEach(period => {
+        const option = document.createElement('option');
+        option.value = `${period.month}-${period.year}`;
+        option.textContent = period.display_name;
+        
+        // Mark current period as selected (August 2025)
+        if (period.month === currentBudgetPeriod.month && period.year === currentBudgetPeriod.year) {
+            option.selected = true;
+        }
+        
+        selector.appendChild(option);
+    });
+    
+    // Update the current period display
+    const currentPeriodDisplay = document.getElementById('currentPeriodDisplay');
+    if (currentPeriodDisplay) {
+        const currentPeriod = periods.find(p => p.month === currentBudgetPeriod.month && p.year === currentBudgetPeriod.year);
+        if (currentPeriod) {
+            currentPeriodDisplay.textContent = currentPeriod.display_name;
+        }
+    }
+}
+
+function saveBudget() {
+    showSnackbar('Budget saved successfully!', 'success');
+}
+
+// Export Budget Functions
+function exportBudget() {
+    showModal('exportBudgetModal');
+}
+
+function showExportModal() {
+    const modal = document.getElementById('exportBudgetModal');
+    if (modal) {
+        // Set current period as default
+        const periodSelect = modal.querySelector('select[name="export_period"]');
+        if (periodSelect) {
+            periodSelect.value = currentBudgetPeriod;
+        }
+        
+        showModal('exportBudgetModal');
+    }
+}
+
+async function processExport(exportData) {
+    try {
+        const response = await fetch('../api/export_budget.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(exportData)
+        });
+        
+        if (exportData.export_format === 'pdf' || exportData.export_format === 'csv') {
+            // Handle file download
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `budget-${exportData.export_period}.${exportData.export_format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } else {
+            // Handle JSON response
+            const result = await response.json();
+            if (result.success) {
+                // Download JSON data
+                const dataStr = JSON.stringify(result.data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = window.URL.createObjectURL(dataBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `budget-${exportData.export_period}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+        }
+        
+        showSnackbar('Budget exported successfully!', 'success');
+        closeModal('exportBudgetModal');
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        showSnackbar('Error exporting budget', 'error');
+    }
 }
 
 // API Functions
@@ -35,22 +604,26 @@ async function loadBudgetData() {
         const dashboardResponse = await fetch('../api/personal_dashboard_data.php');
         const dashboardData = await dashboardResponse.json();
         
-        // Load budget categories
+        // Load budget categories with allocation data
         const categoriesResponse = await fetch('../api/budget_categories.php');
         const categoriesData = await categoriesResponse.json();
         
         if (dashboardData.success && categoriesData.success) {
+            // Store budget allocation data
+            budgetAllocation = categoriesData.allocation;
+            
             // Combine data into expected format
             budgetData = {
-                total_monthly_income: dashboardData.financial_overview?.monthly_income || 0,
+                total_monthly_income: dashboardData.financial_overview?.monthly_income || (budgetAllocation?.monthly_salary || 0),
                 categories: categoriesData.categories || [],
-                summary: calculateBudgetSummary(categoriesData.categories || [], dashboardData.financial_overview || {}),
-                category_type_totals: calculateCategoryTypeTotals(categoriesData.categories || [])
+                allocation: categoriesData.allocation,
+                category_totals: categoriesData.category_totals || {},
+                summary: calculateBudgetSummary(categoriesData.categories || [], dashboardData.financial_overview || {}, categoriesData.allocation)
             };
             
             updateBudgetOverview();
             renderBudgetCategories();
-            updateBudgetSummary();
+            updateMainBudgetSummary();
         } else {
             throw new Error(categoriesData.message || dashboardData.message || 'Failed to load budget data');
         }
@@ -61,29 +634,31 @@ async function loadBudgetData() {
     }
 }
 
-// Helper function to calculate budget summary
-function calculateBudgetSummary(categories, financialOverview) {
+// Helper function to calculate budget summary with real spending and allocation
+function calculateBudgetSummary(categories, financialOverview, allocation) {
     const totalPlanned = categories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0);
-    const totalActual = financialOverview.monthly_expenses || 0;
-    const totalIncome = financialOverview.monthly_income || 0;
-    const remainingBudget = totalPlanned - totalActual;
+    const totalSpent = categories.reduce((sum, cat) => sum + parseFloat(cat.current_month_spent || 0), 0);
+    const totalIncome = allocation?.monthly_salary || financialOverview.monthly_income || 0;
+    const remainingBudget = totalPlanned - totalSpent;
     const availableBalance = totalIncome - totalPlanned;
     const incomeUtilization = totalIncome > 0 ? Math.round((totalPlanned / totalIncome) * 100) : 0;
-    const budgetPerformance = totalPlanned > 0 ? Math.max(0, Math.round(((totalPlanned - totalActual) / totalPlanned) * 100)) : 100;
-    const totalVariance = totalPlanned - totalActual;
+    const budgetPerformance = totalPlanned > 0 ? Math.round(((totalPlanned - totalSpent) / totalPlanned) * 100) : 100;
+    const spendingUtilization = totalPlanned > 0 ? Math.round((totalSpent / totalPlanned) * 100) : 0;
     
     return {
         total_planned: totalPlanned,
-        total_actual: totalActual,
+        total_spent: totalSpent,
         remaining_budget: remainingBudget,
         available_balance: availableBalance,
         income_utilization: incomeUtilization,
         budget_performance: budgetPerformance,
-        total_variance: totalVariance
+        spending_utilization: spendingUtilization,
+        total_variance: remainingBudget,
+        total_income: totalIncome
     };
 }
 
-// Helper function to calculate category type totals
+// Helper function to calculate category type totals with real spending
 function calculateCategoryTypeTotals(categories) {
     const types = ['needs', 'wants', 'savings'];
     const totals = {};
@@ -91,17 +666,47 @@ function calculateCategoryTypeTotals(categories) {
     types.forEach(type => {
         const typeCategories = categories.filter(cat => cat.category_type === type);
         const planned = typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0);
-        const actual = 0; // TODO: Calculate from actual expenses
+        const spent = typeCategories.reduce((sum, cat) => sum + parseFloat(cat.current_month_spent || 0), 0);
         
-        // Get template percentage for this type if it exists
-        const templatePercentage = getTemplatePercentageForType(type);
-        const progressPercentage = templatePercentage || (planned > 0 ? Math.round((actual / planned) * 100) : 0);
+        // Get allocation data from the budget allocation if available
+        const allocatedAmount = totals.allocated || 0;
+        const templatePercentage = totals.template_percentage || null;
+        
+        // Calculate variances
+        const allocationVsBudgetVariance = allocatedAmount - planned; // How much over/under allocated they budgeted
+        const budgetVsSpentVariance = planned - spent; // How much over/under budget they spent
+        const allocationVsSpentVariance = allocatedAmount - spent; // How much of allocation is left
+        
+        // Calculate utilization percentages
+        const budgetUtilization = planned > 0 ? (spent / planned) * 100 : 0;
+        const allocationUtilization = allocatedAmount > 0 ? (spent / allocatedAmount) * 100 : 0;
+        
+        // Determine status
+        let status = 'good';
+        if (spent > allocatedAmount) {
+            status = 'over_allocation';
+        } else if (spent > planned) {
+            status = 'over_budget';
+        } else if (planned > allocatedAmount) {
+            status = 'over_allocated';
+        } else if (budgetUtilization >= 90) {
+            status = 'near_limit';
+        } else if (budgetUtilization >= 70) {
+            status = 'on_track';
+        }
         
         totals[type] = {
             planned: planned,
-            actual: actual,
-            progress_percentage: progressPercentage,
-            template_percentage: templatePercentage
+            spent: spent,
+            allocated_amount: allocatedAmount,
+            template_percentage: templatePercentage,
+            allocation_vs_budget_variance: allocationVsBudgetVariance,
+            budget_vs_spent_variance: budgetVsSpentVariance,
+            allocation_vs_spent_variance: allocationVsSpentVariance,
+            budget_utilization: budgetUtilization,
+            allocation_utilization: allocationUtilization,
+            status: status,
+            categories_count: typeCategories.length
         };
     });
     
@@ -116,19 +721,6 @@ function getTemplatePercentageForType(type) {
         try {
             const template = JSON.parse(savedTemplate);
             return template[type] || null;
-        } catch (e) {
-            return null;
-        }
-    }
-    return null;
-}
-
-// Get applied template information
-function getAppliedTemplateInfo() {
-    const savedTemplate = localStorage.getItem('appliedBudgetTemplate');
-    if (savedTemplate) {
-        try {
-            return JSON.parse(savedTemplate);
         } catch (e) {
             return null;
         }
@@ -206,16 +798,35 @@ function applyTemplate(needsPercent, wantsPercent, savingsPercent, templateName,
     
     localStorage.setItem('appliedBudgetTemplate', JSON.stringify(appliedTemplate));
     
-    // Close template modal
-    closeModal('budgetTemplateModal');
-    
-    // Refresh budget display to show template percentages
-    if (typeof loadBudgetData === 'function') {
-        loadBudgetData();
-    }
-    
-    // Show success message
-    showSnackbar(`Template "${templateName}" applied successfully!`, 'success');
+    // Save allocation to backend
+    fetch('../actions/salary_actions.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `action=update_budget_allocation&needsPercent=${encodeURIComponent(needsPercent)}&wantsPercent=${encodeURIComponent(wantsPercent)}&savingsPercent=${encodeURIComponent(savingsPercent)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close template modal
+            closeModal('budgetTemplateModal');
+            
+            // Refresh budget display to show template percentages
+            if (typeof loadBudgetData === 'function') {
+                loadBudgetData();
+            }
+            
+            // Show success message
+            showSnackbar(`Template "${templateName}" applied and saved!`, 'success');
+        } else {
+            showSnackbar(data.message || 'Failed to save budget allocation', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving budget allocation:', error);
+        showSnackbar('Error saving budget allocation', 'error');
+    });
 }
 
 function showTemplateModal() {
@@ -250,6 +861,36 @@ function resetTemplateModal() {
     
     // Remove selected class from all template cards
     document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+}
+
+function clearTemplate() {
+    // Clear the currently applied budget template
+    const confirmClear = confirm('Are you sure you want to clear the current budget template? This will reset all category allocations.');
+    
+    if (confirmClear) {
+        // Make API call to clear the template
+        fetch('../api/budget_allocation.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload budget data to show cleared state
+                loadBudgetData();
+                showSnackbar('Budget template cleared successfully!', 'success');
+                closeModal('budgetTemplateModal');
+            } else {
+                showSnackbar('Error clearing template: ' + (data.message || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing template:', error);
+            showSnackbar('Error clearing budget template', 'error');
+        });
+    }
 }
 
 function showCustomTemplate() {
@@ -505,6 +1146,73 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof loadCustomTemplates === 'function') {
         loadCustomTemplates();
     }
+    
+    // Initialize period management
+    loadAvailablePeriods();
+    loadBudgetDataForPeriod(currentBudgetPeriod.month, currentBudgetPeriod.year);
+    
+    // Add event listeners for budget input functionality
+    const categoryTypeSelect = document.querySelector('select[name="category_type"]');
+    const percentageInput = document.querySelector('input[name="budget_percentage"]');
+    
+    if (categoryTypeSelect) {
+        categoryTypeSelect.addEventListener('change', updatePercentageCalculation);
+    }
+    
+    if (percentageInput) {
+        percentageInput.addEventListener('input', updatePercentageCalculation);
+    }
+    
+    // Export form event listeners
+    const exportForm = document.getElementById('exportBudgetForm');
+    if (exportForm) {
+        exportForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const exportData = {
+                export_period: formData.get('export_period'),
+                export_format: formData.get('export_format'),
+                export_from_date: formData.get('export_from_date'),
+                export_to_date: formData.get('export_to_date'),
+                include_categories: formData.has('include_categories'),
+                include_expenses: formData.has('include_expenses'),
+                include_variance: formData.has('include_variance'),
+                include_allocation: formData.has('include_allocation'),
+                include_summary: formData.has('include_summary'),
+                include_charts: formData.has('include_charts')
+            };
+            
+            await processExport(exportData);
+        });
+    }
+    
+    // Period select change for custom date range
+    const exportPeriodSelect = document.querySelector('select[name="export_period"]');
+    if (exportPeriodSelect) {
+        exportPeriodSelect.addEventListener('change', function() {
+            const customDateRange = document.getElementById('customDateRange');
+            if (customDateRange) {
+                if (this.value === 'custom') {
+                    customDateRange.style.display = 'block';
+                } else {
+                    customDateRange.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // Period selector change handler
+    const periodSelector = document.getElementById('budgetPeriodSelector');
+    if (periodSelector) {
+        periodSelector.addEventListener('change', function() {
+            const periodValue = this.value;
+            if (periodValue) {
+                const [month, year] = periodValue.split('-');
+                changeBudgetPeriod(parseInt(month), parseInt(year));
+            }
+        });
+    }
 });
 
 async function addCategory(categoryData) {
@@ -653,7 +1361,6 @@ function updateBudgetOverview() {
 }
 
 function updateAppliedTemplateDisplay() {
-    const appliedTemplate = getAppliedTemplateInfo();
     let templateInfoEl = document.getElementById('appliedTemplateInfo');
     
     // Create template info element if it doesn't exist
@@ -669,20 +1376,21 @@ function updateAppliedTemplateDisplay() {
         }
     }
     
-    if (appliedTemplate) {
+    // Check if we have allocation data from the API
+    if (budgetAllocation && budgetAllocation.needs_percentage) {
         templateInfoEl.innerHTML = `
             <div class="template-banner">
                 <div class="template-icon">📊</div>
                 <div class="template-details">
-                    <h4>Active Budget Template: ${appliedTemplate.name}</h4>
-                    <p>Applied on ${new Date(appliedTemplate.appliedDate).toLocaleDateString()}</p>
+                    <h4>Active Budget Allocation</h4>
+                    <p>Based on monthly income of ${formatCurrency(budgetAllocation.monthly_income || 0)}</p>
                     <div class="template-allocations">
-                        <span class="allocation needs">Needs: ${appliedTemplate.needs}%</span>
-                        <span class="allocation wants">Wants: ${appliedTemplate.wants}%</span>
-                        <span class="allocation savings">Savings: ${appliedTemplate.savings}%</span>
+                        <span class="allocation needs">Needs: ${budgetAllocation.needs_percentage}% (${formatCurrency(budgetAllocation.needs_amount || 0)})</span>
+                        <span class="allocation wants">Wants: ${budgetAllocation.wants_percentage}% (${formatCurrency(budgetAllocation.wants_amount || 0)})</span>
+                        <span class="allocation savings">Savings: ${budgetAllocation.savings_percentage}% (${formatCurrency(budgetAllocation.savings_amount || 0)})</span>
                     </div>
                 </div>
-                <button onclick="clearTemplate()" class="clear-template-btn" title="Remove template">×</button>
+                <button onclick="clearAllocation()" class="clear-template-btn" title="Remove allocation">×</button>
             </div>
         `;
         templateInfoEl.style.display = 'block';
@@ -691,14 +1399,31 @@ function updateAppliedTemplateDisplay() {
     }
 }
 
-function clearTemplate() {
+function clearAllocation() {
     // Create a confirmation modal instead of browser alert
-    const confirmClear = confirm('Are you sure you want to remove the active budget template?');
+    const confirmClear = confirm('Are you sure you want to remove the active budget allocation?');
     
     if (confirmClear) {
-        localStorage.removeItem('appliedBudgetTemplate');
-        loadBudgetData(); // Refresh to show regular percentages
-        showSnackbar('Budget template removed successfully!', 'success');
+        // Make API call to delete allocation
+        fetch('../api/budget_allocation.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadBudgetData(); // Refresh to show updated state
+                showSnackbar('Budget allocation removed successfully!', 'success');
+            } else {
+                showSnackbar('Error removing allocation: ' + (data.message || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing allocation:', error);
+            showSnackbar('Error removing allocation', 'error');
+        });
     }
 }
 
@@ -727,7 +1452,55 @@ function renderBudgetCategories() {
     Object.keys(categoryTypes).forEach(type => {
         const typeCategories = budgetData.categories.filter(cat => cat.category_type === type);
         const typeInfo = categoryTypes[type];
-        const typeTotals = budgetData.category_type_totals[type] || { planned: 0, actual: 0, progress_percentage: 0 };
+        
+        // Get totals from the API data or calculate them
+        let typeTotals = budgetData.category_totals?.[type] || {
+            budgeted: 0,
+            spent: 0,
+            allocated: 0
+        };
+        
+        // If we don't have API totals, calculate them
+        if (!budgetData.category_totals) {
+            typeTotals = {
+                budgeted: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0),
+                spent: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.current_month_spent || 0), 0),
+                allocated: 0 // Will be set below if allocation exists
+            };
+        }
+        
+        // Add allocation percentage info if available
+        if (budgetAllocation) {
+            const percentageField = type === 'needs' ? 'needs_percentage' : 
+                                  type === 'wants' ? 'wants_percentage' : 'savings_percentage';
+            typeTotals.template_percentage = budgetAllocation[percentageField];
+            
+            // Use the allocated amount from allocation if available
+            const amountField = type === 'needs' ? 'needs_amount' : 
+                              type === 'wants' ? 'wants_amount' : 'savings_amount';
+            if (budgetAllocation[amountField]) {
+                typeTotals.allocated = parseFloat(budgetAllocation[amountField]);
+            }
+        }
+        
+        // Calculate utilization and status
+        typeTotals.budget_utilization = typeTotals.budgeted > 0 ? (typeTotals.spent / typeTotals.budgeted) * 100 : 0;
+        typeTotals.allocation_utilization = typeTotals.allocated > 0 ? (typeTotals.spent / typeTotals.allocated) * 100 : 0;
+        typeTotals.budget_vs_spent_variance = typeTotals.budgeted - typeTotals.spent;
+        typeTotals.allocation_vs_spent_variance = typeTotals.allocated - typeTotals.spent;
+        
+        // Determine status
+        if (typeTotals.spent > typeTotals.allocated && typeTotals.allocated > 0) {
+            typeTotals.status = 'over_allocation';
+        } else if (typeTotals.spent > typeTotals.budgeted) {
+            typeTotals.status = 'over_budget';
+        } else if (typeTotals.budget_utilization >= 90) {
+            typeTotals.status = 'near_limit';
+        } else if (typeTotals.budget_utilization >= 70) {
+            typeTotals.status = 'on_track';
+        } else {
+            typeTotals.status = 'good';
+        }
 
         const categorySection = createCategorySection(type, typeInfo, typeTotals, typeCategories);
         container.appendChild(categorySection);
@@ -750,28 +1523,59 @@ function createCategorySection(type, typeInfo, totals, categories) {
     const section = document.createElement('div');
     section.className = `category-section ${type}-section`;
     
-    // Get applied template info
-    const appliedTemplate = getAppliedTemplateInfo();
-    const templateText = totals.template_percentage ? 
-        `${totals.template_percentage}% allocated (${appliedTemplate.name || 'Template'})` : 
-        `${totals.progress_percentage}%`;
+    // Get amounts
+    const allocatedAmount = totals.allocated || 0;
+    const plannedAmount = totals.budgeted || 0;
+    const spentAmount = totals.spent || 0;
+    
+    // Determine what to show in progress text
+    let progressText = '';
+    let allocationText = '';
+    
+    if (budgetAllocation && totals.template_percentage) {
+        progressText = `${formatPercent(totals.budget_utilization)} of budget used`;
+        allocationText = `${totals.template_percentage}% of salary (${formatCurrency(allocatedAmount)})`;
+    } else {
+        progressText = `${formatPercent(totals.budget_utilization)} used`;
+        allocationText = 'No allocation set';
+    }
+    
+    // Status styling
+    const statusClass = getStatusClass(totals.status);
+    const statusText = getStatusText(totals.status);
     
     section.innerHTML = `
         <div class="category-header" onclick="toggleCategory('${type}')">
             <div class="category-info">
                 <span class="category-icon">${typeInfo.icon}</span>
                 <div class="category-details">
-                    <h4>${typeInfo.title}</h4>
+                    <h4>${typeInfo.title} <span class="status-badge ${statusClass}">${statusText}</span></h4>
                     <p>${typeInfo.description}</p>
+                    <small class="allocation-info">${allocationText}</small>
                 </div>
             </div>
             <div class="category-summary">
-                <div class="category-amount">${formatCurrency(totals.actual)} / ${formatCurrency(totals.planned)}</div>
+                <div class="category-amounts">
+                    <div class="amount-display">${formatCurrency(spentAmount)} / ${formatCurrency(allocatedAmount > 0 ? allocatedAmount : plannedAmount)}</div>
+                </div>
                 <div class="category-progress">
                     <div class="progress-bar">
-                        <div class="progress-fill ${type}-progress" style="width: ${Math.min(totals.progress_percentage, 100)}%"></div>
+                        <div class="progress-fill ${type}-progress ${totals.budget_utilization > 100 ? 'over-budget' : ''}" 
+                             style="width: ${Math.min(totals.budget_utilization, 100)}%"></div>
                     </div>
-                    <span class="progress-text">${templateText}</span>
+                    <span class="progress-text">${progressText}</span>
+                </div>
+                <div class="variance-summary">
+                    <div class="variance-item ${totals.budget_vs_spent_variance < 0 ? 'negative' : 'positive'}">
+                        ${totals.budget_vs_spent_variance >= 0 ? 'Under budget: ' : 'Over budget: '}
+                        ${formatCurrency(Math.abs(totals.budget_vs_spent_variance))}
+                    </div>
+                    ${allocatedAmount > 0 ? `
+                    <div class="variance-item ${totals.allocation_vs_spent_variance < 0 ? 'negative' : 'positive'}">
+                        ${totals.allocation_vs_spent_variance >= 0 ? 'Allocation left: ' : 'Over allocation: '}
+                        ${formatCurrency(Math.abs(totals.allocation_vs_spent_variance))}
+                    </div>
+                    ` : ''}
                 </div>
                 <span class="expand-icon">▼</span>
             </div>
@@ -783,6 +1587,33 @@ function createCategorySection(type, typeInfo, totals, categories) {
     `;
     
     return section;
+}
+
+// Helper functions for status display
+function getStatusClass(status) {
+    const statusClasses = {
+        'over_allocation': 'status-danger',
+        'over_budget': 'status-danger',
+        'over_allocated': 'status-warning',
+        'near_limit': 'status-warning',
+        'on_track': 'status-success',
+        'good': 'status-success',
+        'under_budget': 'status-info'
+    };
+    return statusClasses[status] || 'status-info';
+}
+
+function getStatusText(status) {
+    const statusTexts = {
+        'over_allocation': 'Over Allocation',
+        'over_budget': 'Over Budget',
+        'over_allocated': 'Over Allocated',
+        'near_limit': 'Near Limit',
+        'on_track': 'On Track',
+        'good': 'Good',
+        'under_budget': 'Under Budget'
+    };
+    return statusTexts[status] || 'Unknown';
 }
 
 function createCategoryTable(categories) {
@@ -807,32 +1638,49 @@ function createCategoryTable(categories) {
     `;
 
     categories.forEach(category => {
-        const actualSpent = 0; // TODO: Calculate from actual expenses
-        const variance = parseFloat(category.budget_limit) - actualSpent;
-        const statusClass = getStatusClass(category.budget_limit, actualSpent);
-        const statusText = getStatusText(category.budget_limit, actualSpent);
-        const varianceClass = variance >= 0 ? 'success' : 'warning';
+        const budgetLimit = parseFloat(category.budget_limit || 0);
+        const spentAmount = parseFloat(category.current_month_spent || 0);
+        const variance = budgetLimit - spentAmount;
+        const percentageUsed = category.percentage_used || 0;
+        const expenseCount = category.expense_count || 0;
+        
+        // Determine status for individual category
+        const categoryStatus = category.status || 'good';
+        const statusClass = getStatusClass(categoryStatus);
+        const statusText = getStatusText(categoryStatus);
+        const varianceClass = variance >= 0 ? 'positive' : 'negative';
         
         tableHTML += `
-            <div class="budget-item" data-category-id="${category.id}">
+            <div class="budget-item ${categoryStatus === 'over_budget' ? 'over-budget' : ''}" data-category-id="${category.id}">
                 <div class="col-item">
                     <span class="item-icon" style="color: ${category.color}">${category.icon}</span>
                     <div class="item-info">
                         <h5>${category.name}</h5>
-                        <p>0 transactions this month</p>
+                        <p>${expenseCount} transaction${expenseCount !== 1 ? 's' : ''} this month</p>
                     </div>
                 </div>
                 <div class="col-planned">
-                    <span class="editable-amount" onclick="makeEditable(this, ${category.id}, 'budget_limit')">${formatCurrency(category.budget_limit)}</span>
+                    <span class="editable-amount" onclick="makeEditable(this, ${category.id}, 'budget_limit')">${formatCurrency(budgetLimit)}</span>
                 </div>
-                <div class="col-actual">${formatCurrency(actualSpent)}</div>
-                <div class="col-variance ${varianceClass}">${formatCurrency(variance)}</div>
+                <div class="col-actual">
+                    <span class="spent-amount ${categoryStatus === 'over_budget' ? 'over-budget' : ''}">${formatCurrency(spentAmount)}</span>
+                    <div class="usage-bar">
+                        <div class="usage-fill ${categoryStatus === 'over_budget' ? 'over-budget' : ''}" 
+                             style="width: ${Math.min(percentageUsed, 100)}%"></div>
+                    </div>
+                    <small>${formatPercent(percentageUsed)} used</small>
+                </div>
+                <div class="col-variance ${varianceClass}">
+                    <span class="variance-amount">${variance >= 0 ? '+' : ''}${formatCurrency(variance)}</span>
+                    <small>${variance >= 0 ? 'Under budget' : 'Over budget'}</small>
+                </div>
                 <div class="col-status">
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
                 <div class="col-actions">
-                    <button class="action-btn" onclick="editBudgetCategory(${category.id})" title="Edit Category">✏️</button>
-                    <button class="action-btn" onclick="addExpenseToCategory(${category.id}, '${category.name}')" title="Add Expense">💰</button>
+                    <button class="action-btn" onclick="editBudgetCategory(${category.id})" title="Edit Budget">✏️</button>
+                    <button class="action-btn primary" onclick="addExpenseToCategory(${category.id}, '${category.name}')" title="Add Expense">💰</button>
+                    <button class="action-btn" onclick="viewCategoryExpenses(${category.id}, '${category.name}')" title="View Expenses">📊</button>
                     <button class="action-btn danger" onclick="deleteCategory(${category.id})" title="Delete Category">🗑️</button>
                 </div>
             </div>
@@ -844,69 +1692,70 @@ function createCategoryTable(categories) {
 }
 
 
-function getStatusClass(planned, actual) {
-    const variance = actual - planned;
-    const percentageVariance = planned > 0 ? Math.abs(variance / planned) * 100 : 0;
+function getStatusClass(status) {
+    // If status is a string, return the appropriate class
+    if (typeof status === 'string') {
+        switch(status) {
+            case 'over_allocation': return 'over_allocation';
+            case 'over_budget': return 'over-budget';
+            case 'over_allocated': return 'over_allocated';
+            case 'near_limit': return 'near_limit';
+            case 'on_track': return 'on-track';
+            case 'good': return 'good';
+            case 'not_started': return 'not-started';
+            default: return 'on-track';
+        }
+    }
     
-    if (actual === 0) return 'not-started';
-    if (variance === 0) return 'on-track';
-    if (variance < 0) return 'under-budget';
-    if (percentageVariance <= 10) return 'near-target';
-    if (actual > planned * 1.5) return 'exceeded';
-    return 'over-budget';
+    // Legacy support for numerical comparison (if needed)
+    const planned = arguments[0];
+    const actual = arguments[1];
+    if (typeof planned === 'number' && typeof actual === 'number') {
+        const variance = actual - planned;
+        const percentageVariance = planned > 0 ? Math.abs(variance / planned) * 100 : 0;
+        
+        if (actual === 0) return 'not-started';
+        if (variance === 0) return 'on-track';
+        if (variance < 0) return 'under-budget';
+        if (percentageVariance <= 10) return 'near-target';
+        if (actual > planned * 1.5) return 'exceeded';
+        return 'over-budget';
+    }
+    
+    return 'on-track';
 }
 
-function getStatusText(planned, actual) {
-    const variance = actual - planned;
-    const percentageVariance = planned > 0 ? Math.abs(variance / planned) * 100 : 0;
+function getStatusText(status) {
+    // If status is a string, return the appropriate text
+    if (typeof status === 'string') {
+        switch(status) {
+            case 'over_allocation': return 'Over Allocation';
+            case 'over_budget': return 'Over Budget';
+            case 'over_allocated': return 'Over Allocated';
+            case 'near_limit': return 'Near Limit';
+            case 'on_track': return 'On Track';
+            case 'good': return 'Good';
+            case 'not_started': return 'Not Started';
+            default: return 'On Track';
+        }
+    }
     
-    if (actual === 0) return 'Not Started';
-    if (variance === 0) return 'On Track';
-    if (variance < 0) return 'Under Budget';
-    if (percentageVariance <= 10) return 'Near Target';
-    if (actual > planned * 1.5) return 'Exceeded';
-    return 'Over Budget';
-}
-
-function updateBudgetSummary() {
-    if (!budgetData) return;
-
-    const summaryPlanned = document.getElementById('summaryPlanned');
-    const summaryActual = document.getElementById('summaryActual');
-    const summaryRemaining = document.getElementById('summaryRemaining');
-    const summaryAvailable = document.getElementById('summaryAvailable');
-    const summaryPlannedPercent = document.getElementById('summaryPlannedPercent');
-    const summaryActualPercent = document.getElementById('summaryActualPercent');
-    const summaryRemainingPercent = document.getElementById('summaryRemainingPercent');
-
-    const summary = budgetData.summary;
-    const income = budgetData.total_monthly_income;
-
-    if (summaryPlanned) {
-        summaryPlanned.textContent = formatCurrency(summary.total_planned);
+    // Legacy support for numerical comparison (if needed)
+    const planned = arguments[0];
+    const actual = arguments[1];
+    if (typeof planned === 'number' && typeof actual === 'number') {
+        const variance = actual - planned;
+        const percentageVariance = planned > 0 ? Math.abs(variance / planned) * 100 : 0;
+        
+        if (actual === 0) return 'Not Started';
+        if (variance === 0) return 'On Track';
+        if (variance < 0) return 'Under Budget';
+        if (percentageVariance <= 10) return 'Near Target';
+        if (actual > planned * 1.5) return 'Exceeded';
+        return 'Over Budget';
     }
-    if (summaryActual) {
-        summaryActual.textContent = formatCurrency(summary.total_actual);
-    }
-    if (summaryRemaining) {
-        summaryRemaining.textContent = formatCurrency(summary.remaining_budget);
-        summaryRemaining.className = summary.remaining_budget >= 0 ? 'summary-amount positive' : 'summary-amount negative';
-    }
-    if (summaryAvailable) {
-        summaryAvailable.textContent = formatCurrency(summary.available_balance);
-    }
-
-    if (summaryPlannedPercent) {
-        summaryPlannedPercent.textContent = `${summary.income_utilization}% of income`;
-    }
-    if (summaryActualPercent) {
-        const actualPercent = income > 0 ? ((summary.total_actual / income) * 100).toFixed(1) : 0;
-        summaryActualPercent.textContent = `${actualPercent}% of income`;
-    }
-    if (summaryRemainingPercent) {
-        const remainingPercent = income > 0 ? ((summary.remaining_budget / income) * 100).toFixed(1) : 0;
-        summaryRemainingPercent.textContent = `${remainingPercent}% unspent`;
-    }
+    
+    return 'On Track';
 }
 
 // State Management Functions
@@ -956,6 +1805,30 @@ function showAddCategoryModal(categoryType = '') {
         if (typeSelect && categoryType) {
             typeSelect.value = categoryType;
         }
+        
+        // Reset budget input type to amount
+        const amountRadio = modal.querySelector('#budgetAmount');
+        const amountInput = modal.querySelector('#amountInput');
+        const percentageInput = modal.querySelector('#percentageInput');
+        const percentageInfo = modal.querySelector('.percentage-info');
+        
+        if (amountRadio) {
+            amountRadio.checked = true;
+            if (amountInput) amountInput.style.display = 'flex';
+            if (percentageInput) percentageInput.style.display = 'none';
+            if (percentageInfo) percentageInfo.classList.remove('show');
+        }
+        
+        // Clear form values
+        const form = modal.querySelector('#addCategoryForm');
+        if (form) {
+            form.reset();
+            // Re-set category type if provided
+            if (typeSelect && categoryType) {
+                typeSelect.value = categoryType;
+            }
+        }
+        
         showModal('addCategoryModal');
     }
 }
@@ -1035,10 +1908,14 @@ function setupFormHandlers() {
             
             try {
                 const formData = new FormData(this);
+                
+                // Use enhanced calculation for budget limit
+                const calculatedBudgetLimit = enhancedSubmitAddCategory(formData);
+                
                 const categoryData = {
                     name: formData.get('name'),
                     category_type: formData.get('category_type'),
-                    budget_limit: formData.get('budget_limit'),
+                    budget_limit: calculatedBudgetLimit,
                     icon: formData.get('icon'),
                     color: formData.get('color')
                 };

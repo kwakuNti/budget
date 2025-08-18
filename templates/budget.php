@@ -36,7 +36,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
                 <a href="salary.php" class="nav-item">Salary Setup</a>
                 <a href="budget.php" class="nav-item active">Budget</a>
-                <a href="expenses.php" class="nav-item">Expenses</a>
+                <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
                 <a href="insights.php" class="nav-item">Insights</a>
                 <a href="reports.php" class="nav-item">Reports</a>
@@ -134,16 +134,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <section class="budget-controls">
                 <div class="period-selector">
                     <label>Budget Period:</label>
-                    <select id="budgetPeriod" onchange="changeBudgetPeriod()">
-                        <option value="january-2025" selected>January 2025</option>
-                        <option value="february-2025">February 2025</option>
-                        <option value="march-2025">March 2025</option>
+                    <select id="budgetPeriodSelector">
+                        <option value="">Loading periods...</option>
                     </select>
+                    <span id="currentPeriodDisplay" class="current-period">
+                        <?php echo date('F Y'); ?>
+                    </span>
                 </div>
-                <div class="budget-actions">
-                    <button class="btn-secondary" onclick="copyFromPreviousMonth()">Copy from Previous</button>
-                    <button class="btn-primary" onclick="saveBudget()">Save Budget</button>
-                </div>
+
             </section>
 
             <!-- Main Budget Categories -->
@@ -227,8 +225,31 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Budget Limit (₵)</label>
-                        <input type="number" name="budget_limit" step="0.01" placeholder="0.00" min="0" required>
+                        <label>Budget Limit</label>
+                        <div class="budget-input-group">
+                            <div class="budget-type-selector">
+                                <input type="radio" id="budgetAmount" name="budget_input_type" value="amount" checked onchange="toggleBudgetInputType()">
+                                <label for="budgetAmount">Fixed Amount (₵)</label>
+                                
+                                <input type="radio" id="budgetPercentage" name="budget_input_type" value="percentage" onchange="toggleBudgetInputType()">
+                                <label for="budgetPercentage">Percentage (%)</label>
+                            </div>
+                            
+                            <div class="budget-input-container">
+                                <div id="amountInput" class="budget-input-section">
+                                    <input type="number" name="budget_limit" step="0.01" placeholder="0.00" min="0" required>
+                                    <span class="input-suffix">₵</span>
+                                </div>
+                                
+                                <div id="percentageInput" class="budget-input-section" style="display: none;">
+                                    <input type="number" name="budget_percentage" step="0.1" placeholder="0.0" min="0" max="100">
+                                    <span class="input-suffix">%</span>
+                                </div>
+                                <div class="percentage-info">
+                                    <small id="percentageCalculation">of section allocation</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Icon</label>
@@ -514,6 +535,112 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Export Budget Modal -->
+    <div id="exportBudgetModal" class="budget-modal">
+        <div class="budget-modal-content">
+            <div class="budget-modal-header">
+                <h3>Export Budget Data</h3>
+                <span class="budget-modal-close" onclick="closeModal('exportBudgetModal')">&times;</span>
+            </div>
+            <form class="budget-modal-form" id="exportBudgetForm">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Export Period</label>
+                        <select name="export_period" required>
+                            <option value="">Select period</option>
+                            <option value="current">Current Month</option>
+                            <option value="january-2025">January 2025</option>
+                            <option value="february-2025">February 2025</option>
+                            <option value="march-2025">March 2025</option>
+                            <option value="april-2025">April 2025</option>
+                            <option value="may-2025">May 2025</option>
+                            <option value="june-2025">June 2025</option>
+                            <option value="july-2025">July 2025</option>
+                            <option value="august-2025">August 2025</option>
+                            <option value="september-2025">September 2025</option>
+                            <option value="october-2025">October 2025</option>
+                            <option value="november-2025">November 2025</option>
+                            <option value="december-2025">December 2025</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customDateRange" class="form-group" style="display: none;">
+                        <label>Custom Date Range</label>
+                        <div class="date-range-inputs">
+                            <div class="date-input">
+                                <label>From:</label>
+                                <input type="date" name="export_from_date">
+                            </div>
+                            <div class="date-input">
+                                <label>To:</label>
+                                <input type="date" name="export_to_date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Export Format</label>
+                        <select name="export_format" required>
+                            <option value="csv">CSV (Excel Compatible)</option>
+                            <option value="pdf">PDF Report</option>
+                            <option value="json">JSON Data</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Include Data</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="include_categories" checked>
+                                <span>Budget Categories</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="include_expenses" checked>
+                                <span>Actual Expenses</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="include_variance" checked>
+                                <span>Variance Analysis</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="include_allocation">
+                                <span>Budget Allocation (80/10/10)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Options</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="include_summary" checked>
+                                <span>Include Summary Statistics</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="include_charts">
+                                <span>Include Charts (PDF only)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="budget-modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('exportBudgetModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <span class="btn-icon">📤</span>
+                        Export Budget
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="budgetLoadingIndicator">
+        <div class="loading-spinner"></div>
+        <div>Loading budget data...</div>
     </div>
 
     <!-- Snackbar -->

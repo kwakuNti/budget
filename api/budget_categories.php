@@ -27,34 +27,91 @@ $method = $_SERVER['REQUEST_METHOD'];
 try {
     switch ($method) {
         case 'GET':
-            // Get all budget categories for the user
+            // Get budget allocation data first
             $stmt = $conn->prepare("
                 SELECT 
-                    id,
-                    name,
-                    category_type,
-                    icon,
-                    color,
-                    budget_limit,
-                    is_active,
-                    created_at
-                FROM budget_categories 
-                WHERE user_id = ? AND is_active = TRUE
-                ORDER BY category_type, name
+                    needs_percentage, wants_percentage, savings_percentage,
+                    monthly_salary,
+                    needs_amount, wants_amount, savings_amount
+                FROM personal_budget_allocation 
+                WHERE user_id = ? AND is_active = TRUE 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $allocationResult = $stmt->get_result();
+            $allocation = $allocationResult->fetch_assoc();
+            
+            // Get all budget categories for the user with spending data
+            $stmt = $conn->prepare("
+                SELECT 
+                    bc.id,
+                    bc.name,
+                    bc.category_type,
+                    bc.icon,
+                    bc.color,
+                    bc.budget_limit,
+                    bc.is_active,
+                    bc.created_at,
+                    COALESCE(SUM(CASE WHEN 
+                        MONTH(pe.expense_date) = MONTH(CURRENT_DATE()) AND 
+                        YEAR(pe.expense_date) = YEAR(CURRENT_DATE()) 
+                        THEN pe.amount ELSE 0 END), 0) as current_month_spent,
+                    COALESCE(COUNT(CASE WHEN 
+                        MONTH(pe.expense_date) = MONTH(CURRENT_DATE()) AND 
+                        YEAR(pe.expense_date) = YEAR(CURRENT_DATE()) 
+                        THEN pe.id ELSE NULL END), 0) as expense_count
+                FROM budget_categories bc
+                LEFT JOIN personal_expenses pe ON bc.id = pe.category_id
+                WHERE bc.user_id = ? AND bc.is_active = TRUE
+                GROUP BY bc.id, bc.name, bc.category_type, bc.icon, bc.color, bc.budget_limit, bc.is_active, bc.created_at
+                ORDER BY bc.category_type, bc.name
             ");
             $stmt->bind_param("i", $userId);
             $stmt->execute();
             $result = $stmt->get_result();
             
             $categories = [];
+            $categoryTotals = [
+                'needs' => ['budgeted' => 0, 'spent' => 0, 'allocated' => $allocation ? floatval($allocation['needs_amount']) : 0],
+                'wants' => ['budgeted' => 0, 'spent' => 0, 'allocated' => $allocation ? floatval($allocation['wants_amount']) : 0],
+                'savings' => ['budgeted' => 0, 'spent' => 0, 'allocated' => $allocation ? floatval($allocation['savings_amount']) : 0]
+            ];
+            
             while ($row = $result->fetch_assoc()) {
+                $budgetLimit = floatval($row['budget_limit']);
+                $spent = floatval($row['current_month_spent']);
+                $remaining = $budgetLimit - $spent;
+                $percentageUsed = $budgetLimit > 0 ? ($spent / $budgetLimit) * 100 : 0;
+                
+                // Add to category totals
+                $type = $row['category_type'];
+                $categoryTotals[$type]['budgeted'] += $budgetLimit;
+                $categoryTotals[$type]['spent'] += $spent;
+                
+                // Determine status
+                $status = 'good';
+                if ($spent > $budgetLimit) {
+                    $status = 'over_budget';
+                } elseif ($percentageUsed >= 90) {
+                    $status = 'near_limit';
+                } elseif ($percentageUsed >= 70) {
+                    $status = 'on_track';
+                }
+                
                 $categories[] = [
                     'id' => intval($row['id']),
                     'name' => $row['name'],
                     'category_type' => $row['category_type'],
                     'icon' => $row['icon'],
                     'color' => $row['color'],
-                    'budget_limit' => floatval($row['budget_limit']),
+                    'budget_limit' => $budgetLimit,
+                    'current_month_spent' => $spent,
+                    'remaining' => $remaining,
+                    'percentage_used' => round($percentageUsed, 1),
+                    'expense_count' => intval($row['expense_count']),
+                    'status' => $status,
                     'is_active' => boolval($row['is_active']),
                     'created_at' => $row['created_at']
                 ];
@@ -62,7 +119,9 @@ try {
             
             echo json_encode([
                 'success' => true,
-                'categories' => $categories
+                'categories' => $categories,
+                'allocation' => $allocation,
+                'category_totals' => $categoryTotals
             ]);
             break;
             

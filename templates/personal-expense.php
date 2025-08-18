@@ -1,43 +1,176 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Get user information from session
+$user_first_name = $_SESSION['first_name'] ?? 'User';
+$user_full_name = $_SESSION['full_name'] ?? 'User';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expenses - Nkansah Budget Manager</title>
+    <title>Expenses</title>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/personal-expense.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-content {
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .chart-section {
+            position: relative;
+            height: 400px;
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .chart-btn {
+            padding: 8px 16px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .chart-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .view-icon {
+            font-size: 16px;
+        }
+        
+        .no-expenses {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .no-expenses p {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
                 <div class="logo-icon">💰</div>
                 <div class="logo-text">
-                    <h1>Nkansah</h1>
-                    <p>Personal Finance</p>
+                    <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
+                    <p>Expense Dashboard</p>
                 </div>
             </div>
             
             <nav class="header-nav">
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
-                <a href="salary.php" class="nav-item">Salary Setup</a>
+                <a href="salary.php" class="nav-item ">Salary Setup</a>
                 <a href="budget.php" class="nav-item">Budget</a>
-                <a href="expenses.php" class="nav-item active">Expenses</a>
+                <a href="personal-expense.php" class="nav-item active">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
                 <a href="insights.php" class="nav-item">Insights</a>
                 <a href="reports.php" class="nav-item">Reports</a>
             </nav>
 
+            <div class="theme-selector">
+                <button class="theme-toggle-btn" onclick="toggleThemeSelector()" title="Change Theme">
+                    <span class="theme-icon">🎨</span>
+                </button>
+                <div class="theme-dropdown" id="themeDropdown">
+                    <div class="theme-dropdown-header">
+                        <h4>Choose Theme</h4>
+                    </div>
+                    <div class="themes-grid">
+                        <div class="theme-option active" data-theme="default" onclick="changeTheme('default')">
+                            <div class="theme-preview">
+                                <div class="theme-color" style="background: linear-gradient(135deg, #3b82f6, #2563eb)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #10b981, #059669)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #f59e0b, #d97706)"></div>
+                            </div>
+                            <span class="theme-name">Ocean Blue</span>
+                        </div>
+                        <div class="theme-option" data-theme="forest" onclick="changeTheme('forest')">
+                            <div class="theme-preview">
+                                <div class="theme-color" style="background: linear-gradient(135deg, #059669, #047857)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #10b981, #065f46)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #34d399, #059669)"></div>
+                            </div>
+                            <span class="theme-name">Forest Green</span>
+                        </div>
+                        <div class="theme-option" data-theme="sunset" onclick="changeTheme('sunset')">
+                            <div class="theme-preview">
+                                <div class="theme-color" style="background: linear-gradient(135deg, #f59e0b, #d97706)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #f97316, #ea580c)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #fbbf24, #f59e0b)"></div>
+                            </div>
+                            <span class="theme-name">Sunset Orange</span>
+                        </div>
+                        <div class="theme-option" data-theme="purple" onclick="changeTheme('purple')">
+                            <div class="theme-preview">
+                                <div class="theme-color" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #a855f7, #9333ea)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #c084fc, #a855f7)"></div>
+                            </div>
+                            <span class="theme-name">Royal Purple</span>
+                        </div>
+                        <div class="theme-option" data-theme="rose" onclick="changeTheme('rose')">
+                            <div class="theme-preview">
+                                <div class="theme-color" style="background: linear-gradient(135deg, #f43f5e, #e11d48)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #fb7185, #f43f5e)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #fda4af, #fb7185)"></div>
+                            </div>
+                            <span class="theme-name">Rose Pink</span>
+                        </div>
+                        <div class="theme-option" data-theme="dark" onclick="changeTheme('dark')">
+                            <div class="theme-preview">
+                                <div class="theme-color" style="background: linear-gradient(135deg, #374151, #1f2937)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #6b7280, #4b5563)"></div>
+                                <div class="theme-color" style="background: linear-gradient(135deg, #9ca3af, #6b7280)"></div>
+                            </div>
+                            <span class="theme-name">Dark Mode</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="user-menu">
-                <div class="user-avatar" onclick="toggleUserMenu()">JD</div>
+                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php 
+                    echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
+                ?></div>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="profile.php">Profile Settings</a>
                     <a href="income-sources.php">Income Sources</a>
                     <a href="categories.php">Categories</a>
                     <hr>
                     <a href="family-dashboard.php">Switch to Family</a>
-                    <a href="logout.php">Logout</a>
+                    <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
         </div>
@@ -65,8 +198,8 @@
                         <h3>Total Spent This Month</h3>
                         <span class="summary-icon">💳</span>
                     </div>
-                    <div class="summary-amount">₵2,180.00</div>
-                    <div class="summary-change warning">₵245 over last month</div>
+                    <div class="summary-amount" id="totalSpent">₵0.00</div>
+                    <div class="summary-change" id="monthChange">Loading...</div>
                 </div>
 
                 <div class="summary-card needs">
@@ -74,11 +207,11 @@
                         <h3>Needs Expenses</h3>
                         <span class="summary-icon">🏠</span>
                     </div>
-                    <div class="summary-amount">₵1,200.00</div>
-                    <div class="summary-budget">₵550 left of ₵1,750</div>
+                    <div class="summary-amount" id="needsSpent">₵0.00</div>
+                    <div class="summary-budget" id="needsBudget">Loading...</div>
                     <div class="budget-progress">
                         <div class="progress-bar">
-                            <div class="progress-fill needs-fill" style="width: 68%"></div>
+                            <div class="progress-fill needs-fill" id="needsProgress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -88,11 +221,11 @@
                         <h3>Wants Expenses</h3>
                         <span class="summary-icon">🎮</span>
                     </div>
-                    <div class="summary-amount">₵580.00</div>
-                    <div class="summary-budget">₵470 left of ₵1,050</div>
+                    <div class="summary-amount" id="wantsSpent">₵0.00</div>
+                    <div class="summary-budget" id="wantsBudget">Loading...</div>
                     <div class="budget-progress">
                         <div class="progress-bar">
-                            <div class="progress-fill wants-fill" style="width: 55%"></div>
+                            <div class="progress-fill wants-fill" id="wantsProgress" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -102,8 +235,8 @@
                         <h3>Daily Average</h3>
                         <span class="summary-icon">📊</span>
                     </div>
-                    <div class="summary-amount">₵72.67</div>
-                    <div class="summary-change positive">₵15 less than target</div>
+                    <div class="summary-amount" id="dailyAverage">₵0.00</div>
+                    <div class="summary-change" id="dailyTarget">Loading...</div>
                 </div>
             </section>
 
@@ -416,21 +549,35 @@
                     <div class="section-header">
                         <h3>Expense Analytics</h3>
                         <div class="chart-controls">
-                            <button class="chart-btn active" onclick="showChart('spending')">Spending Trend</button>
-                            <button class="chart-btn" onclick="showChart('category')">By Category</button>
-                            <button class="chart-btn" onclick="showChart('budget')">Budget vs Actual</button>
+                            <button class="chart-btn active" onclick="showChart('spending')" data-chart="spending">
+                                <span class="view-icon">📈</span>
+                                Spending Trend
+                            </button>
+                            <button class="chart-btn" onclick="showChart('category')" data-chart="category">
+                                <span class="view-icon">🥧</span>
+                                By Category
+                            </button>
+                            <button class="chart-btn" onclick="showChart('budget')" data-chart="budget">
+                                <span class="view-icon">🎯</span>
+                                Budget vs Actual
+                            </button>
                         </div>
                     </div>
                     
-                    <div class="chart-placeholder">
-                        <div class="chart-icon">📊</div>
-                        <h4>Spending Analytics</h4>
-                        <p>Interactive charts showing your expense patterns, category breakdowns, and budget comparisons would be displayed here.</p>
-                        <div class="chart-features">
-                            <div class="feature-item">📈 Daily spending trends</div>
-                            <div class="feature-item">🥧 Category distribution</div>
-                            <div class="feature-item">🎯 Budget vs actual comparison</div>
-                            <div class="feature-item">📅 Monthly comparisons</div>
+                    <div class="chart-content">
+                        <!-- Spending Trend Chart -->
+                        <div id="spendingChart" class="chart-section active">
+                            <canvas id="spendingTrendCanvas" width="400" height="200"></canvas>
+                        </div>
+                        
+                        <!-- Category Pie Chart -->
+                        <div id="categoryChart" class="chart-section" style="display: none;">
+                            <canvas id="categoryPieCanvas" width="400" height="200"></canvas>
+                        </div>
+                        
+                        <!-- Budget vs Actual Chart -->
+                        <div id="budgetChart" class="chart-section" style="display: none;">
+                            <canvas id="budgetComparisonCanvas" width="400" height="200"></canvas>
                         </div>
                     </div>
                 </div>
@@ -454,20 +601,7 @@
                 <div class="form-group">
                     <label>Budget Category</label>
                     <select id="expenseCategory" onchange="updateCategoryBudget()" required>
-                        <option value="">Select category</option>
-                        <optgroup label="Needs (₵1,750 budget)">
-                            <option value="needs-food">Food & Groceries</option>
-                            <option value="needs-transport">Transportation</option>
-                            <option value="needs-utilities">Utilities</option>
-                            <option value="needs-rent">Rent/Housing</option>
-                            <option value="needs-healthcare">Healthcare</option>
-                        </optgroup>
-                        <optgroup label="Wants (₵1,050 budget)">
-                            <option value="wants-entertainment">Entertainment</option>
-                            <option value="wants-shopping">Shopping</option>
-                            <option value="wants-dining">Dining Out</option>
-                            <option value="wants-hobbies">Hobbies</option>
-                        </optgroup>
+                        <option value="">Loading categories...</option>
                     </select>
                     <div id="categoryBudgetInfo" class="category-budget-info" style="display: none;">
                         <span id="budgetStatus"></span>
@@ -512,6 +646,26 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Set today's date as default
             document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('personalTheme') || 'default';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Set active theme option
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            const activeOption = document.querySelector(`[data-theme="${savedTheme}"]`);
+            if (activeOption) {
+                activeOption.classList.add('active');
+            }
+            
+            // Initialize page features
+            loadCategories();
+            loadExpenseSummary();
+            loadCategoryBreakdown();
+            loadRecentExpenses();
+            initializeCharts();
         });
 
         // Toggle user menu
@@ -525,7 +679,31 @@
             if (!e.target.closest('.user-menu')) {
                 document.getElementById('userDropdown').classList.remove('show');
             }
+            if (!e.target.closest('.theme-selector')) {
+                document.getElementById('themeDropdown').classList.remove('show');
+            }
         });
+
+        // Theme Functions
+        function toggleThemeSelector() {
+            const dropdown = document.getElementById('themeDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function changeTheme(theme) {
+            // Set the data-theme attribute directly - no conversion needed
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('personalTheme', theme);
+            
+            // Update active theme option
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
+            
+            // Close theme dropdown
+            document.getElementById('themeDropdown').classList.remove('show');
+        }
 
         // Modal functions
         function showAddExpenseModal() {
@@ -619,25 +797,92 @@
             console.log(`Showing ${chartType} chart`);
         }
 
+        // Load expense summary data
+        function loadExpenseSummary() {
+            fetch('../actions/personal_expense_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_expense_summary'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Summary response:', data); // Debug log
+                if (data.success && data.summary) {
+                    updateSummaryCards(data.summary);
+                } else {
+                    console.error('Failed to load expense summary:', data.message);
+                    showNotification('Failed to load expense summary', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading expense summary:', error);
+                showNotification('Failed to load expense summary', 'error');
+            });
+        }
+
+        // Update summary cards with real data
+        function updateSummaryCards(summary) {
+            // Update total spent
+            document.getElementById('totalSpent').textContent = `₵${summary.total_expenses.toFixed(2)}`;
+            
+            // Update month change
+            const monthChange = document.getElementById('monthChange');
+            const changeAmount = Math.abs(summary.month_change);
+            const changeText = summary.month_change >= 0 
+                ? `₵${changeAmount.toFixed(2)} over last month`
+                : `₵${changeAmount.toFixed(2)} under last month`;
+            monthChange.textContent = changeText;
+            monthChange.className = `summary-change ${summary.month_change >= 0 ? 'warning' : 'positive'}`;
+            
+            // Update needs
+            document.getElementById('needsSpent').textContent = `₵${summary.needs.spent.toFixed(2)}`;
+            const needsRemaining = Math.max(0, summary.needs.remaining);
+            document.getElementById('needsBudget').textContent = 
+                `₵${needsRemaining.toFixed(2)} left of ₵${summary.needs.budget.toFixed(2)}`;
+            
+            const needsPercentage = summary.needs.budget > 0 
+                ? Math.min(100, (summary.needs.spent / summary.needs.budget) * 100) 
+                : 0;
+            document.getElementById('needsProgress').style.width = `${needsPercentage}%`;
+            
+            // Update wants
+            document.getElementById('wantsSpent').textContent = `₵${summary.wants.spent.toFixed(2)}`;
+            const wantsRemaining = Math.max(0, summary.wants.remaining);
+            document.getElementById('wantsBudget').textContent = 
+                `₵${wantsRemaining.toFixed(2)} left of ₵${summary.wants.budget.toFixed(2)}`;
+            
+            const wantsPercentage = summary.wants.budget > 0 
+                ? Math.min(100, (summary.wants.spent / summary.wants.budget) * 100) 
+                : 0;
+            document.getElementById('wantsProgress').style.width = `${wantsPercentage}%`;
+            
+            // Update daily average
+            document.getElementById('dailyAverage').textContent = `₵${summary.daily_average.toFixed(2)}`;
+            const targetDiff = summary.target_daily_average - summary.daily_average;
+            const dailyTargetText = targetDiff >= 0 
+                ? `₵${targetDiff.toFixed(2)} under target`
+                : `₵${Math.abs(targetDiff).toFixed(2)} over target`;
+            const dailyTarget = document.getElementById('dailyTarget');
+            dailyTarget.textContent = dailyTargetText;
+            dailyTarget.className = `summary-change ${targetDiff >= 0 ? 'positive' : 'warning'}`;
+        }
+
         function updateCategoryBudget() {
             const category = document.getElementById('expenseCategory').value;
             const budgetInfo = document.getElementById('categoryBudgetInfo');
             const budgetStatus = document.getElementById('budgetStatus');
             
-            if (category) {
-                // Mock budget data - in real app, fetch from server
-                const budgets = {
-                    'needs-food': { spent: 450, budget: 500, left: 50 },
-                    'needs-transport': { spent: 380, budget: 400, left: 20 },
-                    'needs-utilities': { spent: 220, budget: 300, left: 80 },
-                    'wants-entertainment': { spent: 320, budget: 400, left: 80 },
-                    'wants-shopping': { spent: 260, budget: 300, left: 40 }
-                };
-                
-                const data = budgets[category];
+            if (category && window.categoryBudgets) {
+                const data = window.categoryBudgets[category];
                 if (data) {
-                    budgetStatus.innerHTML = `Spent: ₵${data.spent} | Budget: ₵${data.budget} | Left: ₵${data.left}`;
-                    budgetStatus.className = data.left < 50 ? 'warning' : 'good';
+                    const spent = data.spent || 0;
+                    const budget = data.budget || 0;
+                    const left = budget - spent;
+                    
+                    budgetStatus.innerHTML = `Spent: ₵${spent.toFixed(2)} | Budget: ₵${budget.toFixed(2)} | Left: ₵${left.toFixed(2)}`;
+                    budgetStatus.className = left < 50 ? 'warning' : 'good';
                     budgetInfo.style.display = 'block';
                 }
             } else {
@@ -645,34 +890,297 @@
             }
         }
 
+        // Load categories from database
+        function loadCategories() {
+            fetch('../actions/personal_expense_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_categories'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Categories response:', data); // Debug log
+                if (data.success && data.categories) {
+                    const categorySelect = document.getElementById('expenseCategory');
+                    categorySelect.innerHTML = '<option value="">Select Category</option>';
+                    
+                    // Store category budget data globally for updateCategoryBudget function
+                    window.categoryBudgets = {};
+                    
+                    // Only show 'needs' and 'wants' for expenses, not savings
+                    const expenseTypes = ['needs', 'wants'];
+                    
+                    expenseTypes.forEach(categoryType => {
+                        if (data.categories[categoryType] && data.categories[categoryType].length > 0) {
+                            // Use section totals from budget allocation instead of individual category sums
+                            const sectionBudget = data.section_totals ? data.section_totals[categoryType] : 0;
+                            const sectionSpent = data.section_spending ? data.section_spending[categoryType] : 0;
+                            const sectionRemaining = sectionBudget - sectionSpent;
+                            
+                            const typeLabel = categoryType === 'needs' ? 'Essential Needs' : 'Personal Wants';
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = `${typeLabel} (₵${sectionRemaining.toFixed(2)} left of ₵${sectionBudget.toFixed(2)})`;
+                            
+                            const categories = data.categories[categoryType];
+                            categories.forEach(category => {
+                                const option = document.createElement('option');
+                                option.value = category.id;
+                                option.textContent = category.name;
+                                option.dataset.categoryType = categoryType;
+                                
+                                // Store budget data for this category using category ID
+                                window.categoryBudgets[category.id] = {
+                                    spent: parseFloat(category.spent_this_month) || 0,
+                                    budget: parseFloat(category.budget_limit) || 0
+                                };
+                                
+                                // Add visual indicator for budget status
+                                const spentAmount = parseFloat(category.spent_this_month) || 0;
+                                const budgetLimit = parseFloat(category.budget_limit) || 0;
+                                const budgetPercentage = budgetLimit > 0 ? (spentAmount / budgetLimit) * 100 : 0;
+                                
+                                if (budgetPercentage >= 100) {
+                                    option.textContent += ' ⚠️ (Over Budget)';
+                                    option.style.color = '#dc2626';
+                                } else if (budgetPercentage >= 80) {
+                                    option.textContent += ' ⚡ (Near Limit)';
+                                    option.style.color = '#f59e0b';
+                                }
+                                
+                                optgroup.appendChild(option);
+                            });
+                            
+                            categorySelect.appendChild(optgroup);
+                        }
+                    });
+                } else {
+                    console.error('Failed to load categories:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading categories:', error);
+            });
+        }
+
+        // Load category breakdown data
+        function loadCategoryBreakdown() {
+            fetch('../actions/personal_expense_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_expense_summary'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.summary && data.summary.category_breakdown) {
+                    updateCategoryBreakdown(data.summary.category_breakdown);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading category breakdown:', error);
+            });
+        }
+
+        // Update category breakdown section with real data
+        function updateCategoryBreakdown(categories) {
+            const categoryGrid = document.querySelector('.category-grid');
+            if (!categoryGrid) return;
+
+            // Update the section header with current month
+            const breakdownPeriod = document.querySelector('.breakdown-period');
+            if (breakdownPeriod) {
+                const currentDate = new Date();
+                const monthYear = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                breakdownPeriod.textContent = monthYear;
+            }
+
+            categoryGrid.innerHTML = ''; // Clear existing content
+
+            categories.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = `category-item ${category.category_type}`;
+                
+                const percentage = category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
+                const statusClass = category.status || (percentage >= 100 ? 'over' : percentage >= 80 ? 'warning' : 'good');
+                
+                categoryElement.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-icon">${category.icon || '📝'}</span>
+                        <div class="category-info">
+                            <h4>${category.name}</h4>
+                            <p>${category.transactions} transaction${category.transactions !== 1 ? 's' : ''}</p>
+                        </div>
+                        <div class="category-amount">₵${category.spent.toFixed(2)}</div>
+                    </div>
+                    <div class="category-details">
+                        <div class="detail-row">
+                            <span>Budget: ₵${category.budget.toFixed(2)}</span>
+                            <span class="status ${statusClass}">₵${category.remaining.toFixed(2)} left</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(100, percentage).toFixed(1)}%"></div>
+                        </div>
+                    </div>
+                `;
+                
+                categoryGrid.appendChild(categoryElement);
+            });
+        }
+
+        // Load recent expenses
+        function loadRecentExpenses() {
+            fetch('../actions/personal_expense_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_expenses&limit=10&offset=0'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.expenses) {
+                    updateRecentExpenses(data.expenses);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading recent expenses:', error);
+            });
+        }
+
+        // Update recent expenses list with real data
+        function updateRecentExpenses(expenses) {
+            const expenseList = document.querySelector('.expense-list');
+            if (!expenseList) return;
+
+            expenseList.innerHTML = ''; // Clear existing content
+
+            if (expenses.length === 0) {
+                expenseList.innerHTML = `
+                    <div class="no-expenses">
+                        <p>No expenses recorded yet.</p>
+                        <button class="btn-primary" onclick="showAddExpenseModal()">Add Your First Expense</button>
+                    </div>
+                `;
+                return;
+            }
+
+            expenses.forEach(expense => {
+                const expenseElement = document.createElement('div');
+                expenseElement.className = 'expense-item';
+                expenseElement.dataset.category = `${expense.category_type}-${expense.category_name.toLowerCase().replace(/\s+/g, '-')}`;
+                expenseElement.dataset.date = expense.expense_date;
+                
+                // Get appropriate icon based on category
+                const iconMap = {
+                    'food': '🛒', 'groceries': '🛒', 'transport': '⛽', 'utilities': '💡',
+                    'entertainment': '🎬', 'shopping': '🛍️', 'healthcare': '🏥',
+                    'rent': '🏠', 'fuel': '⛽', 'dining': '🍽️'
+                };
+                
+                const categoryKey = expense.category_name.toLowerCase();
+                const icon = iconMap[categoryKey] || expense.category_icon || '📝';
+                
+                expenseElement.innerHTML = `
+                    <div class="expense-icon ${expense.category_type}">${icon}</div>
+                    <div class="expense-details">
+                        <div class="expense-name">${expense.description}</div>
+                        <div class="expense-meta">
+                            <span class="expense-category">${expense.category_name}</span>
+                            <span class="expense-date">${formatDate(expense.expense_date)}</span>
+                        </div>
+                        <div class="expense-description">${expense.payment_method.charAt(0).toUpperCase() + expense.payment_method.slice(1)} payment</div>
+                    </div>
+                    <div class="expense-amount">₵${parseFloat(expense.amount).toFixed(2)}</div>
+                    <div class="expense-actions">
+                        <button class="action-btn edit" onclick="editExpense(${expense.id})">✏️</button>
+                        <button class="action-btn delete" onclick="deleteExpense(${expense.id})">🗑️</button>
+                    </div>
+                `;
+                
+                expenseList.appendChild(expenseElement);
+            });
+        }
+
+        // Helper function to format dates
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+
         function saveExpense(event) {
             event.preventDefault();
             
             // Get form data
             const amount = document.getElementById('expenseAmount').value;
-            const category = document.getElementById('expenseCategory').value;
+            const category_id = document.getElementById('expenseCategory').value;
             const description = document.getElementById('expenseDescription').value;
-            const date = document.getElementById('expenseDate').value;
-            const paymentMethod = document.getElementById('paymentMethod').value;
+            const expense_date = document.getElementById('expenseDate').value;
+            const payment_method = document.getElementById('paymentMethod').value;
             const notes = document.getElementById('expenseNotes').value;
             
             // Validate required fields
-            if (!amount || !category || !description || !date) {
-                alert('Please fill in all required fields');
+            if (!amount || !category_id || !description || !expense_date) {
+                showNotification('Please fill in all required fields', 'error');
                 return;
             }
             
-            // In a real app, save to database here
-            console.log('Saving expense:', {
-                amount, category, description, date, paymentMethod, notes
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('action', 'add_expense');
+            formData.append('amount', amount);
+            formData.append('category_id', category_id);
+            formData.append('description', description);
+            formData.append('expense_date', expense_date);
+            formData.append('payment_method', payment_method);
+            formData.append('notes', notes);
+            
+            // Send to server
+            fetch('../actions/personal_expense_handler.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Expense added successfully!', 'success');
+                    closeModal('addExpenseModal');
+                    event.target.reset();
+                    
+                    // Refresh all data including charts
+                    loadExpenseSummary();
+                    loadCategoryBreakdown();
+                    loadRecentExpenses();
+                    loadChartData();
+                    
+                    // Also refresh categories to update budget indicators
+                    loadCategories();
+                } else {
+                    showNotification(data.message || 'Failed to add expense', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to add expense. Please try again.', 'error');
+            })
+            .finally(() => {
+                // Restore button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             });
-            
-            // Show success message
-            showNotification('Expense added successfully!', 'success');
-            
-            // Close modal and reset form
-            closeModal('addExpenseModal');
-            event.target.reset();
         }
 
         function editExpense(id) {
@@ -686,6 +1194,278 @@
                 // In real app, delete from database
                 console.log('Deleting expense:', id);
                 showNotification('Expense deleted successfully!', 'success');
+            }
+        }
+
+        // Chart functionality
+        let charts = {
+            spending: null,
+            category: null,
+            budget: null
+        };
+
+        function initializeCharts() {
+            // Initialize empty charts
+            createSpendingTrendChart();
+            createCategoryPieChart();
+            createBudgetComparisonChart();
+            
+            // Load chart data
+            loadChartData();
+        }
+
+        function loadChartData() {
+            // Load data for charts
+            Promise.all([
+                fetch('../actions/personal_expense_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'action=get_expense_summary'
+                }).then(r => r.json()),
+                
+                fetch('../actions/personal_expense_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'action=get_expenses&limit=100&offset=0'
+                }).then(r => r.json())
+            ]).then(([summaryData, expensesData]) => {
+                if (summaryData.success && expensesData.success) {
+                    updateCharts(summaryData.summary, expensesData.expenses);
+                }
+            }).catch(error => {
+                console.error('Error loading chart data:', error);
+            });
+        }
+
+        function createSpendingTrendChart() {
+            const ctx = document.getElementById('spendingTrendCanvas').getContext('2d');
+            charts.spending = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Daily Spending',
+                        data: [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Spending Trend (Last 30 Days)'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₵' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCategoryPieChart() {
+            const ctx = document.getElementById('categoryPieCanvas').getContext('2d');
+            charts.category = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                            '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6b7280'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Spending by Category'
+                        },
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return context.label + ': ₵' + value.toFixed(2) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createBudgetComparisonChart() {
+            const ctx = document.getElementById('budgetComparisonCanvas').getContext('2d');
+            charts.budget = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Budget',
+                            data: [],
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Actual Spending',
+                            data: [],
+                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Budget vs Actual Spending'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₵' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts(summary, expenses) {
+            updateSpendingTrendChart(expenses);
+            updateCategoryPieChart(summary.category_breakdown);
+            updateBudgetComparisonChart(summary.category_breakdown);
+        }
+
+        function updateSpendingTrendChart(expenses) {
+            // Group expenses by date for last 30 days
+            const last30Days = [];
+            const dailySpending = {};
+            
+            // Create last 30 days array
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                last30Days.push(dateStr);
+                dailySpending[dateStr] = 0;
+            }
+            
+            // Aggregate spending by date
+            expenses.forEach(expense => {
+                if (dailySpending.hasOwnProperty(expense.expense_date)) {
+                    dailySpending[expense.expense_date] += parseFloat(expense.amount);
+                }
+            });
+            
+            const labels = last30Days.map(date => {
+                const d = new Date(date);
+                return d.getDate() + '/' + (d.getMonth() + 1);
+            });
+            
+            const data = last30Days.map(date => dailySpending[date]);
+            
+            charts.spending.data.labels = labels;
+            charts.spending.data.datasets[0].data = data;
+            charts.spending.update();
+        }
+
+        function updateCategoryPieChart(categoryBreakdown) {
+            const labels = [];
+            const data = [];
+            
+            categoryBreakdown.forEach(category => {
+                if (category.spent > 0) {
+                    labels.push(category.name);
+                    data.push(category.spent);
+                }
+            });
+            
+            charts.category.data.labels = labels;
+            charts.category.data.datasets[0].data = data;
+            charts.category.update();
+        }
+
+        function updateBudgetComparisonChart(categoryBreakdown) {
+            const labels = [];
+            const budgetData = [];
+            const actualData = [];
+            
+            categoryBreakdown.forEach(category => {
+                labels.push(category.name);
+                budgetData.push(category.budget);
+                actualData.push(category.spent);
+            });
+            
+            charts.budget.data.labels = labels;
+            charts.budget.data.datasets[0].data = budgetData;
+            charts.budget.data.datasets[1].data = actualData;
+            charts.budget.update();
+        }
+
+        function showChart(chartType) {
+            // Update button states
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.chart === chartType) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Hide all chart sections
+            document.querySelectorAll('.chart-section').forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+            
+            // Show selected chart
+            const chartSection = document.getElementById(chartType + 'Chart');
+            if (chartSection) {
+                chartSection.style.display = 'block';
+                chartSection.classList.add('active');
+                
+                // Resize chart to ensure proper display
+                setTimeout(() => {
+                    if (charts[chartType]) {
+                        charts[chartType].resize();
+                    }
+                }, 100);
             }
         }
 

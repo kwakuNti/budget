@@ -513,7 +513,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 
                 <div class="salary-info-hero">
                     <div class="salary-display">
-                        <div class="salary-amount-hero" id="monthlySalaryHero">Monthly Salary: ₵3,600</div>
+                        <div class="salary-amount-hero" id="monthlySalaryHero">Monthly Salary: ₵0.00</div>
                         <button class="setup-salary-btn-hero" onclick="showSalarySetupModal()">⚙️ Setup Salary</button>
                         <button class="setup-salary-btn-hero" onclick="showSalaryPaidModal()">✅ I've Been Paid</button>
                     </div>
@@ -677,7 +677,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="form-row">
                         <div class="form-group">
                             <label>Monthly Salary (₵)</label>
-                            <input type="number" step="0.01" value="3600" required>
+                            <input type="number" step="0.01" value="0" required>
                         </div>
                         <div class="form-group">
                             <label>Pay Frequency</label>
@@ -1341,12 +1341,76 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function confirmSalaryFromDashboard() {
-            // Add salary confirmation logic here
-            showSnackbar('Salary confirmed! Balance updated.', 'success');
-            closeModal('salaryPaidModal');
+            console.log('Dashboard: Confirming salary received...');
             
-            // Update countdown for next month
-            setTimeout(updatePaydayCountdown, 1000);
+            // Update button state
+            const confirmBtn = document.querySelector('#salaryPaidModal .btn-primary');
+            if (confirmBtn) {
+                const originalText = confirmBtn.textContent;
+                confirmBtn.textContent = 'Processing...';
+                confirmBtn.disabled = true;
+                
+                // Make API call to confirm salary
+                fetch('../actions/salary_actions.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=confirm_salary_received'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log('Salary confirmation result:', result);
+                    
+                    if (result.success) {
+                        showSnackbar(result.message, 'success');
+                        closeModal('salaryPaidModal');
+                        
+                        // Refresh dashboard data to show updated income
+                        setTimeout(() => {
+                            loadDashboardData();
+                            updatePaydayCountdown();
+                        }, 1000);
+                    } else {
+                        showSnackbar(result.message || 'Failed to confirm salary', 'error');
+                        
+                        // Reset button state
+                        confirmBtn.textContent = originalText;
+                        confirmBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error confirming salary:', error);
+                    showSnackbar('Failed to confirm salary - please try again', 'error');
+                    
+                    // Reset button state
+                    confirmBtn.textContent = originalText;
+                    confirmBtn.disabled = false;
+                });
+            } else {
+                // Fallback if button not found
+                fetch('../actions/salary_actions.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=confirm_salary_received'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showSnackbar(result.message, 'success');
+                        closeModal('salaryPaidModal');
+                        setTimeout(() => loadDashboardData(), 1000);
+                    } else {
+                        showSnackbar(result.message || 'Failed to confirm salary', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showSnackbar('Failed to confirm salary', 'error');
+                });
+            }
         }
 
         function navigateToSalarySetup() {
