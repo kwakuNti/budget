@@ -1,4 +1,209 @@
-/* Savings Page Specific Styles */
+/* Auto-save status indicators */
+.auto-save-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.auto-save-status.active {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+}
+
+.auto-save-status.inactive {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    color: var(--text-secondary);
+}
+
+/* Enhanced form styles for savings */
+.radio-group {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.radio-mark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+input[type="radio"]:checked + .radio-mark {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+}
+
+input[type="radio"]:checked + .radio-mark::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+/* Input with slider styling */
+.input-with-slider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.config-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, 
+        var(--primary-color) 0%, 
+        var(--primary-color) var(--percentage, 20%), 
+        #e2e8f0 var(--percentage, 20%), 
+        #e2e8f0 100%);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.config-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.config-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+}
+
+.slider-value {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Save preview styling */
+.save-preview {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.preview-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.preview-label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.preview-amount {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.preview-note {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Target breakdown styling */
+.target-breakdown {
+    margin-top: 0.5rem;
+}
+
+.target-breakdown small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Notification styling */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.notification.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.notification.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Enhanced modal auto-save options */
+#autoSaveOptions {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Monthly target enhanced display */
+.monthly-target .target-breakdown {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+}
 
 /* Page Header */
 .page-header {
@@ -84,6 +289,20 @@
 
 .overview-card.savings-rate::before {
     background: linear-gradient(90deg, var(--accent-color), var(--accent-dark));
+}
+
+.overview-card.budget-allocation::before {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.allocation-progress {
+    margin-top: 1rem;
+}
+
+.allocation-breakdown {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 .savings-breakdown,
@@ -1339,4 +1558,36 @@ input[type="checkbox"]:checked + .toggle-switch::after {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+/* Loading placeholder styles */
+.loading-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.no-goals, .no-activity {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
 }

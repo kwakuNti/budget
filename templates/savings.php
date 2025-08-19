@@ -1,3 +1,17 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Get user information from session
+$user_first_name = $_SESSION['first_name'] ?? 'User';
+$user_full_name = $_SESSION['full_name'] ?? 'User';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,8 +28,8 @@
             <div class="logo">
                 <div class="logo-icon">💰</div>
                 <div class="logo-text">
-                    <h1>Nkansah</h1>
-                    <p>Personal Finance</p>
+                    <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
+                    <p>Finance Dashboard</p>
                 </div>
             </div>
             
@@ -91,14 +105,16 @@
             </div>
 
             <div class="user-menu">
-                <div class="user-avatar" onclick="toggleUserMenu()">JD</div>
+                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php 
+                    echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
+                ?></div>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="profile.php">Profile Settings</a>
                     <a href="income-sources.php">Income Sources</a>
                     <a href="categories.php">Categories</a>
                     <hr>
                     <a href="family-dashboard.php">Switch to Family</a>
-                    <a href="logout.php">Logout</a>
+                    <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
         </div>
@@ -137,11 +153,11 @@
                         <span class="card-icon">🏦</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">₵12,450.75</div>
-                        <div class="change positive">+₵850.00 this month</div>
-                        <div class="savings-breakdown">
-                            <span class="breakdown-item">Goals: ₵10,700.00</span>
-                            <span class="breakdown-item">Emergency: ₵1,750.75</span>
+                        <div class="amount" id="totalSavingsAmount">₵0.00</div>
+                        <div class="change" id="totalSavingsChange">Loading...</div>
+                        <div class="savings-breakdown" id="savingsBreakdown">
+                            <span class="breakdown-item">Goals: ₵0.00</span>
+                            <span class="breakdown-item">Emergency: ₵0.00</span>
                         </div>
                     </div>
                 </div>
@@ -152,13 +168,16 @@
                         <span class="card-icon">📊</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">₵700.00</div>
-                        <div class="change">20% of salary</div>
+                        <div class="amount" id="monthlyTargetAmount">₵700.00</div>
+                        <div class="change" id="monthlyTargetPercentage">20% of salary</div>
                         <div class="target-progress">
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 85%"></div>
+                                <div class="progress-fill" id="monthlyProgressFill" style="width: 85%"></div>
                             </div>
-                            <span class="progress-text">₵595 saved • ₵105 to go</span>
+                            <span class="progress-text" id="monthlyProgressText">₵595 saved • ₵105 to go</span>
+                        </div>
+                        <div class="target-breakdown" id="targetBreakdown">
+                            <small>From active goals auto-save settings</small>
                         </div>
                     </div>
                 </div>
@@ -169,14 +188,16 @@
                         <span class="card-icon">📈</span>
                     </div>
                     <div class="card-content">
-                        <div class="amount">17%</div>
-                        <div class="change positive">+2% from last month</div>
-                        <div class="rate-comparison">
+                        <div class="amount" id="savingsRateAmount">0%</div>
+                        <div class="change" id="savingsRateChange">Loading...</div>
+                        <div class="rate-comparison" id="rateComparison">
                             <span class="comparison-item">Target: 20%</span>
                             <span class="comparison-item">Average: 15%</span>
                         </div>
                     </div>
                 </div>
+
+
             </section>
 
             <!-- Savings Goals Grid -->
@@ -192,207 +213,10 @@
                 </div>
 
                 <div class="goals-grid" id="goalsGrid">
-                    <!-- Emergency Fund Goal -->
-                    <div class="goal-card emergency" data-status="active">
-                        <div class="goal-header">
-                            <div class="goal-info">
-                                <h4>🚨 Emergency Fund</h4>
-                                <p class="goal-description">6 months of expenses</p>
-                            </div>
-                            <div class="goal-menu">
-                                <button class="menu-btn" onclick="toggleGoalMenu(this)">⋯</button>
-                                <div class="goal-dropdown">
-                                    <a href="#" onclick="editGoal('emergency')">Edit Goal</a>
-                                    <a href="#" onclick="pauseGoal('emergency')">Pause Goal</a>
-                                    <a href="#" onclick="addToGoal('emergency')">Add Money</a>
-                                    <hr>
-                                    <a href="#" onclick="deleteGoal('emergency')" class="danger">Delete Goal</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="goal-progress">
-                            <div class="progress-circle" data-percentage="57">
-                                <div class="circle-inner">
-                                    <span class="percentage">57%</span>
-                                </div>
-                            </div>
-                            <div class="progress-details">
-                                <div class="current-amount">₵8,500.00</div>
-                                <div class="target-amount">of ₵15,000.00</div>
-                                <div class="remaining">₵6,500.00 to go</div>
-                            </div>
-                        </div>
-
-                        <div class="goal-timeline">
-                            <div class="timeline-item">
-                                <span class="timeline-label">Started:</span>
-                                <span class="timeline-value">Jan 2024</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Target:</span>
-                                <span class="timeline-value">Dec 2025</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Monthly:</span>
-                                <span class="timeline-value">₵500.00</span>
-                            </div>
-                        </div>
-
-                        <div class="goal-actions">
-                            <button class="goal-btn primary" onclick="addToGoal('emergency')">Add ₵500</button>
-                            <button class="goal-btn secondary" onclick="viewGoalDetails('emergency')">Details</button>
-                        </div>
-                    </div>
-
-                    <!-- Vacation Fund Goal -->
-                    <div class="goal-card vacation" data-status="active">
-                        <div class="goal-header">
-                            <div class="goal-info">
-                                <h4>🏖️ Vacation Fund</h4>
-                                <p class="goal-description">Dream trip to Dubai</p>
-                            </div>
-                            <div class="goal-menu">
-                                <button class="menu-btn" onclick="toggleGoalMenu(this)">⋯</button>
-                                <div class="goal-dropdown">
-                                    <a href="#" onclick="editGoal('vacation')">Edit Goal</a>
-                                    <a href="#" onclick="pauseGoal('vacation')">Pause Goal</a>
-                                    <a href="#" onclick="addToGoal('vacation')">Add Money</a>
-                                    <hr>
-                                    <a href="#" onclick="deleteGoal('vacation')" class="danger">Delete Goal</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="goal-progress">
-                            <div class="progress-circle" data-percentage="44">
-                                <div class="circle-inner">
-                                    <span class="percentage">44%</span>
-                                </div>
-                            </div>
-                            <div class="progress-details">
-                                <div class="current-amount">₵2,200.00</div>
-                                <div class="target-amount">of ₵5,000.00</div>
-                                <div class="remaining">₵2,800.00 to go</div>
-                            </div>
-                        </div>
-
-                        <div class="goal-timeline">
-                            <div class="timeline-item">
-                                <span class="timeline-label">Started:</span>
-                                <span class="timeline-value">Nov 2024</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Target:</span>
-                                <span class="timeline-value">Aug 2025</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Bi-weekly:</span>
-                                <span class="timeline-value">₵150.00</span>
-                            </div>
-                        </div>
-
-                        <div class="goal-actions">
-                            <button class="goal-btn primary" onclick="addToGoal('vacation')">Add ₵150</button>
-                            <button class="goal-btn secondary" onclick="viewGoalDetails('vacation')">Details</button>
-                        </div>
-                    </div>
-
-                    <!-- Car Fund Goal -->
-                    <div class="goal-card car" data-status="active">
-                        <div class="goal-header">
-                            <div class="goal-info">
-                                <h4>🚗 Car Fund</h4>
-                                <p class="goal-description">Down payment for new car</p>
-                            </div>
-                            <div class="goal-menu">
-                                <button class="menu-btn" onclick="toggleGoalMenu(this)">⋯</button>
-                                <div class="goal-dropdown">
-                                    <a href="#" onclick="editGoal('car')">Edit Goal</a>
-                                    <a href="#" onclick="pauseGoal('car')">Pause Goal</a>
-                                    <a href="#" onclick="addToGoal('car')">Add Money</a>
-                                    <hr>
-                                    <a href="#" onclick="deleteGoal('car')" class="danger">Delete Goal</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="goal-progress">
-                            <div class="progress-circle" data-percentage="8">
-                                <div class="circle-inner">
-                                    <span class="percentage">8%</span>
-                                </div>
-                            </div>
-                            <div class="progress-details">
-                                <div class="current-amount">₵800.00</div>
-                                <div class="target-amount">of ₵10,000.00</div>
-                                <div class="remaining">₵9,200.00 to go</div>
-                            </div>
-                        </div>
-
-                        <div class="goal-timeline">
-                            <div class="timeline-item">
-                                <span class="timeline-label">Started:</span>
-                                <span class="timeline-value">Dec 2024</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Target:</span>
-                                <span class="timeline-value">Dec 2026</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Monthly:</span>
-                                <span class="timeline-value">₵400.00</span>
-                            </div>
-                        </div>
-
-                        <div class="goal-actions">
-                            <button class="goal-btn primary" onclick="addToGoal('car')">Add ₵400</button>
-                            <button class="goal-btn secondary" onclick="viewGoalDetails('car')">Details</button>
-                        </div>
-                    </div>
-
-                    <!-- Completed Goal Example -->
-                    <div class="goal-card laptop completed" data-status="completed">
-                        <div class="goal-header">
-                            <div class="goal-info">
-                                <h4>💻 MacBook Pro</h4>
-                                <p class="goal-description">Completed Dec 2024</p>
-                            </div>
-                            <div class="completed-badge">✅ Completed</div>
-                        </div>
-
-                        <div class="goal-progress">
-                            <div class="progress-circle completed" data-percentage="100">
-                                <div class="circle-inner">
-                                    <span class="percentage">100%</span>
-                                </div>
-                            </div>
-                            <div class="progress-details">
-                                <div class="current-amount">₵4,500.00</div>
-                                <div class="target-amount">of ₵4,500.00</div>
-                                <div class="completed-text">Goal Achieved! 🎉</div>
-                            </div>
-                        </div>
-
-                        <div class="goal-timeline">
-                            <div class="timeline-item">
-                                <span class="timeline-label">Started:</span>
-                                <span class="timeline-value">May 2024</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Completed:</span>
-                                <span class="timeline-value">Dec 2024</span>
-                            </div>
-                            <div class="timeline-item">
-                                <span class="timeline-label">Duration:</span>
-                                <span class="timeline-value">7 months</span>
-                            </div>
-                        </div>
-
-                        <div class="goal-actions">
-                            <button class="goal-btn secondary" onclick="viewGoalDetails('laptop')">View Details</button>
-                            <button class="goal-btn secondary" onclick="archiveGoal('laptop')">Archive</button>
-                        </div>
+                    <!-- Goals will be loaded dynamically from database -->
+                    <div class="loading-placeholder">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your savings goals...</p>
                     </div>
                 </div>
             </section>
@@ -495,50 +319,11 @@
                     <a href="#" class="view-all">View All Transactions</a>
                 </div>
 
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon deposit">💵</div>
-                        <div class="activity-details">
-                            <div class="activity-title">Emergency Fund Deposit</div>
-                            <div class="activity-meta">Auto-save from salary • Today</div>
-                        </div>
-                        <div class="activity-amount positive">+₵500.00</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon deposit">🔄</div>
-                        <div class="activity-details">
-                            <div class="activity-title">Vacation Fund Contribution</div>
-                            <div class="activity-meta">Manual deposit • Jan 10</div>
-                        </div>
-                        <div class="activity-amount positive">+₵150.00</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon roundup">🔄</div>
-                        <div class="activity-details">
-                            <div class="activity-title">Round-up Savings</div>
-                            <div class="activity-meta">Weekly collection • Jan 8</div>
-                        </div>
-                        <div class="activity-amount positive">+₵8.50</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon goal">🎯</div>
-                        <div class="activity-details">
-                            <div class="activity-title">Car Fund Goal Created</div>
-                            <div class="activity-meta">Target: ₵10,000 • Jan 5</div>
-                        </div>
-                        <div class="activity-amount neutral">New Goal</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon achievement">🏆</div>
-                        <div class="activity-details">
-                            <div class="activity-title">MacBook Pro Goal Completed</div>
-                            <div class="activity-meta">₵4,500 saved in 7 months • Dec 28</div>
-                        </div>
-                        <div class="activity-amount achievement">Completed</div>
+                <div class="activity-list" id="activityList">
+                    <!-- Activities will be loaded dynamically from database -->
+                    <div class="loading-placeholder">
+                        <div class="loading-spinner"></div>
+                        <p>Loading recent activity...</p>
                     </div>
                 </div>
             </section>
@@ -546,144 +331,164 @@
     </main>
 
     <!-- Modals -->
-    <!-- New Goal Modal -->
-    <div id="newGoalModal" class="modal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <h3>Create New Savings Goal</h3>
-                <span class="close" onclick="closeModal('newGoalModal')">&times;</span>
-            </div>
-            <form class="modal-form" onsubmit="createNewGoal(event)">
-                <div class="form-section">
-                    <h4>Goal Details</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Goal Name</label>
-                            <input type="text" id="goalName" placeholder="e.g., Dream Vacation" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Goal Icon</label>
-                            <select id="goalIcon" required>
-                                <option value="">Choose icon</option>
-                                <option value="🏠">🏠 House</option>
-                                <option value="🚗">🚗 Car</option>
-                                <option value="🏖️">🏖️ Vacation</option>
-                                <option value="💻">💻 Electronics</option>
-                                <option value="🎓">🎓 Education</option>
-                                <option value="💍">💍 Wedding</option>
-                                <option value="👶">👶 Baby Fund</option>
-                                <option value="🏥">🏥 Medical</option>
-                                <option value="🎯">🎯 General</option>
-                            </select>
-                        </div>
+<!-- Fixed New Goal Modal -->
+<div id="newGoalModal" class="modal">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3>Create New Savings Goal</h3>
+            <span class="close" onclick="closeModal('newGoalModal')">&times;</span>
+        </div>
+        <form class="modal-form" id="newGoalForm">
+            <div class="form-section">
+                <h4>Goal Details</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Goal Name</label>
+                        <input type="text" name="goal_name" id="goalName" placeholder="e.g., Dream Vacation" required>
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="goalDescription" rows="3" placeholder="What is this goal for?"></textarea>
+                        <label>Goal Type</label>
+                        <select name="goal_type" id="goalType" required>
+                            <option value="">Choose type</option>
+                            <option value="emergency_fund">🚨 Emergency Fund</option>
+                            <option value="vacation">🏖️ Vacation</option>
+                            <option value="car">🚗 Car</option>
+                            <option value="house">🏠 House</option>
+                            <option value="education">🎓 Education</option>
+                            <option value="other">🎯 Other</option>
+                        </select>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-section">
-                    <h4>Financial Details</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Target Amount (₵)</label>
-                            <input type="number" id="targetAmount" step="0.01" placeholder="0.00" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Target Date</label>
-                            <input type="date" id="targetDate" required>
-                        </div>
+            <div class="form-section">
+                <h4>Financial Details</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Target Amount (₵)</label>
+                        <input type="number" name="target_amount" id="targetAmount" step="1" placeholder="0" required>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Save Frequency</label>
-                            <select id="saveFrequency" required>
-                                <option value="monthly">Monthly</option>
-                                <option value="bi-weekly">Bi-weekly</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="manual">Manual Only</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Amount per Save (₵)</label>
-                            <input type="number" id="saveAmount" step="0.01" placeholder="0.00">
-                        </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select name="priority" id="priority" required>
+                            <option value="high">High Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Initial Deposit (₵)</label>
-                        <input type="number" id="initialDeposit" step="0.01" placeholder="0.00">
+                        <input type="number" name="initial_deposit" id="initialDeposit" step="0.01" placeholder="0.00">
                     </div>
                 </div>
+            </div>
 
-                <div class="form-section">
-                    <h4>Auto-Save Settings</h4>
+            <div class="form-section">
+                <h4>Auto-Save Settings</h4>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="auto_save_enabled" id="autoSaveEnabled" value="1">
+                        <span class="checkmark"></span>
+                        Enable automatic savings for this goal
+                    </label>
+                </div>
+                
+                <div id="autoSaveOptions" style="display: none;">
+                    <div class="form-group">
+                        <label>Save Method</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="save_method" value="percentage" id="saveMethodPercentage" checked>
+                                <span class="radio-mark"></span>
+                                Percentage of Income
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="save_method" value="fixed" id="saveMethodFixed">
+                                <span class="radio-mark"></span>
+                                Fixed Amount
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" id="percentageGroup">
+                            <label>Percentage of Income (%)</label>
+                            <div class="input-with-slider">
+                                <input type="range" name="save_percentage" id="savePercentage" min="1" max="50" value="10" class="config-slider">
+                                <span class="slider-value">10%</span>
+                            </div>
+                        </div>
+                        <div class="form-group" id="fixedAmountGroup" style="display: none;">
+                            <label>Fixed Amount (₵)</label>
+                            <input type="number" name="save_amount" id="fixedSaveAmount" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="save-preview">
+                        <div class="preview-info">
+                            <span class="preview-label">Estimated monthly save:</span>
+                            <span class="preview-amount" id="savePreviewAmount">₵350.00</span>
+                        </div>
+                        <small class="preview-note">Based on current income settings</small>
+                    </div>
+                    
                     <div class="checkbox-group">
                         <label class="checkbox-label">
-                            <input type="checkbox" id="autoSaveEnabled">
+                            <input type="checkbox" name="deduct_from_income" id="deductFromIncome" value="1">
                             <span class="checkmark"></span>
-                            Enable automatic savings for this goal
-                        </label>
-                    </div>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="roundUpEnabled">
-                            <span class="checkmark"></span>
-                            Include round-up savings
+                            Deduct from available income automatically
                         </label>
                     </div>
                 </div>
+            </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('newGoalModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Create Goal</button>
-                </div>
-            </form>
-        </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal('newGoalModal')">Cancel</button>
+                <button type="submit" class="btn-primary">Create Goal</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- Add Deposit Modal -->
-    <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Deposit</h3>
-                <span class="close" onclick="closeModal('depositModal')">&times;</span>
-            </div>
-            <form class="modal-form" onsubmit="addDeposit(event)">
-                <div class="form-group">
-                    <label>Select Goal</label>
-                    <select id="depositGoal" required>
-                        <option value="">Choose a goal</option>
-                        <option value="emergency">🚨 Emergency Fund</option>
-                        <option value="vacation">🏖️ Vacation Fund</option>
-                        <option value="car">🚗 Car Fund</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Amount (₵)</label>
-                    <input type="number" id="depositAmount" step="0.01" placeholder="0.00" required>
-                </div>
-                <div class="form-group">
-                    <label>Source</label>
-                    <select id="depositSource" required>
-                        <option value="">Select source</option>
-                        <option value="salary">From Salary</option>
-                        <option value="bonus">Bonus/Extra Income</option>
-                        <option value="manual">Manual Transfer</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Note (Optional)</label>
-                    <input type="text" id="depositNote" placeholder="Add a note...">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('depositModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Deposit</button>
-                </div>
-            </form>
+<!-- Fixed Add Deposit Modal -->
+<div id="depositModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Deposit</h3>
+            <span class="close" onclick="closeModal('depositModal')">&times;</span>
         </div>
+        <form class="modal-form" id="depositForm" onsubmit="addDeposit(event)">
+            <div class="form-group">
+                <label>Select Goal</label>
+                <select name="goal_id" id="depositGoal" required>
+                    <option value="">Choose a goal</option>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount (₵)</label>
+                <input type="number" name="amount" id="depositAmount" step="0.01" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label>Source</label>
+                <select name="source" id="depositSource" required>
+                    <option value="">Select source</option>
+                    <option value="manual">Manual Transfer</option>
+                    <option value="salary">From Salary</option>
+                    <option value="bonus">Bonus/Extra Income</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal('depositModal')">Cancel</button>
+                <button type="submit" class="btn-primary">Add Deposit</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- Auto-Save Configuration Modal -->
     <div id="autoSaveModal" class="modal">
@@ -918,8 +723,1329 @@
             </div>
         </div>
     </div>
+    <script>
+        // Global functions for modal and goal actions - defined immediately
+window.showNewGoalModal = function() {
+    const modal = document.getElementById('newGoalModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        setTimeout(() => modal.style.opacity = '1', 10);
+    } else {
+        console.error('New goal modal not found');
+    }
+};
 
-    <script src="../public/js/personal.js"></script>
-    <script src="../public/js/savings.js"></script>
+window.showDepositModal = function() {
+    const modal = document.getElementById('depositModal');
+    if (modal) {
+        // Populate goals dropdown
+        if (window.savingsManager) {
+            window.savingsManager.populateGoalsDropdown();
+        }
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        setTimeout(() => modal.style.opacity = '1', 10);
+    } else {
+        console.error('Deposit modal not found');
+    }
+};
+
+window.showAutoSaveModal = function() {
+    const modal = document.getElementById('autoSaveModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        setTimeout(() => modal.style.opacity = '1', 10);
+    } else {
+        console.error('Auto-save modal not found');
+    }
+};
+
+window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }, 300);
+    }
+};
+
+window.editGoal = function(goalId) {
+    console.log('Edit goal:', goalId);
+    // Find the goal data
+    const goal = window.savingsManager.currentGoals.find(g => g.id === goalId);
+    if (goal) {
+        // Populate edit form with goal data
+        document.getElementById('goalName').value = goal.goal_name;
+        document.getElementById('targetAmount').value = goal.target_amount;
+        document.getElementById('goalType').value = goal.goal_type;
+        document.getElementById('priority').value = goal.priority;
+        
+        // Show the modal in edit mode
+        const modal = document.getElementById('newGoalModal');
+        const title = modal.querySelector('h3');
+        const submitBtn = modal.querySelector('button[type="submit"]');
+        
+        title.textContent = 'Edit Savings Goal';
+        submitBtn.textContent = 'Update Goal';
+        
+        // Add goal ID as hidden field
+        const form = document.getElementById('newGoalForm');
+        let hiddenField = form.querySelector('input[name="goal_id"]');
+        if (!hiddenField) {
+            hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.name = 'goal_id';
+            form.appendChild(hiddenField);
+        }
+        hiddenField.value = goalId;
+        
+        showNewGoalModal();
+    }
+};
+
+window.pauseGoal = function(goalId) {
+    if (confirm('Are you sure you want to pause this goal? Auto-save will be disabled.')) {
+        fetch('/budget-app/actions/savings_handler.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=pause_goal&goal_id=${goalId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (window.savingsManager) {
+                    window.savingsManager.loadSavingsData();
+                    window.savingsManager.loadSavingsOverview();
+                }
+                window.savingsManager?.showSnackbar('Goal paused successfully', 'success');
+            } else {
+                alert(data.message || 'Failed to pause goal');
+            }
+        })
+        .catch(err => console.error('Pause goal error:', err));
+    }
+};
+
+window.resumeGoal = function(goalId) {
+    fetch('/budget-app/actions/savings_handler.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=resume_goal&goal_id=${goalId}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            if (window.savingsManager) {
+                window.savingsManager.loadSavingsData();
+                window.savingsManager.loadSavingsOverview();
+            }
+            window.savingsManager?.showSnackbar('Goal resumed successfully', 'success');
+        } else {
+            alert(data.message || 'Failed to resume goal');
+        }
+    })
+    .catch(err => console.error('Resume goal error:', err));
+};
+
+window.setGoalInactive = function(goalId) {
+    if (confirm('Are you sure you want to set this goal to inactive? Auto-save will be disabled.')) {
+        fetch('/budget-app/actions/savings_handler.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=set_goal_inactive&goal_id=${goalId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (window.savingsManager) {
+                    window.savingsManager.loadSavingsData();
+                    window.savingsManager.loadSavingsOverview();
+                }
+                window.savingsManager?.showSnackbar('Goal set to inactive', 'success');
+            } else {
+                alert(data.message || 'Failed to set goal inactive');
+            }
+        })
+        .catch(err => console.error('Set goal inactive error:', err));
+    }
+};
+
+window.pauseGoal = function(goalId) {
+    console.log('Pause goal:', goalId);
+    // Implementation will be added
+};
+
+window.resumeGoal = function(goalId) {
+    console.log('Resume goal:', goalId);
+    // Implementation will be added
+};
+
+window.addToGoal = function(goalId) {
+    console.log('Add to goal:', goalId);
+    showDepositModal();
+};
+
+window.viewGoalDetails = function(goalId) {
+    console.log('View goal details:', goalId);
+    const modal = document.getElementById('goalDetailsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+};
+
+window.deleteGoal = function(goalId) {
+    if (confirm('Are you sure you want to delete this goal?')) {
+        console.log('Delete goal:', goalId);
+        fetch('/budget-app/actions/savings_handler.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=delete_goal&goal_id=${goalId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (window.savingsManager) {
+                    window.savingsManager.loadSavingsData();
+                    window.savingsManager.loadSavingsOverview();
+                }
+            } else {
+                alert(data.message || 'Failed to delete goal');
+            }
+        })
+        .catch(err => console.error('Delete goal error:', err));
+    }
+};
+
+window.archiveGoal = function(goalId) {
+    console.log('Archive goal:', goalId);
+    // Implementation will be added
+};
+
+window.toggleGoalMenu = function(btn) {
+    // Close all other dropdowns first
+    document.querySelectorAll('.goal-dropdown').forEach(dropdown => {
+        if (dropdown !== btn.nextElementSibling) {
+            dropdown.classList.remove('show');
+        }
+    });
+    
+    const dropdown = btn.nextElementSibling;
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+};
+
+// Savings Manager Class
+class SavingsManager {
+    constructor() {
+        this.currentGoals = [];
+        this.autoSaveSettings = {};
+        this.monthlyTargetFromGoals = 0;
+        this.init();
+    }
+
+    init() {
+        this.loadSavingsData();
+        this.loadSavingsOverview();
+        this.loadRecentActivity();
+        this.setupEventListeners();
+        this.updateMonthlyTargetDisplay();
+    }
+
+    async loadSavingsOverview() {
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_savings_overview', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            console.log('Savings overview loaded:', data);
+            
+            if (data.success) {
+                this.updateSavingsOverviewDisplay(data.data);
+            } else {
+                console.error('Failed to load savings overview:', data.message);
+                this.updateSavingsOverviewDisplay(null);
+            }
+        } catch (error) {
+            console.error('Error loading savings overview:', error);
+            this.updateSavingsOverviewDisplay(null);
+        }
+    }
+
+    updateSavingsOverviewDisplay(data) {
+        if (!data) {
+            // Show default/error state
+            const totalSavingsAmount = document.getElementById('totalSavingsAmount');
+            const totalSavingsChange = document.getElementById('totalSavingsChange');
+            const savingsBreakdown = document.getElementById('savingsBreakdown');
+            const savingsRateAmount = document.getElementById('savingsRateAmount');
+            const savingsRateChange = document.getElementById('savingsRateChange');
+            
+            if (totalSavingsAmount) totalSavingsAmount.textContent = '₵0.00';
+            if (totalSavingsChange) totalSavingsChange.textContent = 'No data available';
+            if (savingsBreakdown) savingsBreakdown.innerHTML = '<span class="breakdown-item">No savings yet</span>';
+            if (savingsRateAmount) savingsRateAmount.textContent = '0%';
+            if (savingsRateChange) savingsRateChange.textContent = 'No data available';
+            return;
+        }
+
+        // Update Total Savings
+        const totalSavingsAmount = document.getElementById('totalSavingsAmount');
+        if (totalSavingsAmount) {
+            totalSavingsAmount.textContent = `₵${data.total_savings.toFixed(2)}`;
+        }
+
+        const totalSavingsChange = document.getElementById('totalSavingsChange');
+        if (totalSavingsChange) {
+            const changeText = data.monthly_change >= 0 ? 
+                `+₵${data.monthly_change.toFixed(2)} this month` : 
+                `₵${data.monthly_change.toFixed(2)} this month`;
+            totalSavingsChange.textContent = changeText;
+            totalSavingsChange.className = `change ${data.change_direction}`;
+        }
+
+        const savingsBreakdown = document.getElementById('savingsBreakdown');
+        if (savingsBreakdown) {
+            savingsBreakdown.innerHTML = `
+                <span class="breakdown-item">Goals: ₵${data.goal_savings.toFixed(2)}</span>
+                <span class="breakdown-item">Emergency: ₵${data.emergency_savings.toFixed(2)}</span>
+            `;
+        }
+
+        // Update Savings Rate
+        const savingsRateAmount = document.getElementById('savingsRateAmount');
+        if (savingsRateAmount) {
+            savingsRateAmount.textContent = `${data.savings_rate}%`;
+        }
+
+        const savingsRateChange = document.getElementById('savingsRateChange');
+        if (savingsRateChange) {
+            const rateChangeText = data.savings_rate_change >= 0 ? 
+                `+${data.savings_rate_change}% from last month` : 
+                `${data.savings_rate_change}% from last month`;
+            savingsRateChange.textContent = rateChangeText;
+            savingsRateChange.className = `change ${data.rate_change_direction}`;
+        }
+
+        // Update comparison targets (could be made dynamic in the future)
+        const rateComparison = document.getElementById('rateComparison');
+        if (rateComparison) {
+            rateComparison.innerHTML = `
+                <span class="comparison-item">Target: 20%</span>
+                <span class="comparison-item">Current: ${data.savings_rate}%</span>
+            `;
+        }
+    }
+
+    async loadSavingsOverview() {
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_savings_overview', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            console.log('Savings overview loaded:', data);
+            
+            if (data.success) {
+                this.updateSavingsOverviewDisplay(data.data);
+            } else {
+                console.error('Failed to load savings overview:', data.message);
+                this.updateSavingsOverviewDisplay(null);
+            }
+        } catch (error) {
+            console.error('Error loading savings overview:', error);
+            this.updateSavingsOverviewDisplay(null);
+        }
+    }
+
+    updateSavingsOverviewDisplay(data) {
+        if (!data) {
+            // Show default/error state
+            const totalSavingsAmount = document.getElementById('totalSavingsAmount');
+            const totalSavingsChange = document.getElementById('totalSavingsChange');
+            const savingsBreakdown = document.getElementById('savingsBreakdown');
+            const savingsRateAmount = document.getElementById('savingsRateAmount');
+            const savingsRateChange = document.getElementById('savingsRateChange');
+            
+            if (totalSavingsAmount) totalSavingsAmount.textContent = '₵0.00';
+            if (totalSavingsChange) totalSavingsChange.textContent = 'No data available';
+            if (savingsBreakdown) savingsBreakdown.innerHTML = '<span class="breakdown-item">No savings yet</span>';
+            if (savingsRateAmount) savingsRateAmount.textContent = '0%';
+            if (savingsRateChange) savingsRateChange.textContent = 'No data available';
+            return;
+        }
+
+        // Update Total Savings
+        const totalSavingsAmount = document.getElementById('totalSavingsAmount');
+        if (totalSavingsAmount) {
+            totalSavingsAmount.textContent = `₵${data.total_savings.toFixed(2)}`;
+        }
+
+        const totalSavingsChange = document.getElementById('totalSavingsChange');
+        if (totalSavingsChange) {
+            const changeText = data.monthly_change >= 0 ? 
+                `+₵${data.monthly_change.toFixed(2)} this month` : 
+                `₵${data.monthly_change.toFixed(2)} this month`;
+            totalSavingsChange.textContent = changeText;
+            totalSavingsChange.className = `change ${data.change_direction}`;
+        }
+
+        const savingsBreakdown = document.getElementById('savingsBreakdown');
+        if (savingsBreakdown) {
+            savingsBreakdown.innerHTML = `
+                <span class="breakdown-item">Goals: ₵${data.goal_savings.toFixed(2)}</span>
+                <span class="breakdown-item">Emergency: ₵${data.emergency_savings.toFixed(2)}</span>
+            `;
+        }
+
+        // Update Savings Rate
+        const savingsRateAmount = document.getElementById('savingsRateAmount');
+        if (savingsRateAmount) {
+            savingsRateAmount.textContent = `${data.savings_rate}%`;
+        }
+
+        const savingsRateChange = document.getElementById('savingsRateChange');
+        if (savingsRateChange) {
+            const rateChangeText = data.savings_rate_change >= 0 ? 
+                `+${data.savings_rate_change}% from last month` : 
+                `${data.savings_rate_change}% from last month`;
+            savingsRateChange.textContent = rateChangeText;
+            savingsRateChange.className = `change ${data.rate_change_direction}`;
+        }
+
+        // Update comparison targets (could be made dynamic in the future)
+        const rateComparison = document.getElementById('rateComparison');
+        if (rateComparison) {
+            rateComparison.innerHTML = `
+                <span class="comparison-item">Target: 20%</span>
+                <span class="comparison-item">Current: ${data.savings_rate}%</span>
+            `;
+        }
+    }
+
+    async loadSavingsData() {
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_goals', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            console.log('Savings data loaded:', data);
+            
+            if (data.success) {
+                this.currentGoals = data.goals || [];
+                this.autoSaveSettings = data.auto_save_settings || {};
+                this.budgetAllocation = data.budget_allocation || {};
+                this.updateGoalsDisplay();
+                this.updateMonthlyTargetDisplay();
+                this.updateBudgetAllocationDisplay();
+                // this.updateAutoSaveStatus(); // Commented out for now
+            } else {
+                console.error('Failed to load savings data:', data.message);
+            }
+        } catch (error) {
+            console.error('Error loading savings data:', error);
+        }
+    }
+
+    setupEventListeners() {
+        // Setup form submission handlers
+        const newGoalForm = document.getElementById('newGoalForm');
+        if (newGoalForm) {
+            newGoalForm.addEventListener('submit', (e) => this.handleNewGoal(e));
+        }
+
+        const depositForm = document.getElementById('depositForm');
+        if (depositForm) {
+            depositForm.addEventListener('submit', (e) => this.handleDeposit(e));
+        }
+
+        const autoSaveForm = document.getElementById('autoSaveForm');
+        if (autoSaveForm) {
+            autoSaveForm.addEventListener('submit', (e) => this.handleAutoSaveSettings(e));
+        }
+
+        // Setup auto save method toggle
+        const autoSaveMethod = document.getElementById('auto_save_method');
+        if (autoSaveMethod) {
+            autoSaveMethod.addEventListener('change', () => this.toggleAutoSaveMethod());
+        }
+
+        // Setup goal filtering
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => this.filterGoals(e.target.dataset.filter));
+        });
+
+        // Setup auto-save method toggle in goal creation
+        const saveMethodRadios = document.querySelectorAll('input[name="save_method"]');
+        saveMethodRadios.forEach(radio => {
+            radio.addEventListener('change', () => this.toggleSaveMethod());
+        });
+
+        // Setup auto-save enabled checkbox
+        const autoSaveEnabledCheckbox = document.getElementById('autoSaveEnabled');
+        if (autoSaveEnabledCheckbox) {
+            autoSaveEnabledCheckbox.addEventListener('change', () => this.toggleAutoSaveOptions());
+        }
+
+        // Setup percentage slider
+        const savePercentageSlider = document.getElementById('savePercentage');
+        if (savePercentageSlider) {
+            savePercentageSlider.addEventListener('input', () => this.updateSavePreview());
+        }
+
+        // Setup fixed amount input
+        const fixedSaveAmountInput = document.getElementById('fixedSaveAmount');
+        if (fixedSaveAmountInput) {
+            fixedSaveAmountInput.addEventListener('input', () => this.updateSavePreview());
+        }
+
+        // Close modals when clicking outside
+        this.setupModalHandlers();
+    }
+
+    setupModalHandlers() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    filterGoals(filter) {
+        // Update active filter button
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+
+        // Filter goals
+        const goalCards = document.querySelectorAll('.goal-card');
+        goalCards.forEach(card => {
+            const goalStatus = card.dataset.status || 'active';
+            const isCompleted = card.classList.contains('completed');
+            
+            let shouldShow = false;
+            
+            switch(filter) {
+                case 'all':
+                    shouldShow = true;
+                    break;
+                case 'active':
+                    shouldShow = goalStatus === 'active' && !isCompleted;
+                    break;
+                case 'completed':
+                    shouldShow = isCompleted;
+                    break;
+                case 'paused':
+                    shouldShow = goalStatus === 'paused' && !isCompleted;
+                    break;
+                case 'inactive':
+                    shouldShow = goalStatus === 'inactive' && !isCompleted;
+                    break;
+            }
+            
+            if (shouldShow) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    toggleSaveMethod() {
+        const percentageRadio = document.getElementById('saveMethodPercentage');
+        const fixedRadio = document.getElementById('saveMethodFixed');
+        const percentageGroup = document.getElementById('percentageGroup');
+        const fixedAmountGroup = document.getElementById('fixedAmountGroup');
+        
+        if (percentageRadio && percentageRadio.checked) {
+            percentageGroup.style.display = 'block';
+            fixedAmountGroup.style.display = 'none';
+            this.updateSavePreview();
+        } else if (fixedRadio && fixedRadio.checked) {
+            percentageGroup.style.display = 'none';
+            fixedAmountGroup.style.display = 'block';
+            this.updateSavePreview();
+        }
+    }
+
+    toggleAutoSaveOptions() {
+        const autoSaveEnabled = document.getElementById('autoSaveEnabled');
+        const autoSaveOptions = document.getElementById('autoSaveOptions');
+        
+        if (autoSaveEnabled && autoSaveOptions) {
+            if (autoSaveEnabled.checked) {
+                autoSaveOptions.style.display = 'block';
+                this.updateSavePreview();
+            } else {
+                autoSaveOptions.style.display = 'none';
+            }
+        }
+    }
+
+    updateSavePreview() {
+        const percentageRadio = document.getElementById('saveMethodPercentage');
+        const savePercentage = document.getElementById('savePercentage');
+        const fixedSaveAmount = document.getElementById('fixedSaveAmount');
+        const previewAmount = document.getElementById('savePreviewAmount');
+        
+        if (!previewAmount) return;
+        
+        // Get user's salary from the monthly target data
+        const monthlySalary = this.autoSaveSettings?.monthly_target?.monthly_salary || 3500; // Default for preview
+        
+        let estimatedAmount = 0;
+        
+        if (percentageRadio && percentageRadio.checked && savePercentage) {
+            const percentage = parseFloat(savePercentage.value) || 0;
+            estimatedAmount = (monthlySalary * percentage) / 100;
+            
+            // Update slider value display
+            const sliderValue = document.querySelector('.slider-value');
+            if (sliderValue) {
+                sliderValue.textContent = percentage + '%';
+            }
+        } else if (fixedSaveAmount) {
+            estimatedAmount = parseFloat(fixedSaveAmount.value) || 0;
+        }
+        
+        previewAmount.textContent = `₵${estimatedAmount.toFixed(2)}`;
+    }
+
+    updateGoalsDisplay() {
+        const goalsList = document.getElementById('goalsGrid');
+        if (!goalsList) {
+            console.log('Goals grid element not found');
+            return;
+        }
+
+        if (this.currentGoals.length === 0) {
+            goalsList.innerHTML = '<p class="no-goals">No savings goals set. Click "New Goal" to get started!</p>';
+            return;
+        }
+
+        goalsList.innerHTML = this.currentGoals.map(goal => {
+            const percentage = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
+            const remaining = Math.max(goal.target_amount - goal.current_amount, 0);
+            const goalIcon = this.getGoalIcon(goal.goal_type);
+            const isCompleted = goal.current_amount >= goal.target_amount;
+            const status = goal.status || 'active';
+            
+            // Status display
+            let statusBadge = '';
+            let statusClass = status;
+            switch(status) {
+                case 'active':
+                    statusBadge = '<span class="status-badge active">🟢 Active</span>';
+                    break;
+                case 'paused':
+                    statusBadge = '<span class="status-badge paused">⏸️ Paused</span>';
+                    statusClass = 'paused';
+                    break;
+                case 'inactive':
+                    statusBadge = '<span class="status-badge inactive">⭕ Inactive</span>';
+                    statusClass = 'inactive';
+                    break;
+            }
+            
+            // Auto-save status
+            const autoSaveStatus = goal.auto_save_enabled ? 
+                (goal.save_method === 'percentage' ? 
+                    `${goal.save_percentage}% (₵${parseFloat(goal.save_amount || 0).toFixed(2)})` :
+                    `₵${parseFloat(goal.save_amount || 0).toFixed(2)}/month`) : 
+                'Manual Only';
+            const autoSaveClass = goal.auto_save_enabled ? 'active' : 'inactive';
+            
+            // Action buttons based on status
+            let actionButtons = '';
+            if (isCompleted) {
+                actionButtons = `
+                    <button class="goal-btn completed" disabled>Goal Achieved! 🎉</button>
+                    <button class="goal-btn secondary" onclick="viewGoalDetails(${goal.id})">View Details</button>
+                `;
+            } else {
+                const addAmount = Math.min(100, remaining);
+                actionButtons = `
+                    <button class="goal-btn primary" onclick="addToGoal(${goal.id})">Add </button>
+                    <button class="goal-btn secondary" onclick="viewGoalDetails(${goal.id})">Details</button>
+                `;
+            }
+            
+            // Menu options based on status
+            let menuOptions = '';
+            if (status === 'active') {
+                menuOptions = `
+                    <a href="#" onclick="editGoal(${goal.id})">Edit Goal</a>
+                    <a href="#" onclick="pauseGoal(${goal.id})">Pause Goal</a>
+                    <a href="#" onclick="setGoalInactive(${goal.id})">Set Inactive</a>
+                    <a href="#" onclick="addToGoal(${goal.id})">Add Money</a>
+                    <hr>
+                    <a href="#" onclick="deleteGoal(${goal.id})" class="danger">Delete Goal</a>
+                `;
+            } else if (status === 'paused') {
+                menuOptions = `
+                    <a href="#" onclick="editGoal(${goal.id})">Edit Goal</a>
+                    <a href="#" onclick="resumeGoal(${goal.id})">Resume Goal</a>
+                    <a href="#" onclick="setGoalInactive(${goal.id})">Set Inactive</a>
+                    <a href="#" onclick="addToGoal(${goal.id})">Add Money</a>
+                    <hr>
+                    <a href="#" onclick="deleteGoal(${goal.id})" class="danger">Delete Goal</a>
+                `;
+            } else {
+                menuOptions = `
+                    <a href="#" onclick="editGoal(${goal.id})">Edit Goal</a>
+                    <a href="#" onclick="resumeGoal(${goal.id})">Activate Goal</a>
+                    <a href="#" onclick="addToGoal(${goal.id})">Add Money</a>
+                    <hr>
+                    <a href="#" onclick="deleteGoal(${goal.id})" class="danger">Delete Goal</a>
+                `;
+            }
+            
+            return `
+                <div class="goal-card ${goal.goal_type} ${isCompleted ? 'completed' : statusClass}" data-status="${status}" data-goal-id="${goal.id}">
+                    <div class="goal-header">
+                        <div class="goal-info">
+                            <h4>${goalIcon} ${goal.goal_name}</h4>
+                            <div class="goal-meta">
+                                ${statusBadge}
+                                <span class="priority-badge ${goal.priority}">${goal.priority.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <div class="goal-menu">
+                            <button class="menu-btn" onclick="toggleGoalMenu(this)">⋯</button>
+                            <div class="goal-dropdown">
+                                ${menuOptions}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="goal-progress">
+                        <div class="progress-circle" data-percentage="${percentage.toFixed(0)}">
+                            <div class="circle-inner">
+                                <span class="percentage">${percentage.toFixed(0)}%</span>
+                            </div>
+                        </div>
+                        <div class="progress-details">
+                            <div class="current-amount">₵${parseFloat(goal.current_amount).toFixed(2)}</div>
+                            <div class="target-amount">of ₵${parseFloat(goal.target_amount).toFixed(2)}</div>
+                            <div class="remaining">${isCompleted ? 'Goal Achieved! 🎉' : `₵${remaining.toFixed(2)} to go`}</div>
+                        </div>
+                    </div>
+
+                    <div class="goal-timeline">
+                        <div class="timeline-item">
+                            <span class="timeline-label">Started:</span>
+                            <span class="timeline-value">${new Date(goal.created_at).toLocaleDateString('en-US', {month: 'short', year: 'numeric'})}</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-label">Target:</span>
+                            <span class="timeline-value">${goal.target_date ? new Date(goal.target_date).toLocaleDateString('en-US', {month: 'short', year: 'numeric'}) : 'No deadline'}</span>
+                        </div>
+                        <div class="timeline-item">
+                            <span class="timeline-label">Auto-Save:</span>
+                            <span class="timeline-value auto-save-status ${autoSaveClass}">${autoSaveStatus}</span>
+                        </div>
+                    </div>
+
+                    <div class="goal-actions">
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    getGoalIcon(goalType) {
+        const icons = {
+            'emergency_fund': '🚨',
+            'vacation': '🏖️',
+            'car': '🚗',
+            'house': '🏠',
+            'education': '🎓',
+            'other': '🎯'
+        };
+        return icons[goalType] || '🎯';
+    }
+
+    async loadRecentActivity() {
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_recent_activity', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            console.log('Recent activity loaded:', data);
+            
+            if (data.success) {
+                this.updateRecentActivityDisplay(data.data || []);
+            } else {
+                console.error('Failed to load recent activity:', data.message);
+                this.updateRecentActivityDisplay([]);
+            }
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+            this.updateRecentActivityDisplay([]);
+        }
+    }
+
+    updateRecentActivityDisplay(activities) {
+        const activityList = document.getElementById('activityList');
+        if (!activityList) {
+            console.log('Activity list element not found');
+            return;
+        }
+
+        if (activities.length === 0) {
+            activityList.innerHTML = '<p class="no-activity">No recent activity. Start saving to see your progress!</p>';
+            return;
+        }
+
+        activityList.innerHTML = activities.map(activity => {
+            const icon = this.getActivityIcon(activity.activity_type);
+            const activityClass = this.getActivityClass(activity.activity_type);
+            const amountDisplay = this.getActivityAmountDisplay(activity);
+            
+            return `
+                <div class="activity-item">
+                    <div class="activity-icon ${activityClass}">${icon}</div>
+                    <div class="activity-details">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-meta">${activity.description} • ${this.formatDate(activity.created_at)}</div>
+                    </div>
+                    <div class="activity-amount ${amountDisplay.class}">${amountDisplay.text}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    getActivityIcon(activityType) {
+        const icons = {
+            'goal': '🎯',
+            'contribution': '💵',
+            'auto_save': '🔄',
+            'achievement': '🏆'
+        };
+        return icons[activityType] || '💵';
+    }
+
+    getActivityClass(activityType) {
+        const classes = {
+            'goal': 'goal',
+            'contribution': 'deposit',
+            'auto_save': 'roundup',
+            'achievement': 'achievement'
+        };
+        return classes[activityType] || 'deposit';
+    }
+
+    getActivityAmountDisplay(activity) {
+        if (activity.activity_type === 'goal') {
+            return { text: 'New Goal', class: 'neutral' };
+        }
+        if (activity.activity_type === 'achievement') {
+            return { text: 'Completed', class: 'achievement' };
+        }
+        if (activity.amount > 0) {
+            return { text: `+₵${parseFloat(activity.amount).toFixed(2)}`, class: 'positive' };
+        }
+        return { text: '₵0.00', class: 'neutral' };
+    }
+
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) return 'Today';
+        if (diffDays === 2) return 'Yesterday';
+        if (diffDays <= 7) return `${diffDays} days ago`;
+        
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    populateGoalsDropdown() {
+        const goalSelect = document.getElementById('depositGoal');
+        if (!goalSelect) return;
+
+        // Clear existing options (except the first one)
+        goalSelect.innerHTML = '<option value="">Choose a goal</option>';
+
+        // Add goals from currentGoals
+        this.currentGoals.forEach(goal => {
+            if (goal.current_amount < goal.target_amount) { // Only show incomplete goals
+                const option = document.createElement('option');
+                option.value = goal.id;
+                option.textContent = `${this.getGoalIcon(goal.goal_type)} ${goal.goal_name} (₵${parseFloat(goal.current_amount).toFixed(2)} / ₵${parseFloat(goal.target_amount).toFixed(2)})`;
+                goalSelect.appendChild(option);
+            }
+        });
+    }
+
+    updateMonthlyTargetDisplay() {
+        // Calculate total monthly target from all active goals
+        const activeGoals = this.currentGoals.filter(goal => goal.status === 'active');
+        let totalMonthlyTarget = 0;
+        
+        const targetBreakdown = activeGoals.map(goal => {
+            const remainingAmount = goal.target_amount - goal.current_amount;
+            const remainingMonths = this.calculateRemainingMonths(goal.target_date);
+            const monthlyTarget = remainingMonths > 0 ? remainingAmount / remainingMonths : remainingAmount;
+            totalMonthlyTarget += monthlyTarget;
+            
+            return {
+                name: goal.goal_name,
+                monthlyTarget: monthlyTarget,
+                remainingAmount: remainingAmount
+            };
+        });
+
+        this.monthlyTargetFromGoals = totalMonthlyTarget;
+
+        // Update the monthly target amount display
+        const targetAmountElement = document.getElementById('monthlyTargetAmount');
+        if (targetAmountElement) {
+            targetAmountElement.textContent = `₵${totalMonthlyTarget.toFixed(2)}`;
+        }
+
+        // Update the percentage display to show combined percentage
+        const targetPercentageElement = document.getElementById('monthlyTargetPercentage');
+        if (targetPercentageElement && this.autoSaveSettings && this.autoSaveSettings.monthly_target) {
+            const salaryPercentage = this.autoSaveSettings.monthly_target.salary_percentage || 0;
+            targetPercentageElement.textContent = `${salaryPercentage}% of salary`;
+        }
+
+        // Update the breakdown display
+        const targetBreakdownElement = document.getElementById('targetBreakdown');
+        if (targetBreakdownElement && targetBreakdown.length > 0) {
+            targetBreakdownElement.innerHTML = `
+                <small>Active Goals Breakdown:</small>
+                ${targetBreakdown.map(item => `
+                    <div class="breakdown-item">
+                        <span>${item.name}: ₵${item.monthlyTarget.toFixed(2)} (${(item.monthlyTarget/totalMonthlyTarget*100).toFixed(1)}%)</span>
+                    </div>
+                `).join('')}
+            `;
+        } else if (targetBreakdownElement) {
+            targetBreakdownElement.innerHTML = '<small>No active auto-save goals</small>';
+        }
+    }
+
+    calculateRemainingMonths(targetDate) {
+        const today = new Date();
+        const target = new Date(targetDate);
+        const diffTime = target - today;
+        const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+        return Math.max(diffMonths, 1);
+    }
+
+    updateAutoSaveStatus() {
+        const statusDiv = document.getElementById('autoSaveStatus');
+        if (!statusDiv) return;
+
+        if (this.autoSaveSettings.enabled) {
+            const method = this.autoSaveSettings.method === 'percentage' ? 
+                `${this.autoSaveSettings.percentage}% of income` : 
+                `GH₵ ${this.autoSaveSettings.fixed_amount}`;
+            
+            statusDiv.innerHTML = `
+                <div class="auto-save-active">
+                    <span class="status-indicator active"></span>
+                    Auto-save is ON (${method})
+                </div>
+            `;
+        } else {
+            statusDiv.innerHTML = `
+                <div class="auto-save-inactive">
+                    <span class="status-indicator inactive"></span>
+                    Auto-save is OFF
+                </div>
+            `;
+        }
+    }
+
+    updateBudgetAllocationDisplay() {
+        if (!this.budgetAllocation) {
+            return;
+        }
+
+        // Update Budget Allocation Amount
+        const allocationAmountElement = document.getElementById('budgetAllocationAmount');
+        if (allocationAmountElement) {
+            allocationAmountElement.textContent = `₵${this.budgetAllocation.allocated_savings.toFixed(2)}`;
+        }
+
+        // Update Budget Allocation Percentage
+        const allocationPercentageElement = document.getElementById('budgetAllocationPercentage');
+        if (allocationPercentageElement) {
+            allocationPercentageElement.textContent = `${this.budgetAllocation.savings_percentage}% allocated`;
+        }
+
+        // Update progress bar
+        const allocationProgressFill = document.getElementById('allocationProgressFill');
+        const allocationProgressText = document.getElementById('allocationProgressText');
+        
+        if (allocationProgressFill && allocationProgressText) {
+            const usedAmount = this.budgetAllocation.total_goal_amounts;
+            const totalAllocated = this.budgetAllocation.allocated_savings;
+            const remainingAmount = this.budgetAllocation.remaining_allocation;
+            const usagePercentage = totalAllocated > 0 ? (usedAmount / totalAllocated) * 100 : 0;
+            
+            allocationProgressFill.style.width = `${Math.min(usagePercentage, 100)}%`;
+            allocationProgressText.textContent = `₵${usedAmount.toFixed(2)} used • ₵${remainingAmount.toFixed(2)} remaining`;
+            
+            // Change color based on usage
+            if (usagePercentage > 90) {
+                allocationProgressFill.style.backgroundColor = '#ef4444'; // Red
+            } else if (usagePercentage > 75) {
+                allocationProgressFill.style.backgroundColor = '#f59e0b'; // Orange
+            } else {
+                allocationProgressFill.style.backgroundColor = '#10b981'; // Green
+            }
+        }
+
+        // Update breakdown
+        const allocationBreakdownElement = document.getElementById('allocationBreakdown');
+        if (allocationBreakdownElement) {
+            const percentageUsed = this.budgetAllocation.allocation_percentage_used;
+            allocationBreakdownElement.innerHTML = `
+                <small>Auto-save goals using ${percentageUsed.toFixed(1)}% of allocation</small>
+            `;
+        }
+
+        // Update the monthly target to use budget allocation instead of salary percentage
+        this.updateMonthlyTargetFromBudget();
+    }
+
+    updateMonthlyTargetFromBudget() {
+        if (!this.budgetAllocation) return;
+
+        const targetAmountElement = document.getElementById('monthlyTargetAmount');
+        const targetPercentageElement = document.getElementById('monthlyTargetPercentage');
+        
+        if (targetAmountElement) {
+            targetAmountElement.textContent = `₵${this.budgetAllocation.allocated_savings.toFixed(2)}`;
+        }
+
+        if (targetPercentageElement) {
+            targetPercentageElement.textContent = `${this.budgetAllocation.savings_percentage}% of salary (Budget Allocation)`;
+        }
+
+        // Update progress based on current month's progress toward allocated amount
+        const monthlyProgressFill = document.getElementById('monthlyProgressFill');
+        const monthlyProgressText = document.getElementById('monthlyProgressText');
+        
+        if (monthlyProgressFill && monthlyProgressText) {
+            const totalGoalContributions = this.budgetAllocation.total_goal_amounts;
+            const allocatedAmount = this.budgetAllocation.allocated_savings;
+            const progressPercentage = allocatedAmount > 0 ? (totalGoalContributions / allocatedAmount) * 100 : 0;
+            const remaining = allocatedAmount - totalGoalContributions;
+            
+            monthlyProgressFill.style.width = `${Math.min(progressPercentage, 100)}%`;
+            monthlyProgressText.textContent = `₵${totalGoalContributions.toFixed(2)} committed • ₵${remaining.toFixed(2)} available`;
+        }
+
+        const targetBreakdownElement = document.getElementById('targetBreakdown');
+        if (targetBreakdownElement) {
+            targetBreakdownElement.innerHTML = `
+                <small>From budget allocation (${this.budgetAllocation.savings_percentage}% of monthly salary)</small>
+            `;
+        }
+    }
+
+    async handleNewGoal(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const goalId = formData.get('goal_id');
+        
+        if (goalId) {
+            formData.append('action', 'update_goal');
+        } else {
+            formData.append('action', 'create_goal');
+        }
+
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.closeModal('newGoalModal');
+                e.target.reset();
+                
+                // Reset form to create mode
+                const modal = document.getElementById('newGoalModal');
+                const title = modal.querySelector('h3');
+                const submitBtn = modal.querySelector('button[type="submit"]');
+                title.textContent = 'Create New Savings Goal';
+                submitBtn.textContent = 'Create Goal';
+                
+                // Remove goal_id hidden field
+                const hiddenField = e.target.querySelector('input[name="goal_id"]');
+                if (hiddenField) {
+                    hiddenField.remove();
+                }
+                
+                this.loadSavingsData();
+                this.loadSavingsOverview();
+                this.loadRecentActivity();
+                
+                const message = goalId ? 'Goal updated successfully!' : 'Goal created successfully!';
+                
+                // Show budget allocation feedback if available
+                if (data.budget_check) {
+                    const remaining = data.budget_check.remaining_allocation;
+                    const allocatedSavings = data.budget_check.allocated_savings;
+                    const usagePercentage = ((allocatedSavings - remaining) / allocatedSavings * 100).toFixed(1);
+                    
+                    this.showSnackbar(
+                        `${message} Budget allocation: ${usagePercentage}% used, ₵${remaining.toFixed(2)} remaining.`, 
+                        'success'
+                    );
+                } else {
+                    this.showSnackbar(message, 'success');
+                }
+            } else {
+                this.showSnackbar(data.message || 'Error saving goal', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving goal:', error);
+            this.showSnackbar('Error saving goal', 'error');
+        }
+    }
+
+    async handleDeposit(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        formData.append('action', 'add_contribution');
+
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.closeModal('depositModal');
+                e.target.reset();
+                this.loadSavingsData();
+                this.loadSavingsOverview();
+                this.loadRecentActivity();
+                this.showSnackbar('Contribution added successfully!', 'success');
+            } else {
+                this.showSnackbar(data.message || 'Error adding contribution', 'error');
+            }
+        } catch (error) {
+            console.error('Error adding contribution:', error);
+            this.showSnackbar('Error adding contribution', 'error');
+        }
+    }
+
+    async handleAutoSaveSettings(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        formData.append('action', 'update_auto_save');
+
+        try {
+            const response = await fetch('/budget-app/actions/savings_handler.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.closeModal('autoSaveModal');
+                this.loadSavingsData();
+                this.showSnackbar('Auto-save settings updated!', 'success');
+            } else {
+                this.showSnackbar(data.message || 'Error updating auto-save settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error updating auto-save settings:', error);
+            this.showSnackbar('Error updating auto-save settings', 'error');
+        }
+    }
+
+    toggleAutoSaveMethod() {
+        const method = document.getElementById('auto_save_method').value;
+        const percentageField = document.getElementById('percentageField');
+        const fixedAmountField = document.getElementById('fixedAmountField');
+
+        if (method === 'percentage') {
+            percentageField.style.display = 'block';
+            fixedAmountField.style.display = 'none';
+            document.getElementById('auto_save_percentage').required = true;
+            document.getElementById('auto_save_fixed_amount').required = false;
+        } else {
+            percentageField.style.display = 'none';
+            fixedAmountField.style.display = 'block';
+            document.getElementById('auto_save_percentage').required = false;
+            document.getElementById('auto_save_fixed_amount').required = true;
+        }
+    }
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+            }, 300);
+        }
+    }
+
+    showSnackbar(message, type = 'info') {
+        // Remove existing snackbar if any
+        const existingSnackbar = document.querySelector('.snackbar');
+        if (existingSnackbar) {
+            existingSnackbar.remove();
+        }
+
+        // Create new snackbar
+        const snackbar = document.createElement('div');
+        snackbar.className = `snackbar ${type}`;
+        
+        const icons = {
+            success: '✓',
+            error: '✗',
+            warning: '⚠',
+            info: 'ℹ'
+        };
+        
+        snackbar.innerHTML = `
+            <span class="snackbar-icon">${icons[type] || icons.info}</span>
+            <span class="snackbar-message">${message}</span>
+        `;
+        
+        document.body.appendChild(snackbar);
+        
+        // Show snackbar
+        setTimeout(() => snackbar.classList.add('show'), 100);
+        
+        // Hide snackbar after 4 seconds
+        setTimeout(() => {
+            snackbar.classList.remove('show');
+            setTimeout(() => snackbar.remove(), 300);
+        }, 4000);
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing SavingsManager');
+    window.savingsManager = new SavingsManager();
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('personalTheme') || 'default';
+    changeTheme(savedTheme);
+});
+
+console.log('Savings inline JS loaded - Global functions available');
+
+// Theme functionality
+function toggleThemeSelector() {
+    const dropdown = document.getElementById('themeDropdown');
+    dropdown.classList.toggle('show');
+}
+
+function changeTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Update active theme option
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.classList.remove('active');
+    });
+    document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
+    
+    // Close dropdown
+    document.getElementById('themeDropdown').classList.remove('show');
+    
+    // Save theme preference
+    localStorage.setItem('personalTheme', theme);
+}
+
+// User menu functionality
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('show');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    // Close theme dropdown
+    const themeDropdown = document.getElementById('themeDropdown');
+    const themeToggle = document.querySelector('.theme-toggle-btn');
+    if (themeDropdown && themeToggle && !themeToggle.contains(event.target) && !themeDropdown.contains(event.target)) {
+        themeDropdown.classList.remove('show');
+    }
+    
+    // Close user dropdown
+    const userDropdown = document.getElementById('userDropdown');
+    const userAvatar = document.getElementById('userAvatar');
+    if (userDropdown && userAvatar && !userAvatar.contains(event.target) && !userDropdown.contains(event.target)) {
+        userDropdown.classList.remove('show');
+    }
+    
+    // Close goal dropdowns
+    const goalDropdowns = document.querySelectorAll('.goal-dropdown');
+    goalDropdowns.forEach(dropdown => {
+        const menuBtn = dropdown.previousElementSibling;
+        if (menuBtn && !menuBtn.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+});
+    </script>
 </body>
 </html>

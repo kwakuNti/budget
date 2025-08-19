@@ -100,13 +100,17 @@ try {
         $updateStmt->bind_param("si", $nextPayDate, $salary['id']);
         $updateStmt->execute();
         
+        // Process auto-save for goals if enabled
+        $autoSaveResult = processAutoSave($conn, $userId, $salary['monthly_salary']);
+        
         echo json_encode([
             'success' => true,
             'message' => 'Salary confirmed successfully',
             'data' => [
                 'confirmed_amount' => floatval($salary['monthly_salary']),
                 'confirmation_date' => $today,
-                'next_pay_date' => $nextPayDate
+                'next_pay_date' => $nextPayDate,
+                'auto_save' => $autoSaveResult
             ]
         ]);
     } else {
@@ -121,6 +125,103 @@ try {
         'success' => false,
         'message' => 'Error confirming salary: ' . $e->getMessage()
     ]);
+}
+
+/**
+ * Process auto-save for goals when salary is confirmed
+ */
+function processAutoSave($conn, $userId, $salaryAmount) {
+    try {
+        // Get all active goals with auto-save enabled that should deduct from income
+        $stmt = $conn->prepare("
+            SELECT 
+                pg.id,
+                pg.goal_name,
+                pgs.save_method,
+                pgs.save_percentage,
+                pgs.save_amount,
+                pgs.deduct_from_income
+            FROM personal_goals pg
+            JOIN personal_goal_settings pgs ON pg.id = pgs.goal_id
+            WHERE pg.user_id = ? 
+            AND pg.is_completed = 0 
+            AND pgs.auto_save_enabled = 1
+            AND pgs.deduct_from_income = 1
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $totalDeducted = 0;
+        $processed = [];
+        
+        $conn->begin_transaction();
+        
+        while ($row = $result->fetch_assoc()) {
+            $saveAmount = 0;
+            
+            if ($row['save_method'] === 'percentage') {
+                $saveAmount = ($salaryAmount * $row['save_percentage']) / 100;
+            } else if ($row['save_method'] === 'fixed') {
+                $saveAmount = floatval($row['save_amount']);
+            }
+            
+            if ($saveAmount > 0) {
+                // Add contribution
+                $stmt = $conn->prepare("
+                    INSERT INTO personal_goal_contributions 
+                    (goal_id, user_id, amount, contribution_date, source, description) 
+                    VALUES (?, ?, ?, CURDATE(), 'auto_save', 'Auto-save from salary confirmation')
+                ");
+                $stmt->bind_param("iid", $row['id'], $userId, $saveAmount);
+                $stmt->execute();
+                
+                // Update goal current amount
+                $stmt = $conn->prepare("
+                    UPDATE personal_goals 
+                    SET current_amount = current_amount + ?, updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ");
+                $stmt->bind_param("di", $saveAmount, $row['id']);
+                $stmt->execute();
+                
+                $totalDeducted += $saveAmount;
+                $processed[] = [
+                    'goal_name' => $row['goal_name'],
+                    'amount' => $saveAmount
+                ];
+            }
+        }
+        
+        // Record auto-save history
+        if ($totalDeducted > 0) {
+            $stmt = $conn->prepare("
+                INSERT INTO personal_auto_save_history 
+                (user_id, salary_date, salary_amount, total_auto_saved, remaining_after_saves, goals_processed) 
+                VALUES (?, CURDATE(), ?, ?, ?, ?)
+            ");
+            $goalsProcessedJson = json_encode($processed);
+            $remainingAfterSaves = $salaryAmount - $totalDeducted;
+            $stmt->bind_param("iddds", $userId, $salaryAmount, $totalDeducted, $remainingAfterSaves, $goalsProcessedJson);
+            $stmt->execute();
+        }
+        
+        $conn->commit();
+        
+        return [
+            'enabled' => true,
+            'total_deducted' => $totalDeducted,
+            'remaining_salary' => $salaryAmount - $totalDeducted,
+            'processed_goals' => $processed
+        ];
+        
+    } catch (Exception $e) {
+        $conn->rollback();
+        return [
+            'enabled' => false,
+            'error' => $e->getMessage()
+        ];
+    }
 }
 
 /**
