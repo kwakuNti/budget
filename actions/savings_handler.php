@@ -1173,6 +1173,41 @@ function getRecentActivity($conn, $userId) {
 
 function getSavingsOverview($conn, $userId) {
     try {
+        // Clean any output buffer
+        ob_start();
+        ob_clean();
+        
+        // Check if tables exist
+        $stmt = $conn->prepare("SHOW TABLES LIKE 'personal_goals'");
+        $stmt->execute();
+        $goalsTableExists = $stmt->get_result()->num_rows > 0;
+        
+        $stmt = $conn->prepare("SHOW TABLES LIKE 'personal_budget_allocation'");
+        $stmt->execute();
+        $budgetTableExists = $stmt->get_result()->num_rows > 0;
+        
+        if (!$goalsTableExists) {
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'total_savings' => 0,
+                    'emergency_savings' => 0,
+                    'goal_savings' => 0,
+                    'monthly_contributions' => 0,
+                    'monthly_change' => 0,
+                    'change_direction' => 'neutral',
+                    'savings_rate' => 0,
+                    'savings_rate_change' => 0,
+                    'rate_change_direction' => 'neutral',
+                    'monthly_salary' => 0,
+                    'total_goals' => 0,
+                    'target_savings_percentage' => 20,
+                    'target_savings_amount' => 0
+                ]
+            ]);
+            return;
+        }
+        
         // Get total savings from all goals
         $stmt = $conn->prepare("
             SELECT 
@@ -1213,24 +1248,58 @@ function getSavingsOverview($conn, $userId) {
         $stmt->execute();
         $prevMonthData = $stmt->get_result()->fetch_assoc();
         
-        // Get user's current salary for savings rate calculation
-        $stmt = $conn->prepare("
-            SELECT monthly_salary 
-            FROM salaries 
-            WHERE user_id = ? AND is_active = 1 
-            ORDER BY created_at DESC 
-            LIMIT 1
-        ");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $salaryData = $stmt->get_result()->fetch_assoc();
+        // Get user's budget allocation for target savings percentage
+        $targetSavingsPercentage = 20; // Default
+        $targetSavingsAmount = 0;
+        $monthlySalary = 0;
+        
+        if ($budgetTableExists) {
+            $stmt = $conn->prepare("
+                SELECT 
+                    monthly_salary,
+                    savings_percentage,
+                    savings_amount
+                FROM personal_budget_allocation 
+                WHERE user_id = ? AND is_active = 1 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $budgetData = $stmt->get_result()->fetch_assoc();
+            
+            if ($budgetData) {
+                $monthlySalary = floatval($budgetData['monthly_salary']);
+                $targetSavingsPercentage = floatval($budgetData['savings_percentage']);
+                $targetSavingsAmount = floatval($budgetData['savings_amount']);
+            }
+        }
+        
+        // Fallback to salary table if no budget allocation
+        if ($monthlySalary === 0) {
+            $stmt = $conn->prepare("
+                SELECT monthly_salary 
+                FROM salaries 
+                WHERE user_id = ? AND is_active = 1 
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $salaryData = $stmt->get_result()->fetch_assoc();
+            $monthlySalary = floatval($salaryData['monthly_salary'] ?? 0);
+            
+            // Calculate target savings amount if we have salary but no budget allocation
+            if ($monthlySalary > 0 && $targetSavingsAmount === 0) {
+                $targetSavingsAmount = ($monthlySalary * $targetSavingsPercentage) / 100;
+            }
+        }
         
         $totalSavings = floatval($totals['total_savings'] ?? 0);
         $emergencySavings = floatval($totals['emergency_savings'] ?? 0);
         $goalSavings = floatval($totals['goal_savings'] ?? 0);
         $monthlyContributions = floatval($monthlyData['monthly_contributions'] ?? 0);
         $prevMonthlyContributions = floatval($prevMonthData['prev_monthly_contributions'] ?? 0);
-        $monthlySalary = floatval($salaryData['monthly_salary'] ?? 0);
         
         // Calculate savings rate
         $savingsRate = 0;
@@ -1263,7 +1332,9 @@ function getSavingsOverview($conn, $userId) {
                 'savings_rate_change' => round($rateChange, 1),
                 'rate_change_direction' => $rateChangeDirection,
                 'monthly_salary' => $monthlySalary,
-                'total_goals' => intval($totals['total_goals'] ?? 0)
+                'total_goals' => intval($totals['total_goals'] ?? 0),
+                'target_savings_percentage' => round($targetSavingsPercentage, 1),
+                'target_savings_amount' => $targetSavingsAmount
             ]
         ]);
         

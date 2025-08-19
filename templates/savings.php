@@ -191,8 +191,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <div class="amount" id="savingsRateAmount">0%</div>
                         <div class="change" id="savingsRateChange">Loading...</div>
                         <div class="rate-comparison" id="rateComparison">
-                            <span class="comparison-item">Target: 20%</span>
-                            <span class="comparison-item">Average: 15%</span>
+                            <span class="comparison-item">Target: Loading...</span>
+                            <span class="comparison-item">Current: 0%</span>
                         </div>
                     </div>
                 </div>
@@ -1048,11 +1048,12 @@ class SavingsManager {
             savingsRateChange.className = `change ${data.rate_change_direction}`;
         }
 
-        // Update comparison targets (could be made dynamic in the future)
+        // Update comparison targets with dynamic data
         const rateComparison = document.getElementById('rateComparison');
         if (rateComparison) {
+            const targetPercentage = data.target_savings_percentage || 20;
             rateComparison.innerHTML = `
-                <span class="comparison-item">Target: 20%</span>
+                <span class="comparison-item">Target: ${targetPercentage}%</span>
                 <span class="comparison-item">Current: ${data.savings_rate}%</span>
             `;
         }
@@ -1080,71 +1081,6 @@ class SavingsManager {
         } catch (error) {
             console.error('Error loading savings overview:', error);
             this.updateSavingsOverviewDisplay(null);
-        }
-    }
-
-    updateSavingsOverviewDisplay(data) {
-        if (!data) {
-            // Show default/error state
-            const totalSavingsAmount = document.getElementById('totalSavingsAmount');
-            const totalSavingsChange = document.getElementById('totalSavingsChange');
-            const savingsBreakdown = document.getElementById('savingsBreakdown');
-            const savingsRateAmount = document.getElementById('savingsRateAmount');
-            const savingsRateChange = document.getElementById('savingsRateChange');
-            
-            if (totalSavingsAmount) totalSavingsAmount.textContent = '₵0.00';
-            if (totalSavingsChange) totalSavingsChange.textContent = 'No data available';
-            if (savingsBreakdown) savingsBreakdown.innerHTML = '<span class="breakdown-item">No savings yet</span>';
-            if (savingsRateAmount) savingsRateAmount.textContent = '0%';
-            if (savingsRateChange) savingsRateChange.textContent = 'No data available';
-            return;
-        }
-
-        // Update Total Savings
-        const totalSavingsAmount = document.getElementById('totalSavingsAmount');
-        if (totalSavingsAmount) {
-            totalSavingsAmount.textContent = `₵${data.total_savings.toFixed(2)}`;
-        }
-
-        const totalSavingsChange = document.getElementById('totalSavingsChange');
-        if (totalSavingsChange) {
-            const changeText = data.monthly_change >= 0 ? 
-                `+₵${data.monthly_change.toFixed(2)} this month` : 
-                `₵${data.monthly_change.toFixed(2)} this month`;
-            totalSavingsChange.textContent = changeText;
-            totalSavingsChange.className = `change ${data.change_direction}`;
-        }
-
-        const savingsBreakdown = document.getElementById('savingsBreakdown');
-        if (savingsBreakdown) {
-            savingsBreakdown.innerHTML = `
-                <span class="breakdown-item">Goals: ₵${data.goal_savings.toFixed(2)}</span>
-                <span class="breakdown-item">Emergency: ₵${data.emergency_savings.toFixed(2)}</span>
-            `;
-        }
-
-        // Update Savings Rate
-        const savingsRateAmount = document.getElementById('savingsRateAmount');
-        if (savingsRateAmount) {
-            savingsRateAmount.textContent = `${data.savings_rate}%`;
-        }
-
-        const savingsRateChange = document.getElementById('savingsRateChange');
-        if (savingsRateChange) {
-            const rateChangeText = data.savings_rate_change >= 0 ? 
-                `+${data.savings_rate_change}% from last month` : 
-                `${data.savings_rate_change}% from last month`;
-            savingsRateChange.textContent = rateChangeText;
-            savingsRateChange.className = `change ${data.rate_change_direction}`;
-        }
-
-        // Update comparison targets (could be made dynamic in the future)
-        const rateComparison = document.getElementById('rateComparison');
-        if (rateComparison) {
-            rateComparison.innerHTML = `
-                <span class="comparison-item">Target: 20%</span>
-                <span class="comparison-item">Current: ${data.savings_rate}%</span>
-            `;
         }
     }
 

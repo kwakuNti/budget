@@ -168,8 +168,13 @@ function enhancedSubmitAddCategory(formData) {
         }
     }
     
+    // Properly handle budget limit precision to avoid floating point errors
+    // Round to 2 decimal places and check if it's a whole number
+    const roundedAmount = Math.round(finalBudgetLimit * 100) / 100;
+    const budgetLimitValue = (roundedAmount % 1 === 0) ? roundedAmount.toString() : roundedAmount.toFixed(2);
+    
     // Update the form data with calculated amount
-    formData.set('budget_limit', finalBudgetLimit.toFixed(2));
+    formData.set('budget_limit', budgetLimitValue);
     
     return finalBudgetLimit;
 }
