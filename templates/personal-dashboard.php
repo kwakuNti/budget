@@ -16,7 +16,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Dashboard - Nkansah Budget Manager</title>
+    <title>Personal Dashboard </title>
     <link rel="stylesheet" href="../public/css/personal.css">
     <style>
         /* Enhanced Payday Countdown Styles */
@@ -872,6 +872,73 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 min-width: auto;
             }
         }
+
+        /* Budget Template Preview Modal styles */
+        .budget-template-hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: #fff;
+            border-radius: 16px;
+            padding: 16px 16px 12px 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        }
+        .budget-template-hero h4 {
+            margin: 0 0 6px 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+        .budget-template-hero small {
+            opacity: 0.95;
+        }
+        .allocation-bar {
+            display: flex;
+            width: 100%;
+            height: 14px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--border-color);
+            margin: 10px 0 4px 0;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .allocation-segment {
+            height: 100%;
+        }
+        .allocation-segment.needs { background: rgba(59,130,246,0.9); }
+        .allocation-segment.wants { background: rgba(245,158,11,0.9); }
+        .allocation-segment.savings { background: rgba(16,185,129,0.9); }
+        .allocation-legend {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .legend-item {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .legend-left { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 999px; }
+        .legend-dot.needs { background: #3b82f6; }
+        .legend-dot.wants { background: #f59e0b; }
+        .legend-dot.savings { background: #10b981; }
+        .legend-label { font-weight: 700; font-size: 0.9rem; }
+        .legend-amount { font-weight: 700; }
+        .pill {
+            background: rgba(255,255,255,0.18);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .empty-template-state { text-align: center; padding: 20px 12px; }
+        .empty-template-state h4 { margin: 10px 0 6px 0; }
+        .empty-template-state p { color: var(--text-secondary); margin: 0 0 12px 0; }
     </style>
 </head>
 <body>
@@ -1027,7 +1094,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <span class="btn-icon">💸</span>
                         Add Expense
                     </button>
-                    <button class="quick-btn" onclick="navigateToSalarySetup()">
+                    <button class="quick-btn" onclick="showBudgetTemplateViewModal()">
                         <span class="btn-icon">📊</span>
                         View Budget
                     </button>
@@ -1331,6 +1398,26 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <button type="submit" class="btn-primary">Add Expense</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Budget Template Preview Modal -->
+    <div id="budgetTemplateViewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Budget Template</h3>
+                <span class="close" onclick="closeModal('budgetTemplateViewModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="budgetTemplateViewContent" style="padding: 0 16px 16px 16px;">
+                <div style="text-align:center; padding: 24px 12px; color: var(--text-secondary);">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">⏳</div>
+                    <div>Loading template...</div>
+                </div>
+            </div>
+            <div class="modal-actions" style="display:flex; gap:8px; justify-content:flex-end; padding: 0 16px 16px 16px;">
+                <button type="button" class="btn-secondary" onclick="window.location.href='budget.php'">Open Budget Page</button>
+                <button type="button" class="btn-primary" onclick="closeModal('budgetTemplateViewModal')">Close</button>
+            </div>
         </div>
     </div>
 
@@ -2083,6 +2170,90 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         function navigateToSalarySetup() {
             window.location.href = 'budget.php';
+        }
+
+        // Budget Template View (Dashboard)
+        function showBudgetTemplateViewModal() {
+            const container = document.getElementById('budgetTemplateViewContent');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 24px 12px; color: var(--text-secondary);">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">⏳</div>
+                        <div>Loading template...</div>
+                    </div>
+                `;
+            }
+            showModal('budgetTemplateViewModal');
+            fetch('../api/budget_categories.php')
+                .then(r => r.json())
+                .then(data => {
+                    if (!container) return;
+                    if (data.success && data.allocation && (data.allocation.needs_percentage || data.allocation.wants_percentage || data.allocation.savings_percentage)) {
+                        const alloc = data.allocation;
+                        const monthly = parseFloat(alloc.monthly_salary || 0);
+                        const needsPct = parseFloat(alloc.needs_percentage || 0);
+                        const wantsPct = parseFloat(alloc.wants_percentage || 0);
+                        const savingsPct = parseFloat(alloc.savings_percentage || 0);
+                        const needsAmt = parseFloat(alloc.needs_amount || 0);
+                        const wantsAmt = parseFloat(alloc.wants_amount || 0);
+                        const savingsAmt = parseFloat(alloc.savings_amount || 0);
+                        const totalPct = needsPct + wantsPct + savingsPct;
+                        container.innerHTML = `
+                            <div class="budget-template-hero">
+                                <h4>Active Allocation ${totalPct === 100 ? '' : '<span class=\'pill\'>Not totaling 100%</span>'}</h4>
+                                <small>Based on monthly income of ₵${(monthly||0).toLocaleString()}</small>
+                                <div class="allocation-bar">
+                                    <div class="allocation-segment needs" style="width: ${Math.max(0, needsPct)}%"></div>
+                                    <div class="allocation-segment wants" style="width: ${Math.max(0, wantsPct)}%"></div>
+                                    <div class="allocation-segment savings" style="width: ${Math.max(0, savingsPct)}%"></div>
+                                </div>
+                                <div class="allocation-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-left">
+                                            <span class="legend-dot needs"></span>
+                                            <span class="legend-label">Needs</span>
+                                            <span class="pill">${needsPct}%</span>
+                                        </div>
+                                        <div class="legend-amount">₵${needsAmt.toLocaleString()}</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-left">
+                                            <span class="legend-dot wants"></span>
+                                            <span class="legend-label">Wants</span>
+                                            <span class="pill">${wantsPct}%</span>
+                                        </div>
+                                        <div class="legend-amount">₵${wantsAmt.toLocaleString()}</div>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-left">
+                                            <span class="legend-dot savings"></span>
+                                            <span class="legend-label">Savings</span>
+                                            <span class="pill">${savingsPct}%</span>
+                                        </div>
+                                        <div class="legend-amount">₵${savingsAmt.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="empty-template-state">
+                                <div style="font-size: 2.2rem;">📋</div>
+                                <h4>No budget template set</h4>
+                                <p>Apply a template (e.g., 50/30/20) to allocate your income across Needs, Wants, and Savings.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(() => {
+                    if (!container) return;
+                    container.innerHTML = `
+                        <div style="text-align:center; padding: 24px 12px; color: var(--text-secondary);">
+                            <div style="font-size: 2rem; margin-bottom: 8px;">❌</div>
+                            <div>Failed to load budget template. Try again from the Budget page.</div>
+                        </div>
+                    `;
+                });
         }
 
         // Snackbar notification function
