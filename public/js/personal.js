@@ -64,6 +64,10 @@ function populateDashboardWithData(data) {
     }
     
     // Update salary information
+    const totalMonthlyIncome = parseFloat(data.financial_overview?.monthly_income || 0);
+    const baseSalary = parseFloat(data.salary?.monthly_salary || 0);
+    const additionalIncome = totalMonthlyIncome - baseSalary;
+    
     if (data.salary && data.salary.monthly_salary) {
         console.log('Salary data found:', data.salary);
         const salaryDueInfo = document.getElementById('salaryDueInfo');
@@ -77,13 +81,17 @@ function populateDashboardWithData(data) {
                 month: 'short', 
                 year: 'numeric' 
             });
-            salaryDueInfo.innerHTML = `Your next salary (₵${parseFloat(data.salary.monthly_salary).toLocaleString()}) is due on <strong>${formattedDate}</strong>`;
+            salaryDueInfo.innerHTML = `Your next salary (₵${baseSalary.toLocaleString()}) is due on <strong>${formattedDate}</strong>`;
         }
         if (monthlySalary) {
-            monthlySalary.textContent = `Monthly Salary: ₵${parseFloat(data.salary.monthly_salary).toLocaleString()}`;
+            if (additionalIncome > 0) {
+                monthlySalary.textContent = `Total Monthly Income: ₵${totalMonthlyIncome.toLocaleString()} (₵${baseSalary.toLocaleString()} salary + ₵${additionalIncome.toLocaleString()} additional)`;
+            } else {
+                monthlySalary.textContent = `Monthly Income: ₵${totalMonthlyIncome.toLocaleString()}`;
+            }
         }
         if (salaryAllocationTitle) {
-            salaryAllocationTitle.textContent = `Salary Allocation & Budget Preview (₵${parseFloat(data.salary.monthly_salary).toLocaleString()})`;
+            salaryAllocationTitle.textContent = `Budget Allocation & Preview (₵${totalMonthlyIncome.toLocaleString()} total income)`;
         }
     } else {
         console.log('No salary data found - showing setup prompts');
@@ -95,10 +103,14 @@ function populateDashboardWithData(data) {
             salaryDueInfo.innerHTML = '📝 <strong>Please set up your salary information to get started</strong>';
         }
         if (monthlySalary) {
-            monthlySalary.textContent = 'Monthly Salary: Not set';
+            if (totalMonthlyIncome > 0) {
+                monthlySalary.textContent = `Total Monthly Income: ₵${totalMonthlyIncome.toLocaleString()} (Set up salary for better tracking)`;
+            } else {
+                monthlySalary.textContent = 'Monthly Income: Not set';
+            }
         }
         if (salaryAllocationTitle) {
-            salaryAllocationTitle.textContent = 'Budget Allocation & Preview (Set up salary first)';
+            salaryAllocationTitle.textContent = 'Budget Allocation & Preview (Set up income first)';
         }
     }
     
@@ -184,23 +196,22 @@ function updateFinancialOverviewCards(data) {
         if (budgetRemaining) budgetRemaining.textContent = 'No budget set';
     }
     
-    // Auto Savings (calculate from salary and savings rate)
-    if (autoSavings && data.financial_overview && data.salary && data.salary.monthly_salary) {
+    // Auto Savings (calculate from total monthly income and savings rate)
+    if (autoSavings && data.financial_overview && totalMonthlyIncome > 0) {
         const savingsRate = parseFloat(data.financial_overview.savings_rate) || 0;
-        const salaryAmount = parseFloat(data.salary.monthly_salary) || 0;
-        const savings = (salaryAmount * savingsRate) / 100;
+        const savings = (totalMonthlyIncome * savingsRate) / 100;
         autoSavings.textContent = `₵${savings.toLocaleString()}`;
         
         if (savingsPercentage) {
-            savingsPercentage.textContent = `${savingsRate.toFixed(0)}% of salary saved`;
+            savingsPercentage.textContent = `${savingsRate.toFixed(0)}% of total income saved`;
         }
     } else {
         if (autoSavings) autoSavings.textContent = '₵0.00';
         if (savingsPercentage) {
-            if (!data.salary || !data.salary.monthly_salary) {
-                savingsPercentage.textContent = 'Set up salary to enable auto-savings';
+            if (totalMonthlyIncome <= 0) {
+                savingsPercentage.textContent = 'Set up income to enable auto-savings';
             } else {
-                savingsPercentage.textContent = '0% of salary saved';
+                savingsPercentage.textContent = '0% of income saved';
             }
         }
     }
@@ -219,11 +230,10 @@ function updateBudgetAllocationPreview(allocations) {
     
     if (!budgetAllocationPreview) return;
     
-    // Calculate total budget from salary data
-    let totalSalary = 0;
-    if (allocations.length > 0) {
-        totalSalary = allocations.reduce((sum, allocation) => sum + (parseFloat(allocation.allocated_amount) || 0), 0);
-    }
+    // Calculate total monthly income from window variables
+    const salary = parseFloat(window.userSalary) || 0;
+    const additionalIncome = parseFloat(window.userAdditionalIncome) || 0;
+    const totalMonthlyIncome = salary + additionalIncome;
     
     if (allocations.length === 0) {
         // Hide the preview section when no data
@@ -233,9 +243,9 @@ function updateBudgetAllocationPreview(allocations) {
     
     budgetAllocationPreview.style.display = 'block';
     
-    // Update total display
+    // Update total display to show it's based on total monthly income
     if (previewBasedOnSalary) {
-        previewBasedOnSalary.textContent = `₵${totalSalary.toLocaleString()}`;
+        previewBasedOnSalary.textContent = `₵${totalMonthlyIncome.toLocaleString()}`;
     }
     if (previewTotalAllocated) {
         const totalPercentage = allocations.reduce((sum, allocation) => sum + (allocation.percentage || 0), 0);
@@ -465,15 +475,16 @@ function updateInsights(data) {
 
 function generateInsights(data) {
     const insights = [];
+    const totalMonthlyIncome = parseFloat(data.financial_overview?.monthly_income || 0);
     
-    // Check if user needs to set up salary first
-    if (!data.salary || !data.salary.monthly_salary) {
+    // Check if user needs to set up income first
+    if (totalMonthlyIncome <= 0) {
         insights.push({
             type: 'info',
             icon: '🚀',
             title: 'Get Started',
-            description: 'Set up your monthly salary and budget allocation to start tracking your personal finances effectively.',
-            actionText: 'Set Up Salary',
+            description: 'Set up your monthly income and budget allocation to start tracking your personal finances effectively.',
+            actionText: 'Set Up Income',
             action: 'showSalarySetupModal()'
         });
         return insights;
@@ -500,7 +511,7 @@ function generateInsights(data) {
     }
     
     // Savings opportunity insight
-    if (data.financial_overview && data.salary) {
+    if (data.financial_overview && totalMonthlyIncome > 0) {
         const savingsRate = parseFloat(data.financial_overview.savings_rate) || 0;
         
         if (savingsRate < 20) {
@@ -508,7 +519,7 @@ function generateInsights(data) {
                 type: 'suggestion',
                 icon: '💡',
                 title: 'Savings Opportunity',
-                description: `You're currently saving ${savingsRate.toFixed(0)}% of your salary. Financial experts recommend saving at least 20% for better financial health.`,
+                description: `You're currently saving ${savingsRate.toFixed(0)}% of your total income. Financial experts recommend saving at least 20% for better financial health.`,
                 actionText: 'Adjust Budget',
                 action: 'showBudgetModal()'
             });
@@ -517,14 +528,14 @@ function generateInsights(data) {
                 type: 'success',
                 icon: '🎯',
                 title: 'Great Savings Rate!',
-                description: `You're saving ${savingsRate.toFixed(0)}% of your salary, which exceeds the recommended 20%. Keep up the excellent work!`,
+                description: `You're saving ${savingsRate.toFixed(0)}% of your total income, which exceeds the recommended 20%. Keep up the excellent work!`,
                 actionText: 'View Goals'
             });
         }
     }
     
-    // Default insight if no specific insights and salary is set
-    if (insights.length === 0 && data.salary && data.salary.monthly_salary) {
+    // Default insight if no specific insights and income is set
+    if (insights.length === 0 && totalMonthlyIncome > 0) {
         insights.push({
             type: 'info',
             icon: '💡',
@@ -1409,10 +1420,14 @@ document.head.appendChild(style);
 // Navigation functions
 function navigateToSalarySetup() {
     // Pass current dashboard state to salary setup page
-    const salaryAmount = document.getElementById('monthlySalary')?.textContent?.replace(/[^\d.]/g, '') || '';
+    const totalIncomeText = document.getElementById('monthlySalary')?.textContent || '';
+    const totalIncomeMatch = totalIncomeText.match(/₵([\d,]+(?:\.\d{2})?)/);
+    const totalIncomeAmount = totalIncomeMatch ? totalIncomeMatch[1].replace(',', '') : '';
+    
     const params = new URLSearchParams();
-    if (salaryAmount) {
-        params.append('amount', salaryAmount);
+    if (totalIncomeAmount) {
+        params.append('amount', totalIncomeAmount);
+        params.append('type', 'total_income');
     }
     params.append('from', 'dashboard');
     

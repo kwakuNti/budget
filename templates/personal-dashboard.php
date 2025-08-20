@@ -1071,8 +1071,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 
                 <div class="salary-info-hero">
                     <div class="salary-display">
-                        <div class="salary-amount-hero" id="monthlySalaryHero">Monthly Salary: ₵0.00</div>
-                        <button class="setup-salary-btn-hero" onclick="window.location.href='salary.php'">⚙️ Setup Salary</button>
+                        <div class="salary-amount-hero" id="monthlySalaryHero">Monthly Income: ₵0.00</div>
+                        <button class="setup-salary-btn-hero" onclick="window.location.href='salary.php'">⚙️ Setup Income</button>
                         <button class="setup-salary-btn-hero" onclick="showSalaryPaidModal()">✅ I've Been Paid</button>
                     </div>
                 </div>

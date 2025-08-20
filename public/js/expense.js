@@ -1,3 +1,136 @@
+// Animation function for counting numbers
+function animateNumber(element, start, end, duration = 2000, prefix = '', suffix = '') {
+    if (!element) return;
+    
+    const startTime = performance.now();
+    const range = end - start;
+    
+    function updateNumber(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = start + (range * easeOutQuart);
+        
+        // Format number with appropriate decimal places
+        const formattedNumber = current.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        element.textContent = prefix + formattedNumber + suffix;
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateNumber);
+        } else {
+            // Ensure final value is exact
+            const finalFormatted = end.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            element.textContent = prefix + finalFormatted + suffix;
+        }
+    }
+    
+    requestAnimationFrame(updateNumber);
+}
+
+// Function to load fresh expense data and animate
+async function loadExpenseData() {
+    try {
+        const response = await fetch('../api/expense_data.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update global data
+            window.expenseStats = data.expense_stats;
+            window.recentExpenses = data.recent_expenses;
+            expensesData = data.recent_expenses;
+            
+            // Start animations with fresh data
+            setTimeout(() => {
+                animateExpenseOverview();
+            }, 300);
+            
+            // Update charts with fresh data
+            updateChartsWithFreshData(data);
+            
+        } else {
+            console.error('Failed to load expense data:', data.message);
+        }
+        
+        // Add visibility change listener for refresh when returning to page
+        if (typeof document.visibilityState !== 'undefined') {
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // Page became visible again, refresh data
+                    loadExpenseData();
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading expense data:', error);
+    }
+}
+
+// Function to animate the expense overview cards
+function animateExpenseOverview() {
+    const stats = window.expenseStats || {};
+    
+    // Animate Total Expenses
+    const totalExpensesEl = document.getElementById('totalExpenses');
+    if (totalExpensesEl) {
+        animateNumber(totalExpensesEl, 0, parseFloat(stats.total_expenses) || 0, 2500);
+    }
+    
+    // Animate Current Month Expenses
+    const currentMonthEl = document.getElementById('currentMonthExpenses');
+    if (currentMonthEl) {
+        animateNumber(currentMonthEl, 0, parseFloat(stats.this_month_expenses) || 0, 2500);
+    }
+    
+    // Animate Average Monthly Expenses
+    const avgMonthlyEl = document.getElementById('avgMonthlyExpenses');
+    if (avgMonthlyEl) {
+        animateNumber(avgMonthlyEl, 0, parseFloat(stats.average_monthly) || 0, 2500);
+    }
+    
+    // Animate top category (just text, no number animation needed)
+    const largestCategoryEl = document.getElementById('largestCategory');
+    if (largestCategoryEl && stats.top_category) {
+        largestCategoryEl.textContent = stats.top_category;
+    }
+}
+
+// Function to update chart data after expense changes
+function updateChartsData() {
+    // Placeholder for chart updates
+    // You could fetch fresh chart data here and update the charts
+    console.log('Updating charts data...');
+}
+
+// Function to update charts with fresh data from API
+function updateChartsWithFreshData(data) {
+    try {
+        // Update expense trends chart
+        if (expenseTrendsChart && data.expense_trends_data) {
+            expenseTrendsChart.data = data.expense_trends_data;
+            expenseTrendsChart.update();
+        }
+        
+        // Update category chart
+        if (categoryChart && data.category_data) {
+            categoryChart.data = data.category_data;
+            categoryChart.update();
+        }
+        
+        console.log('Charts updated with fresh data');
+    } catch (error) {
+        console.error('Error updating charts:', error);
+    }
+}
+
 // Sidebar functionality
 const sidebar = document.getElementById('sidebar');
 const toggleBtn = document.getElementById('sidebarToggle');
@@ -405,8 +538,10 @@ function submitExpense(category, amount, description, date, paymentMethod, notes
     .then(data => {
         if (data.success) {
             showSnackbar(`₵${amount.toFixed(2)} expense added successfully!`, 'success');
-            // Reload the page to show updated data
-            setTimeout(() => location.reload(), 1500);
+            // Refresh data and animations instead of full page reload
+            setTimeout(() => {
+                loadExpenseData();
+            }, 500);
         } else {
             showSnackbar(data.message || 'Error adding expense', 'error');
         }
@@ -648,6 +783,9 @@ window.addEventListener('resize', () => {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
+    // Start expense data loading and animations
+    loadExpenseData();
+    
     // Show welcome message
     setTimeout(() => {
         if (expensesData.length === 0) {

@@ -77,11 +77,11 @@ A comprehensive family budget management system built with PHP, MySQL, and JavaS
 
 4. **Web Server Setup**
    - Place the project in your web server document root
-   - For MAMP: `/Applications/MAMP/htdocs/budget-app/`
-   - For XAMPP: `C:\xampp\htdocs\budget-app\`
+   - For MAMP: `/Applications/MAMP/htdocs/budget/`
+   - For XAMPP: `C:\xampp\htdocs\budget\`
 
 5. **Access the Application**
-   - Open your browser and navigate to: `http://localhost/budget-app/`
+   - Open your browser and navigate to: `http://localhost/budget/`
    - Default login credentials:
      - Username: `nkansah_admin`
      - Password: `family123`
@@ -89,7 +89,7 @@ A comprehensive family budget management system built with PHP, MySQL, and JavaS
 ## Project Structure
 
 ```
-budget-app/
+budget/
 ├── actions/           # Form handlers and backend actions
 ├── ajax/             # AJAX endpoints for dynamic content
 ├── api/              # REST API endpoints

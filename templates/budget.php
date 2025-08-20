@@ -646,11 +646,262 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <!-- Snackbar -->
     <div id="snackbar"></div>
 
+    <!-- Add Expense Modal -->
+    <div id="addExpenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Expense</h3>
+                <span class="close" onclick="closeModal('addExpenseModal')">&times;</span>
+            </div>
+            <form class="modal-form" id="addExpenseForm">
+                <div class="form-group">
+                    <label>Amount (₵)</label>
+                    <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label>Budget Category</label>
+                    <select name="category_id" required>
+                        <option value="">Loading categories...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" placeholder="What was this for?" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="expense_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select name="payment_method">
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="mobile_money">Mobile Money</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes (Optional)</label>
+                    <input type="text" name="notes" placeholder="Additional notes">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addExpenseModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Load saved theme on page load
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('personalTheme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+
+        // Animated number counting function
+        function animateNumber(element, start, end, duration = 2000, prefix = '', suffix = '') {
+            if (!element) return;
+            
+            const startTime = performance.now();
+            const difference = end - start;
+            
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function for smooth animation
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = start + (difference * easeOutQuart);
+                
+                if (suffix === '%') {
+                    element.textContent = prefix + Math.round(current) + suffix;
+                } else {
+                    element.textContent = prefix + current.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + suffix;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                }
+            }
+            
+            requestAnimationFrame(step);
+        }
+
+        // Snackbar notification function
+        function showSnackbar(message, type = 'info') {
+            // Remove existing snackbar if any
+            const existingSnackbar = document.querySelector('.snackbar');
+            if (existingSnackbar) {
+                existingSnackbar.remove();
+            }
+
+            // Create new snackbar
+            const snackbar = document.createElement('div');
+            snackbar.className = `snackbar ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            snackbar.innerHTML = `
+                <span class="snackbar-icon">${icons[type] || icons.info}</span>
+                <span class="snackbar-message">${message}</span>
+            `;
+            
+            document.body.appendChild(snackbar);
+            
+            // Show snackbar
+            setTimeout(() => snackbar.classList.add('show'), 100);
+            
+            // Hide snackbar after 4 seconds
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+                setTimeout(() => snackbar.remove(), 300);
+            }, 4000);
+        }
+
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Add Expense Modal Functions
+        function showAddExpenseModal() {
+            loadExpenseCategories();
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('#addExpenseModal input[name="expense_date"]').value = today;
+            showModal('addExpenseModal');
+        }
+
+        // View Expenses function - redirect to expense page
+        function viewExpenses() {
+            window.location.href = 'personal-expense.php';
+        }
+
+        // Load categories for expense form
+        function loadExpenseCategories() {
+            fetch('../api/budget_categories.php')
+                .then(response => response.json())
+                .then(data => {
+                    const categorySelect = document.querySelector('#addExpenseModal select[name="category_id"]');
+                    categorySelect.innerHTML = '<option value="">Select a category</option>';
+                    
+                    if (data.success && data.categories) {
+                        data.categories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.id;
+                            option.textContent = `${category.category_name} (₵${parseFloat(category.budget_limit || 0).toFixed(2)} budget)`;
+                            categorySelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading categories:', error);
+                    showSnackbar('Failed to load categories', 'error');
+                });
+        }
+
+        // Handle Add Expense Form Submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const addExpenseForm = document.getElementById('addExpenseForm');
+            if (addExpenseForm) {
+                addExpenseForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    const originalText = submitButton.textContent;
+                    
+                    // Show loading state
+                    submitButton.textContent = 'Adding...';
+                    submitButton.disabled = true;
+                    
+                    fetch('../actions/personal_expense_handler.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            showSnackbar('Expense added successfully!', 'success');
+                            closeModal('addExpenseModal');
+                            this.reset();
+                            
+                            // Refresh budget data with animation
+                            refreshBudgetData();
+                        } else {
+                            showSnackbar(result.message || 'Failed to add expense', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showSnackbar('Failed to add expense. Please try again.', 'error');
+                    })
+                    .finally(() => {
+                        submitButton.textContent = originalText;
+                        submitButton.disabled = false;
+                    });
+                });
+            }
+        });
+
+        // Refresh budget data with animation
+        function refreshBudgetData() {
+            // This function will be enhanced by the existing budget.js
+            // For now, we'll trigger a reload of the budget data
+            if (typeof loadBudgetData === 'function') {
+                loadBudgetData();
+            } else {
+                // Fallback: reload the page
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        }
+
+        // Enhance budget numbers with animation when data loads
+        function animateBudgetNumbers(data) {
+            if (data && data.overview) {
+                const overview = data.overview;
+                
+                // Animate the overview cards
+                if (document.getElementById('totalIncome')) {
+                    animateNumber(document.getElementById('totalIncome'), 0, parseFloat(overview.total_income || 0), 1500, '₵');
+                }
+                if (document.getElementById('plannedBudget')) {
+                    animateNumber(document.getElementById('plannedBudget'), 0, parseFloat(overview.total_planned || 0), 1500, '₵');
+                }
+                if (document.getElementById('actualSpending')) {
+                    animateNumber(document.getElementById('actualSpending'), 0, parseFloat(overview.total_spent || 0), 1500, '₵');
+                }
+                if (document.getElementById('budgetPerformance')) {
+                    animateNumber(document.getElementById('budgetPerformance'), 0, parseFloat(overview.budget_performance || 0), 1500, '', '%');
+                }
+            }
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
         });
     </script>
     <script src="../public/js/budget.js"></script>

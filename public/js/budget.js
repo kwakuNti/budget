@@ -17,10 +17,13 @@ function formatCurrency(amount) {
     }
     
     // Convert to number and ensure it's valid
-    const numAmount = parseFloat(amount);
+    let numAmount = parseFloat(amount);
     if (isNaN(numAmount)) {
         return '₵0.00';
     }
+    
+    // Round to 2 decimal places to avoid floating point precision issues
+    numAmount = Math.round(numAmount * 100) / 100;
     
     return `₵${numAmount.toFixed(2)}`;
 }
@@ -40,28 +43,39 @@ function formatPercent(value) {
     return `${numValue.toFixed(1)}%`;
 }
 
-function showSnackbar(message, type = '') {
-    showNotification(message, type);
-}
-
-function showNotification(message, type = 'info') {
-    // Create notification element if it doesn't exist
-    let notification = document.getElementById('budgetNotification');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'budgetNotification';
-        notification.className = 'notification';
-        document.body.appendChild(notification);
+function showSnackbar(message, type = 'info') {
+    // Remove existing snackbar if any
+    const existingSnackbar = document.querySelector('.snackbar');
+    if (existingSnackbar) {
+        existingSnackbar.remove();
     }
+
+    // Create new snackbar
+    const snackbar = document.createElement('div');
+    snackbar.className = `snackbar ${type}`;
     
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notification.style.display = 'block';
+    const icons = {
+        success: '✓',
+        error: '✗',
+        warning: '⚠',
+        info: 'ℹ'
+    };
     
-    // Auto-hide after 3 seconds
+    snackbar.innerHTML = `
+        <span class="snackbar-icon">${icons[type] || icons.info}</span>
+        <span class="snackbar-message">${message}</span>
+    `;
+    
+    document.body.appendChild(snackbar);
+    
+    // Show snackbar
+    setTimeout(() => snackbar.classList.add('show'), 100);
+    
+    // Hide snackbar after 4 seconds
     setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000);
+        snackbar.classList.remove('show');
+        setTimeout(() => snackbar.remove(), 300);
+    }, 4000);
 }
 
 // Budget input type toggle
@@ -169,14 +183,13 @@ function enhancedSubmitAddCategory(formData) {
     }
     
     // Properly handle budget limit precision to avoid floating point errors
-    // Round to 2 decimal places and check if it's a whole number
-    const roundedAmount = Math.round(finalBudgetLimit * 100) / 100;
-    const budgetLimitValue = (roundedAmount % 1 === 0) ? roundedAmount.toString() : roundedAmount.toFixed(2);
+    // Use parseFloat and toFixed to ensure proper decimal precision
+    const budgetLimitValue = parseFloat(finalBudgetLimit.toFixed(2));
     
     // Update the form data with calculated amount
-    formData.set('budget_limit', budgetLimitValue);
+    formData.set('budget_limit', budgetLimitValue.toString());
     
-    return finalBudgetLimit;
+    return budgetLimitValue;
 }
 
 // Budget Period Management
@@ -351,20 +364,42 @@ function updateAllocationDisplay(allocation) {
 }
 
 function updateBudgetSummary(data) {
-    let totalBudgeted = 0;
-    let totalSpent = 0;
+    // Use the summary data from the new API structure
+    const summary = data?.summary || {};
+    const totalIncome = data?.total_monthly_income || 0;
+    const totalBudgeted = summary.total_planned || 0;
+    const totalSpent = summary.total_actual || 0;
+    const budgetPerformance = summary.budget_performance || 0;
     
-    if (data && data.categories) {
-        data.categories.forEach(category => {
-            totalBudgeted += category.budget_amount || 0;
-            totalSpent += category.spent_amount || 0;
-        });
+    // Update overview cards with animation if animateNumber function exists
+    if (typeof animateNumber === 'function') {
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const plannedBudgetEl = document.getElementById('plannedBudget');
+        const actualSpendingEl = document.getElementById('actualSpending');
+        const budgetPerformanceEl = document.getElementById('budgetPerformance');
+        
+        if (totalIncomeEl) animateNumber(totalIncomeEl, 0, totalIncome, 1500, '₵');
+        if (plannedBudgetEl) animateNumber(plannedBudgetEl, 0, totalBudgeted, 1500, '₵');
+        if (actualSpendingEl) animateNumber(actualSpendingEl, 0, totalSpent, 1500, '₵');
+        if (budgetPerformanceEl) animateNumber(budgetPerformanceEl, 0, budgetPerformance, 1500, '', '%');
+    } else {
+        // Fallback to direct update
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const plannedBudgetEl = document.getElementById('plannedBudget');
+        const actualSpendingEl = document.getElementById('actualSpending');
+        const budgetPerformanceEl = document.getElementById('budgetPerformance');
+        
+        if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(totalIncome);
+        if (plannedBudgetEl) plannedBudgetEl.textContent = formatCurrency(totalBudgeted);
+        if (actualSpendingEl) actualSpendingEl.textContent = formatCurrency(totalSpent);
+        if (budgetPerformanceEl) budgetPerformanceEl.textContent = formatPercent(budgetPerformance);
     }
     
+    // Update other summary displays
     const summaryElements = {
         'totalBudgeted': totalBudgeted,
         'totalSpent': totalSpent,
-        'totalVariance': totalBudgeted - totalSpent
+        'totalVariance': summary.total_variance || (totalBudgeted - totalSpent)
     };
     
     Object.keys(summaryElements).forEach(key => {
@@ -374,9 +409,44 @@ function updateBudgetSummary(data) {
         }
     });
     
+    // Update budget status text
+    updateBudgetStatusText(totalIncome, totalBudgeted, totalSpent);
+    
     // Also update the main budget summary if budgetData is available
     if (budgetData) {
         updateMainBudgetSummary();
+    }
+}
+
+// Add function to update status text
+function updateBudgetStatusText(income, budgeted, spent) {
+    const budgetSurplusEl = document.getElementById('budgetSurplus');
+    const spendingVarianceEl = document.getElementById('spendingVariance');
+    const performanceLabelEl = document.getElementById('performanceLabel');
+    
+    if (budgetSurplusEl) {
+        const surplus = income - budgeted;
+        budgetSurplusEl.textContent = surplus >= 0 ? `₵${surplus.toFixed(2)} surplus` : `₵${Math.abs(surplus).toFixed(2)} over budget`;
+        budgetSurplusEl.className = surplus >= 0 ? 'change positive' : 'change negative';
+    }
+    
+    if (spendingVarianceEl) {
+        const variance = budgeted - spent;
+        spendingVarianceEl.textContent = variance >= 0 ? `₵${variance.toFixed(2)} under budget` : `₵${Math.abs(variance).toFixed(2)} over budget`;
+        spendingVarianceEl.className = variance >= 0 ? 'change positive' : 'change negative';
+    }
+    
+    if (performanceLabelEl) {
+        const performanceRatio = budgeted > 0 ? (spent / budgeted) : 0;
+        if (performanceRatio <= 0.8) {
+            performanceLabelEl.textContent = 'Excellent control';
+        } else if (performanceRatio <= 0.95) {
+            performanceLabelEl.textContent = 'Good spending';
+        } else if (performanceRatio <= 1.0) {
+            performanceLabelEl.textContent = 'On track';
+        } else {
+            performanceLabelEl.textContent = 'Over budget';
+        }
     }
 }
 
@@ -605,32 +675,26 @@ async function processExport(exportData) {
 // API Functions
 async function loadBudgetData() {
     try {
-        // Load personal dashboard data for financial overview
-        const dashboardResponse = await fetch('../api/personal_dashboard_data.php');
-        const dashboardData = await dashboardResponse.json();
+        // Load budget data from the unified API
+        const response = await fetch('../api/budget_data.php');
+        const data = await response.json();
         
-        // Load budget categories with allocation data
-        const categoriesResponse = await fetch('../api/budget_categories.php');
-        const categoriesData = await categoriesResponse.json();
-        
-        if (dashboardData.success && categoriesData.success) {
-            // Store budget allocation data
-            budgetAllocation = categoriesData.allocation;
+        if (data.success) {
+            // Store data globally
+            budgetData = data;
+            budgetAllocation = data.budget_allocation;
             
-            // Combine data into expected format
-            budgetData = {
-                total_monthly_income: dashboardData.financial_overview?.monthly_income || (budgetAllocation?.monthly_salary || 0),
-                categories: categoriesData.categories || [],
-                allocation: categoriesData.allocation,
-                category_totals: categoriesData.category_totals || {},
-                summary: calculateBudgetSummary(categoriesData.categories || [], dashboardData.financial_overview || {}, categoriesData.allocation)
-            };
+            // Reset numbers to 0 before animating
+            resetBudgetDisplay();
             
-            updateBudgetOverview();
-            renderBudgetCategories();
-            updateMainBudgetSummary();
+            // Start animations after a short delay
+            setTimeout(() => {
+                updateBudgetOverview();
+                renderBudgetCategories();
+                updateMainBudgetSummary();
+            }, 200);
         } else {
-            throw new Error(categoriesData.message || dashboardData.message || 'Failed to load budget data');
+            throw new Error(data.message || 'Failed to load budget data');
         }
     } catch (error) {
         console.error('Error loading budget data:', error);
@@ -639,10 +703,27 @@ async function loadBudgetData() {
     }
 }
 
+// Function to reset budget display to 0 for animation
+function resetBudgetDisplay() {
+    const elements = [
+        'totalIncome',
+        'plannedBudget', 
+        'actualSpending',
+        'budgetPerformance'
+    ];
+    
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = '0.00';
+        }
+    });
+}
+
 // Helper function to calculate budget summary with real spending and allocation
 function calculateBudgetSummary(categories, financialOverview, allocation) {
     const totalPlanned = categories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0);
-    const totalSpent = categories.reduce((sum, cat) => sum + parseFloat(cat.current_month_spent || 0), 0);
+    const totalSpent = categories.reduce((sum, cat) => sum + parseFloat(cat.actual_spent || 0), 0);
     const totalIncome = allocation?.monthly_salary || financialOverview.monthly_income || 0;
     const remainingBudget = totalPlanned - totalSpent;
     const availableBalance = totalIncome - totalPlanned;
@@ -671,7 +752,7 @@ function calculateCategoryTypeTotals(categories) {
     types.forEach(type => {
         const typeCategories = categories.filter(cat => cat.category_type === type);
         const planned = typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0);
-        const spent = typeCategories.reduce((sum, cat) => sum + parseFloat(cat.current_month_spent || 0), 0);
+        const spent = typeCategories.reduce((sum, cat) => sum + parseFloat(cat.actual_spent || 0), 0);
         
         // Get allocation data from the budget allocation if available
         const allocatedAmount = totals.allocated || 0;
@@ -743,9 +824,9 @@ function selectTemplate(needsPercent, wantsPercent, savingsPercent, templateName
         return;
     }
     
-    const needsAmount = Math.round((monthlyIncome * needsPercent) / 100);
-    const wantsAmount = Math.round((monthlyIncome * wantsPercent) / 100);
-    const savingsAmount = Math.round((monthlyIncome * savingsPercent) / 100);
+    const needsAmount = parseFloat(((monthlyIncome * needsPercent) / 100).toFixed(2));
+    const wantsAmount = parseFloat(((monthlyIncome * wantsPercent) / 100).toFixed(2));
+    const savingsAmount = parseFloat(((monthlyIncome * savingsPercent) / 100).toFixed(2));
     
     // Update the template preview
     const templatePreview = document.getElementById('templatePreview');
@@ -1311,45 +1392,55 @@ async function deleteCategory(categoryId) {
 function updateBudgetOverview() {
     if (!budgetData) return;
 
-    const totalIncomeEl = document.getElementById('totalIncome');
-    const plannedBudgetEl = document.getElementById('plannedBudget');
-    const actualSpendingEl = document.getElementById('actualSpending');
-    const budgetPerformanceEl = document.getElementById('budgetPerformance');
-    const budgetSurplusEl = document.getElementById('budgetSurplus');
-    const spendingVarianceEl = document.getElementById('spendingVariance');
-    const performanceLabelEl = document.getElementById('performanceLabel');
+    const summary = budgetData.summary || {};
+    const totalIncome = budgetData.total_monthly_income || 0;
+    const totalPlanned = summary.total_planned || 0;
+    const totalActual = summary.total_actual || 0;
+    const budgetPerformance = summary.budget_performance || 0;
 
-    if (totalIncomeEl) {
-        totalIncomeEl.textContent = formatCurrency(budgetData.total_monthly_income);
-    }
-
-    if (plannedBudgetEl) {
-        plannedBudgetEl.textContent = formatCurrency(budgetData.summary.total_planned);
-    }
-
-    if (actualSpendingEl) {
-        actualSpendingEl.textContent = formatCurrency(budgetData.summary.total_actual);
-    }
-
-    if (budgetPerformanceEl) {
-        budgetPerformanceEl.textContent = budgetData.summary.budget_performance + '%';
+    // Update overview cards with animation if animateNumber function exists
+    if (typeof animateNumber === 'function') {
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const plannedBudgetEl = document.getElementById('plannedBudget');
+        const actualSpendingEl = document.getElementById('actualSpending');
+        const budgetPerformanceEl = document.getElementById('budgetPerformance');
+        
+        if (totalIncomeEl) animateNumber(totalIncomeEl, 0, totalIncome, 1500, '₵');
+        if (plannedBudgetEl) animateNumber(plannedBudgetEl, 0, totalPlanned, 1500, '₵');
+        if (actualSpendingEl) animateNumber(actualSpendingEl, 0, totalActual, 1500, '₵');
+        if (budgetPerformanceEl) animateNumber(budgetPerformanceEl, 0, budgetPerformance, 1500, '', '%');
+    } else {
+        // Fallback to direct update
+        const totalIncomeEl = document.getElementById('totalIncome');
+        const plannedBudgetEl = document.getElementById('plannedBudget');
+        const actualSpendingEl = document.getElementById('actualSpending');
+        const budgetPerformanceEl = document.getElementById('budgetPerformance');
+        
+        if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(totalIncome);
+        if (plannedBudgetEl) plannedBudgetEl.textContent = formatCurrency(totalPlanned);
+        if (actualSpendingEl) actualSpendingEl.textContent = formatCurrency(totalActual);
+        if (budgetPerformanceEl) budgetPerformanceEl.textContent = formatPercent(budgetPerformance);
     }
 
     // Update variance displays
-    const surplus = budgetData.summary.available_balance;
+    const budgetSurplusEl = document.getElementById('budgetSurplus');
+    const spendingVarianceEl = document.getElementById('spendingVariance');
+    const performanceLabelEl = document.getElementById('performanceLabel');
+    
+    const surplus = summary.available_balance || 0;
     if (budgetSurplusEl) {
         budgetSurplusEl.textContent = surplus >= 0 ? `₵${surplus.toFixed(2)} surplus` : `₵${Math.abs(surplus).toFixed(2)} deficit`;
         budgetSurplusEl.className = surplus >= 0 ? 'change positive' : 'change negative';
     }
 
-    const variance = budgetData.summary.total_variance;
+    const variance = summary.total_variance || 0;
     if (spendingVarianceEl) {
         spendingVarianceEl.textContent = variance >= 0 ? `₵${variance.toFixed(2)} under budget` : `₵${Math.abs(variance).toFixed(2)} over budget`;
         spendingVarianceEl.className = variance >= 0 ? 'change positive' : 'change negative';
     }
 
     if (performanceLabelEl) {
-        const performance = budgetData.summary.budget_performance;
+        const performance = summary.budget_performance || 0;
         if (performance >= 95) {
             performanceLabelEl.textContent = 'Excellent tracking';
         } else if (performance >= 80) {
@@ -1383,12 +1474,24 @@ function updateAppliedTemplateDisplay() {
     
     // Check if we have allocation data from the API
     if (budgetAllocation && budgetAllocation.needs_percentage) {
+        const totalIncome = budgetAllocation.total_monthly_income || budgetAllocation.monthly_income || budgetAllocation.monthly_salary || 0;
+        const baseSalary = budgetAllocation.base_salary || 0;
+        const additionalIncome = budgetAllocation.additional_income || 0;
+        
+        let incomeBreakdown = '';
+        if (additionalIncome > 0) {
+            incomeBreakdown = `<small>Salary: ${formatCurrency(baseSalary)} + Additional: ${formatCurrency(additionalIncome)}</small>`;
+        } else {
+            incomeBreakdown = `<small>Based on salary only</small>`;
+        }
+        
         templateInfoEl.innerHTML = `
             <div class="template-banner">
                 <div class="template-icon">📊</div>
                 <div class="template-details">
                     <h4>Active Budget Allocation</h4>
-                    <p>Based on monthly income of ${formatCurrency(budgetAllocation.monthly_income || 0)}</p>
+                    <p>Based on total monthly income of ${formatCurrency(totalIncome)}</p>
+                    ${incomeBreakdown}
                     <div class="template-allocations">
                         <span class="allocation needs">Needs: ${budgetAllocation.needs_percentage}% (${formatCurrency(budgetAllocation.needs_amount || 0)})</span>
                         <span class="allocation wants">Wants: ${budgetAllocation.wants_percentage}% (${formatCurrency(budgetAllocation.wants_amount || 0)})</span>
@@ -1458,21 +1561,33 @@ function renderBudgetCategories() {
         const typeCategories = budgetData.categories.filter(cat => cat.category_type === type);
         const typeInfo = categoryTypes[type];
         
-        // Get totals from the API data or calculate them
-        let typeTotals = budgetData.category_totals?.[type] || {
-            budgeted: 0,
-            spent: 0,
-            allocated: 0
+        // Get totals from the API data (category_type_totals from budget_data.php)
+        let typeTotals = budgetData.category_type_totals?.[type] || {
+            planned: 0,
+            actual: 0,
+            count: 0,
+            variance: 0,
+            progress_percentage: 0
         };
         
-        // If we don't have API totals, calculate them
-        if (!budgetData.category_totals) {
+        // If we don't have API totals, calculate them from categories
+        if (!budgetData.category_type_totals) {
             typeTotals = {
-                budgeted: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0),
-                spent: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.current_month_spent || 0), 0),
-                allocated: 0 // Will be set below if allocation exists
+                planned: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0),
+                actual: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.actual_spent || 0), 0),
+                count: typeCategories.length,
+                variance: 0,
+                progress_percentage: 0
             };
+            typeTotals.variance = typeTotals.planned - typeTotals.actual;
+            typeTotals.progress_percentage = typeTotals.planned > 0 ? 
+                Math.round((typeTotals.actual / typeTotals.planned) * 100) : 0;
         }
+        
+        // For backward compatibility, map to old field names that the rest of the function expects
+        typeTotals.budgeted = typeTotals.planned;
+        typeTotals.spent = typeTotals.actual;
+        typeTotals.allocated = 0; // Will be set below if allocation exists
         
         // Add allocation percentage info if available
         if (budgetAllocation) {
@@ -1644,13 +1759,23 @@ function createCategoryTable(categories) {
 
     categories.forEach(category => {
         const budgetLimit = parseFloat(category.budget_limit || 0);
-        const spentAmount = parseFloat(category.current_month_spent || 0);
+        const spentAmount = parseFloat(category.actual_spent || 0);
         const variance = budgetLimit - spentAmount;
-        const percentageUsed = category.percentage_used || 0;
-        const expenseCount = category.expense_count || 0;
+        const percentageUsed = budgetLimit > 0 ? (spentAmount / budgetLimit) * 100 : 0;
+        const expenseCount = category.transaction_count || 0;
         
-        // Determine status for individual category
-        const categoryStatus = category.status || 'good';
+        // Calculate status based on spending vs budget
+        let categoryStatus;
+        if (spentAmount > budgetLimit) {
+            categoryStatus = 'over_budget';
+        } else if (percentageUsed >= 90) {
+            categoryStatus = 'near_limit';
+        } else if (percentageUsed >= 70) {
+            categoryStatus = 'on_track';
+        } else {
+            categoryStatus = 'good';
+        }
+        
         const statusClass = getStatusClass(categoryStatus);
         const statusText = getStatusText(categoryStatus);
         const varianceClass = variance >= 0 ? 'positive' : 'negative';
@@ -1894,7 +2019,128 @@ function editBudgetCategory(categoryId) {
 }
 
 function addExpenseToCategory(categoryId, categoryName) {
-    showSnackbar(`Add expense functionality for "${categoryName}" coming soon`, 'info');
+    // Find the category data to get the budget limit
+    const category = budgetData?.categories?.find(cat => cat.id === categoryId);
+    
+    if (!category) {
+        showSnackbar(`Category not found: ${categoryName}`, 'error');
+        return;
+    }
+    
+    const budgetLimit = category.budget_limit || 0;
+    const spent = category.actual_spent || 0;
+    const remaining = budgetLimit - spent;
+    
+    if (budgetLimit <= 0) {
+        showSnackbar(`No budget limit set for "${categoryName}". Please set a budget limit first.`, 'warning');
+        return;
+    }
+    
+    if (remaining <= 0) {
+        showSnackbar(`Budget already fully spent for "${categoryName}". Remaining: ${formatCurrency(remaining)}`, 'warning');
+        return;
+    }
+    
+    // Automatically add expense for the remaining budget amount
+    const expenseAmount = remaining;
+    const today = new Date().toISOString().split('T')[0];
+    const expenseData = {
+        category_id: categoryId,
+        amount: expenseAmount,
+        description: `Budget allocation for ${categoryName}`,
+        expense_date: today
+    };
+    
+    // Send to server
+    fetch('../actions/personal_expense_handler.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'add_expense',
+            category_id: categoryId,
+            amount: expenseAmount,
+            description: expenseData.description,
+            expense_date: expenseData.expense_date
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            showSnackbar(`Expense of ${formatCurrency(expenseAmount)} added to ${categoryName}`, 'success');
+            loadBudgetData(); // Refresh the budget data
+        } else {
+            showSnackbar(result.message || 'Failed to add expense', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding expense:', error);
+        showSnackbar('Error adding expense', 'error');
+    });
+}
+
+function viewCategoryExpenses(categoryId, categoryName) {
+    // Navigate to the personal expense page with the category pre-selected
+    // You can modify this to open a modal instead if preferred
+    const url = `../templates/personal-expense.php?category=${categoryId}&name=${encodeURIComponent(categoryName)}`;
+    window.location.href = url;
+}
+
+function makeEditable(element, categoryId, field) {
+    const currentValue = element.textContent.replace('₵', '').replace(',', '');
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.value = currentValue;
+    input.className = 'editable-input';
+    
+    input.addEventListener('blur', async function() {
+        const newValue = parseFloat(this.value);
+        if (!isNaN(newValue) && newValue >= 0) {
+            try {
+                const response = await fetch('../api/budget_categories.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_category',
+                        category_id: categoryId,
+                        [field]: newValue
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    element.textContent = formatCurrency(newValue);
+                    showSnackbar('Budget limit updated successfully', 'success');
+                    await loadBudgetData(); // Refresh data
+                } else {
+                    element.textContent = formatCurrency(currentValue);
+                    showSnackbar('Failed to update budget limit', 'error');
+                }
+            } catch (error) {
+                element.textContent = formatCurrency(currentValue);
+                showSnackbar('Error updating budget limit', 'error');
+            }
+        } else {
+            element.textContent = formatCurrency(currentValue);
+        }
+        element.style.display = 'inline';
+        this.remove();
+    });
+    
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            this.blur();
+        }
+    });
+    
+    element.style.display = 'none';
+    element.parentNode.insertBefore(input, element.nextSibling);
+    input.focus();
+    input.select();
 }
 
 // Form Setup and Handlers
@@ -2073,6 +2319,18 @@ async function initializePage() {
         }
     });
     
+    // Reload data when page becomes visible (user returns to tab)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadBudgetData();
+        }
+    });
+    
+    // Also reload when window gains focus
+    window.addEventListener('focus', function() {
+        loadBudgetData();
+    });
+    
     // Load budget data
     await loadBudgetData();
     
@@ -2093,6 +2351,8 @@ window.budgetFunctions = {
     showAddCategoryModal,
     editBudgetCategory,
     addExpenseToCategory,
+    viewCategoryExpenses,
+    makeEditable,
     deleteCategory,
     toggleUserMenu,
     closeModal,
@@ -2124,6 +2384,13 @@ window.updateCustomTemplate = updateCustomTemplate;
 window.saveCustomTemplate = saveCustomTemplate;
 window.deleteCustomTemplate = deleteCustomTemplate;
 window.syncSliderWithInput = syncSliderWithInput;
+window.makeEditable = makeEditable;
+window.addExpenseToCategory = addExpenseToCategory;
+window.viewCategoryExpenses = viewCategoryExpenses;
+window.editBudgetCategory = editBudgetCategory;
+window.deleteCategory = deleteCategory;
+window.addExpenseToCategory = addExpenseToCategory;
+window.viewCategoryExpenses = viewCategoryExpenses;
 
 // Additional functions needed for HTML integration
 window.showAddCategoryModal = (categoryType = '') => {

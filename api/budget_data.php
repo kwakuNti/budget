@@ -73,17 +73,13 @@ try {
         ];
     }
 
-    // Get total monthly income from personal dashboard
+    // Get total monthly income (use monthly_salary from allocation as it includes all income)
     $stmt = $conn->prepare("
         SELECT 
-            COALESCE(pba.monthly_salary, 0) + COALESCE(SUM(pi.amount), 0) as total_monthly_income
+            COALESCE(pba.monthly_salary, 0) as total_monthly_income
         FROM users u
         LEFT JOIN personal_budget_allocation pba ON u.id = pba.user_id AND pba.is_active = TRUE
-        LEFT JOIN personal_income pi ON u.id = pi.user_id 
-            AND MONTH(pi.income_date) = MONTH(CURRENT_DATE())
-            AND YEAR(pi.income_date) = YEAR(CURRENT_DATE())
         WHERE u.id = ?
-        GROUP BY u.id, pba.monthly_salary
     ");
     $stmt->bind_param("i", $userId);
     $stmt->execute();

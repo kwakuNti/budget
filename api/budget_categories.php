@@ -43,6 +43,48 @@ try {
             $allocationResult = $stmt->get_result();
             $allocation = $allocationResult->fetch_assoc();
             
+            // Get actual salary and additional income for proper calculation
+            if ($allocation) {
+                // Get base salary
+                $stmt = $conn->prepare("
+                    SELECT monthly_salary 
+                    FROM salaries 
+                    WHERE user_id = ? AND is_active = 1 
+                    ORDER BY created_at DESC 
+                    LIMIT 1
+                ");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+                $salaryResult = $stmt->get_result()->fetch_assoc();
+                $baseSalary = $salaryResult ? floatval($salaryResult['monthly_salary']) : 0;
+                
+                // Get additional income
+                $stmt = $conn->prepare("
+                    SELECT COALESCE(SUM(monthly_amount), 0) as total_additional_income 
+                    FROM personal_income_sources 
+                    WHERE user_id = ? AND is_active = 1 AND include_in_budget = 1
+                ");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+                $additionalResult = $stmt->get_result()->fetch_assoc();
+                $additionalIncome = floatval($additionalResult['total_additional_income'] ?? 0);
+                
+                $totalMonthlyIncome = $baseSalary + $additionalIncome;
+                
+                // Update allocation data with correct breakdown
+                $allocation['total_monthly_income'] = $totalMonthlyIncome;
+                $allocation['base_salary'] = $baseSalary;
+                $allocation['additional_income'] = $additionalIncome;
+                $allocation['monthly_income'] = $totalMonthlyIncome; // For backward compatibility
+                
+                // Recalculate amounts based on total income if the stored monthly_salary is different
+                if (abs(floatval($allocation['monthly_salary']) - $totalMonthlyIncome) > 0.01) {
+                    $allocation['needs_amount'] = round($totalMonthlyIncome * intval($allocation['needs_percentage']) / 100, 2);
+                    $allocation['wants_amount'] = round($totalMonthlyIncome * intval($allocation['wants_percentage']) / 100, 2);
+                    $allocation['savings_amount'] = round($totalMonthlyIncome * intval($allocation['savings_percentage']) / 100, 2);
+                }
+            }
+            
             // Get all budget categories for the user with spending data
             $stmt = $conn->prepare("
                 SELECT 

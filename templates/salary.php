@@ -767,6 +767,380 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 flex-direction: column;
             }
         }
+
+        /* Primary Salary Hero Section */
+        .primary-salary-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin: 24px 0;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .salary-hero-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .hero-title-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hero-icon {
+            font-size: 48px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .hero-text h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-text p {
+            margin: 4px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .edit-salary-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .edit-salary-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .salary-display-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 24px;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .salary-main-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .salary-amount-display {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .salary-currency {
+            font-size: 24px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .salary-amount {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .salary-period {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-left: 4px;
+        }
+
+        .salary-schedule {
+            display: flex;
+            gap: 24px;
+        }
+
+        .schedule-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .schedule-label {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .schedule-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .salary-quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .quick-action-btn.primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4f46e5;
+        }
+
+        .quick-action-btn.primary:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .quick-action-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 16px;
+        }
+
+        /* Enhanced Budget Efficiency */
+        .efficiency-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none !important;
+        }
+
+        .efficiency-card .card-header h3 {
+            color: white;
+        }
+
+        .efficiency-card .card-icon {
+            filter: brightness(0) invert(1);
+        }
+
+        .efficiency-score {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .score-circle {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.8) 0deg, rgba(255, 255, 255, 0.2) 360deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .score-number, .score-label {
+            position: relative;
+            z-index: 1;
+        }
+
+        .score-number {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 12px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .efficiency-details {
+            text-align: center;
+        }
+
+        .efficiency-status {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+
+        .efficiency-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .breakdown-label {
+            opacity: 0.8;
+        }
+
+        .breakdown-value {
+            font-weight: 600;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .primary-salary-hero {
+                padding: 20px;
+            }
+
+            .salary-hero-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .hero-text h2 {
+                font-size: 24px;
+            }
+
+            .salary-display-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .salary-amount {
+                font-size: 36px;
+            }
+
+            .salary-schedule {
+                justify-content: center;
+                gap: 16px;
+            }
+
+            .salary-quick-actions {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+        /* Primary Salary Hero Section */
+        .primary-salary-hero {
+            background: var(--card-background);
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .salary-hero-content {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .salary-hero-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .salary-icon {
+            font-size: 48px;
+            width: 72px;
+            height: 72px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .salary-info h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .salary-info p {
+            margin: 4px 0 0 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .salary-display-hero {
+            text-align: right;
+        }
+
+        .salary-amount-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 4px;
+        }
+
+        .salary-status {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .salary-hero-actions {
+            padding: 0 24px 24px 24px;
+        }
+
+        .salary-hero-actions .btn-primary {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
     </style>
 </head>
 <body>
@@ -932,71 +1306,50 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="card-content">
                         <div class="amount" id="budgetEfficiency">--</div>
                         <div class="change" id="efficiencyStatus">Set up salary first</div>
+                        <div class="efficiency-breakdown" id="efficiencyBreakdown" style="display: none;">
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="color: #6c757d; font-size: 14px;">Savings Rate:</span>
+                                    <span style="color: #495057; font-weight: 500;" id="savingsRateDisplay">0%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="color: #6c757d; font-size: 14px;">Budget Usage:</span>
+                                    <span style="color: #495057; font-weight: 500;" id="budgetUtilizationDisplay">0%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #6c757d; font-size: 14px;">Income Coverage:</span>
+                                    <span style="color: #495057; font-weight: 500;" id="incomeCoverageDisplay">0%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
                 </div>
             </section>
 
             <!-- Primary Salary Configuration -->
             <section class="salary-breakdown">
-                <div class="section-header">
-                    <h3>Primary Salary Configuration</h3>
-                    <button class="edit-allocation-btn" onclick="showPrimarySalaryModal()">Edit Details</button>
-                </div>
-                
-                <div class="salary-config-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Monthly Salary Amount (₵)</label>
-                            <input type="number" id="salaryAmount" value="0" step="0.01" readonly style="background: #f8f9fa; cursor: not-allowed;">
-                        </div>
-                        <div class="form-group">
-                            <label>Pay Frequency</label>
-                            <select id="payFrequency" disabled style="background: #f8f9fa; cursor: not-allowed;">
-                                <option value="monthly" selected>Monthly</option>
-                                <option value="bi-weekly">Bi-weekly</option>
-                                <option value="weekly">Weekly</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Next Pay Date</label>
-                            <input type="date" id="nextPayDate" value="" readonly style="background: #f8f9fa; cursor: not-allowed;">
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Method</label>
-                            <div class="payment-method-group">
-                                <div class="payment-method selected" style="pointer-events: none; background: #f8f9fa;">
-                                    <div class="payment-method-icon">🏦</div>
-                                    <div class="payment-method-name">Bank Account</div>
-                                </div>
-                                <div class="payment-method" style="pointer-events: none; background: #f8f9fa;">
-                                    <div class="payment-method-icon">📱</div>
-                                    <div class="payment-method-name">Mobile Money</div>
-                                </div>
+                <div class="primary-salary-hero">
+                    <div class="salary-hero-content">
+                        <div class="salary-hero-header">
+                            <div class="salary-icon">💰</div>
+                            <div class="salary-info">
+                                <h2>Monthly Salary</h2>
+                                <p>Your primary income source</p>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="form-row" id="paymentDetails">
-                        <div class="form-group">
-                            <label id="paymentDetailsLabel">Bank Account</label>
-                            <select id="paymentAccount" disabled style="background: #f8f9fa; cursor: not-allowed;">
-                                <option value="">Select account...</option>
-                            </select>
+                        <div class="salary-display-hero">
+                            <div class="salary-amount-display" id="primarySalaryAmount">₵0.00</div>
+                            <div class="salary-status" id="primarySalaryStatus">Not set up yet</div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Auto-Budget Allocation</label>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="autoBudget" disabled style="pointer-events: none;">
-                            <label for="autoBudget" style="color: #6c757d;">Automatically allocate salary to budget categories</label>
-                        </div>
-                        <p style="font-size: 14px; color: #6c757d; margin-top: 8px;">Click "Edit Details" to modify these settings</p>
+                    <div class="salary-hero-actions">
+                        <button class="btn-primary" id="salaryActionBtn" onclick="showPrimarySalaryModal()">Set Up Salary</button>
                     </div>
                 </div>
+                
+    
+            </section>
             </section>
 
             <!-- Budget Allocation Preview -->
@@ -1199,7 +1552,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </div>
                 </div>
 
-                <div class="form-section">
+                <div class="form-section" style="display: none;">
                     <h4>Payment Settings</h4>
                     <div class="form-group">
                         <label>Payment Method</label>
@@ -1227,7 +1580,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </div>
                 </div>
 
-                <div class="form-section">
+                <div class="form-section" style="display: none;">
                     <h4>Budget Settings</h4>
                     <div class="form-group">
                         <div class="toggle-switch">
@@ -1594,7 +1947,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             try {
                 // Load data from both endpoints
                 const [dashboardResponse, salaryResponse] = await Promise.all([
-                    fetch('/budget-app/api/personal_dashboard_data.php'),
+                    fetch('/budget/api/personal_dashboard_data.php'),
                     fetch('../actions/salary_actions.php', {
                         method: 'POST',
                         headers: {
@@ -1671,6 +2024,51 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 }
             }
 
+            // Update Primary Salary Hero Display
+            const primarySalaryAmount = document.getElementById('primarySalaryAmount');
+            const primarySalaryStatus = document.getElementById('primarySalaryStatus');
+            const salaryActionBtn = document.getElementById('salaryActionBtn');
+            
+            if (primarySalaryAmount && primarySalaryStatus && salaryActionBtn) {
+                const salary = parseFloat(salaryData.monthly_salary || 0);
+                
+                if (salary > 0) {
+                    // Salary is set up
+                    primarySalaryAmount.textContent = `₵${salary.toLocaleString()}`;
+                    
+                    if (salaryData.next_pay_date) {
+                        const date = new Date(salaryData.next_pay_date);
+                        const today = new Date();
+                        const daysUntil = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysUntil <= 0) {
+                            primarySalaryStatus.textContent = 'Payment due now';
+                            primarySalaryStatus.style.color = '#dc3545';
+                        } else if (daysUntil <= 3) {
+                            primarySalaryStatus.textContent = `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+                            primarySalaryStatus.style.color = '#fd7e14';
+                        } else {
+                            primarySalaryStatus.textContent = `Next payment: ${date.toLocaleDateString('en-GB', {
+                                day: 'numeric',
+                                month: 'short'
+                            })}`;
+                            primarySalaryStatus.style.color = '#6c757d';
+                        }
+                    } else {
+                        primarySalaryStatus.textContent = 'Payment date not set';
+                        primarySalaryStatus.style.color = '#6c757d';
+                    }
+                    
+                    salaryActionBtn.textContent = 'Edit Salary';
+                } else {
+                    // Salary not set up
+                    primarySalaryAmount.textContent = '₵0.00';
+                    primarySalaryStatus.textContent = 'Not set up yet';
+                    primarySalaryStatus.style.color = '#6c757d';
+                    salaryActionBtn.textContent = 'Set Up Salary';
+                }
+            }
+
             // Additional income
             const additionalIncome = document.getElementById('additionalIncome');
             const incomeSourcesCount = document.getElementById('incomeSourcesCount');
@@ -1697,21 +2095,66 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 totalIncome.textContent = `₵${total.toFixed(2)}`;
             }
 
-            // Budget efficiency
+            // Budget efficiency - Enhanced implementation
             const budgetEfficiency = document.getElementById('budgetEfficiency');
             const efficiencyStatus = document.getElementById('efficiencyStatus');
+            const efficiencyBreakdown = document.getElementById('efficiencyBreakdown');
+            const savingsRateDisplay = document.getElementById('savingsRateDisplay');
+            const budgetUtilizationDisplay = document.getElementById('budgetUtilizationDisplay');
+            const incomeCoverageDisplay = document.getElementById('incomeCoverageDisplay');
+            
             if (budgetEfficiency) {
-                if (data.financial_overview && data.financial_overview.savings_rate) {
-                    const efficiency = Math.round(parseFloat(data.financial_overview.savings_rate));
-                    budgetEfficiency.textContent = `${efficiency}%`;
-                    if (efficiencyStatus) {
-                        efficiencyStatus.textContent = efficiency >= 20 ? 'Well optimized' : 
-                                                     efficiency >= 10 ? 'Good planning' : 'Needs improvement';
+                const totalIncome = parseFloat(data.financial_overview?.monthly_income || 0);
+                const savingsRate = parseFloat(data.financial_overview?.savings_rate || 0);
+                
+                if (totalIncome > 0 && data.budget_allocation && data.budget_allocation.length > 0) {
+                    // Calculate comprehensive efficiency metrics
+                    const totalAllocated = data.budget_allocation.reduce((sum, allocation) => 
+                        sum + parseFloat(allocation.allocated_amount || 0), 0
+                    );
+                    
+                    const budgetUtilization = totalIncome > 0 ? (totalAllocated / totalIncome) * 100 : 0;
+                    const incomeCoverage = Math.min(100, budgetUtilization);
+                    
+                    // Calculate overall efficiency score (weighted average)
+                    const efficiencyScore = Math.round(
+                        (savingsRate * 0.4) + // 40% weight on savings
+                        (Math.min(100, budgetUtilization) * 0.3) + // 30% weight on budget coverage
+                        ((100 - Math.abs(100 - budgetUtilization)) * 0.3) // 30% weight on balance
+                    );
+                    
+                    budgetEfficiency.textContent = `${efficiencyScore}%`;
+                    
+                    // Update status based on score
+                    if (efficiencyScore >= 80) {
+                        efficiencyStatus.textContent = 'Excellent financial planning!';
+                        efficiencyStatus.style.color = '#28a745';
+                    } else if (efficiencyScore >= 65) {
+                        efficiencyStatus.textContent = 'Very good budget management';
+                        efficiencyStatus.style.color = '#28a745';
+                    } else if (efficiencyScore >= 50) {
+                        efficiencyStatus.textContent = 'Good planning, room for improvement';
+                        efficiencyStatus.style.color = '#ffc107';
+                    } else {
+                        efficiencyStatus.textContent = 'Consider optimizing your budget';
+                        efficiencyStatus.style.color = '#dc3545';
+                    }
+                    
+                    // Show breakdown
+                    if (efficiencyBreakdown) {
+                        efficiencyBreakdown.style.display = 'block';
+                        if (savingsRateDisplay) savingsRateDisplay.textContent = `${Math.round(savingsRate)}%`;
+                        if (budgetUtilizationDisplay) budgetUtilizationDisplay.textContent = `${Math.round(budgetUtilization)}%`;
+                        if (incomeCoverageDisplay) incomeCoverageDisplay.textContent = `${Math.round(incomeCoverage)}%`;
                     }
                 } else {
                     budgetEfficiency.textContent = '--';
                     if (efficiencyStatus) {
                         efficiencyStatus.textContent = 'Set up salary first';
+                        efficiencyStatus.style.color = '#6c757d';
+                    }
+                    if (efficiencyBreakdown) {
+                        efficiencyBreakdown.style.display = 'none';
                     }
                 }
             }
@@ -1724,7 +2167,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             
             // Update budget preview
             if (salaryData.monthly_salary && salaryData.monthly_salary > 0) {
-                document.getElementById('salaryAmount').value = salaryData.monthly_salary;
+                const salaryAmountElement = document.getElementById('salaryAmount');
+                if (salaryAmountElement) {
+                    salaryAmountElement.value = salaryData.monthly_salary;
+                }
                 updateBudgetPreview();
             }
             
@@ -2322,7 +2768,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Salary setup specific JavaScript
         function updateBudgetPreview() {
-            const salary = parseFloat(document.getElementById('salaryAmount').value) || 0;
+            // Try to get salary from multiple possible sources
+            let salary = 0;
+            const salaryAmountElement = document.getElementById('salaryAmount');
+            const modalSalaryAmountElement = document.getElementById('modalSalaryAmount');
+            const primarySalaryAmountElement = document.getElementById('primarySalaryAmount');
+            
+            if (salaryAmountElement && salaryAmountElement.value) {
+                salary = parseFloat(salaryAmountElement.value) || 0;
+            } else if (modalSalaryAmountElement && modalSalaryAmountElement.value) {
+                salary = parseFloat(modalSalaryAmountElement.value) || 0;
+            } else if (primarySalaryAmountElement) {
+                // Extract salary from display element (remove ₵ and commas)
+                const displayText = primarySalaryAmountElement.textContent.replace('₵', '').replace(/,/g, '');
+                salary = parseFloat(displayText) || 0;
+            }
             
             // Get additional income from the displayed value
             const additionalIncomeElement = document.getElementById('additionalIncome');
@@ -2556,7 +3016,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function previewBudgetAllocation() {
-            const salary = parseFloat(document.getElementById('salaryAmount').value) || 0;
+            // Try to get salary from multiple possible sources
+            let salary = 0;
+            const salaryAmountElement = document.getElementById('salaryAmount');
+            const modalSalaryAmountElement = document.getElementById('modalSalaryAmount');
+            const primarySalaryAmountElement = document.getElementById('primarySalaryAmount');
+            
+            if (salaryAmountElement && salaryAmountElement.value) {
+                salary = parseFloat(salaryAmountElement.value) || 0;
+            } else if (modalSalaryAmountElement && modalSalaryAmountElement.value) {
+                salary = parseFloat(modalSalaryAmountElement.value) || 0;
+            } else if (primarySalaryAmountElement) {
+                // Extract salary from display element (remove ₵ and commas)
+                const displayText = primarySalaryAmountElement.textContent.replace('₵', '').replace(/,/g, '');
+                salary = parseFloat(displayText) || 0;
+            }
             
             // Try data-category approach first, then fallback to ID approach
             let needsSlider = document.querySelector('[data-category="needs"]');
@@ -2667,8 +3141,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Primary Salary Modal Functions
         function showPrimarySalaryModal() {
             // Pre-populate form with current values
-            const salaryAmount = document.getElementById('salaryAmount').value;
-            const payFrequency = document.getElementById('payFrequency').value;
+            const salaryAmountElement = document.getElementById('salaryAmount');
+            const payFrequencyElement = document.getElementById('payFrequency');
+            
+            const salaryAmount = salaryAmountElement ? salaryAmountElement.value : '';
+            const payFrequency = payFrequencyElement ? payFrequencyElement.value : 'monthly';
             const nextPayDate = document.getElementById('nextPayDate').value;
             
             document.getElementById('modalSalaryAmount').value = salaryAmount;
@@ -2703,7 +3180,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function updatePreviewBudgetData() {
-            const salaryAmount = parseFloat(document.getElementById('salaryAmount').value) || 0;
+            // Try to get salary from multiple possible sources
+            let salaryAmount = 0;
+            const salaryAmountElement = document.getElementById('salaryAmount');
+            const modalSalaryAmountElement = document.getElementById('modalSalaryAmount');
+            const primarySalaryAmountElement = document.getElementById('primarySalaryAmount');
+            
+            if (salaryAmountElement && salaryAmountElement.value) {
+                salaryAmount = parseFloat(salaryAmountElement.value) || 0;
+            } else if (modalSalaryAmountElement && modalSalaryAmountElement.value) {
+                salaryAmount = parseFloat(modalSalaryAmountElement.value) || 0;
+            } else if (primarySalaryAmountElement) {
+                // Extract salary from display element (remove ₵ and commas)
+                const displayText = primarySalaryAmountElement.textContent.replace('₵', '').replace(/,/g, '');
+                salaryAmount = parseFloat(displayText) || 0;
+            }
             
             // Get additional income from the displayed value
             const additionalIncomeElement = document.getElementById('additionalIncome');
@@ -2805,11 +3296,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {
-                            // Update the main form with new values
-                            document.getElementById('salaryAmount').value = data.salaryAmount;
-                            document.getElementById('payFrequency').value = data.payFrequency;
-                            document.getElementById('nextPayDate').value = data.nextPayDate;
-                            document.getElementById('autoBudget').checked = data.autoBudget === 'on';
+                            // Update the main form with new values (with null checks)
+                            const salaryAmountElement = document.getElementById('salaryAmount');
+                            const payFrequencyElement = document.getElementById('payFrequency');
+                            const nextPayDateElement = document.getElementById('nextPayDate');
+                            const autoBudgetElement = document.getElementById('autoBudget');
+                            
+                            if (salaryAmountElement) salaryAmountElement.value = data.salaryAmount;
+                            if (payFrequencyElement) payFrequencyElement.value = data.payFrequency;
+                            if (nextPayDateElement) nextPayDateElement.value = data.nextPayDate;
+                            if (autoBudgetElement) autoBudgetElement.checked = data.autoBudget === 'on';
                             
                             showSnackbar(result.message, 'success');
                             closeModal('primarySalaryModal');

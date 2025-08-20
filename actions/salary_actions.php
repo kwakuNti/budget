@@ -121,19 +121,31 @@ function savePrimarySalary($conn, $userId) {
         
         // If auto-budget is enabled, create/update budget allocation
         if ($autoBudget) {
+            // Calculate total monthly income (salary + additional income sources)
+            $stmt = $conn->prepare("
+                SELECT COALESCE(SUM(monthly_amount), 0) as total_additional_income 
+                FROM personal_income_sources 
+                WHERE user_id = ? AND is_active = 1 AND include_in_budget = 1
+            ");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $additionalResult = $stmt->get_result()->fetch_assoc();
+            
+            $totalMonthlyIncome = $salaryAmount + ($additionalResult['total_additional_income'] ?? 0);
+            
             // Deactivate existing budget allocations
             $stmt = $conn->prepare("UPDATE personal_budget_allocation SET is_active = 0 WHERE user_id = ?");
             $stmt->bind_param("i", $userId);
             $stmt->execute();
             
-            // Create new budget allocation with 50-30-20 rule
+            // Create new budget allocation with 50-30-20 rule (store total income in monthly_salary field)
             $stmt = $conn->prepare("
                 INSERT INTO personal_budget_allocation (
                     user_id, needs_percentage, wants_percentage, savings_percentage, 
                     monthly_salary, is_active, created_at, updated_at
                 ) VALUES (?, 50, 30, 20, ?, 1, NOW(), NOW())
             ");
-            $stmt->bind_param("id", $userId, $salaryAmount);
+            $stmt->bind_param("id", $userId, $totalMonthlyIncome);
             $stmt->execute();
         }
         
@@ -225,12 +237,37 @@ function getSalaryData($conn, $userId) {
         $incomeSources[] = $row;
     }
     
+    // Calculate total monthly income breakdown
+    $baseSalary = $salaryData ? floatval($salaryData['monthly_salary']) : 0;
+    $additionalIncome = 0;
+    $totalMonthlyIncome = $baseSalary;
+    
+    foreach ($incomeSources as $source) {
+        if ($source['include_in_budget']) {
+            $additionalIncome += floatval($source['monthly_amount']);
+        }
+    }
+    $totalMonthlyIncome = $baseSalary + $additionalIncome;
+    
+    // Update budget allocation data with correct total income
+    if ($budgetData) {
+        $budgetData['total_monthly_income'] = $totalMonthlyIncome;
+        $budgetData['base_salary'] = $baseSalary;
+        $budgetData['additional_income'] = $additionalIncome;
+        $budgetData['monthly_income'] = $totalMonthlyIncome; // For backward compatibility
+    }
+    
     echo json_encode([
         'success' => true,
         'data' => [
             'salary' => $salaryData,
             'budget_allocation' => $budgetData,
-            'income_sources' => $incomeSources
+            'income_sources' => $incomeSources,
+            'income_summary' => [
+                'base_salary' => $baseSalary,
+                'additional_income' => $additionalIncome,
+                'total_monthly_income' => $totalMonthlyIncome
+            ]
         ]
     ]);
 }
@@ -274,6 +311,18 @@ function updateBudgetAllocation($conn, $userId) {
     
     $monthlySalary = $result['monthly_salary'];
     
+    // Calculate total monthly income (salary + additional income sources)
+    $stmt = $conn->prepare("
+        SELECT COALESCE(SUM(monthly_amount), 0) as total_additional_income 
+        FROM personal_income_sources 
+        WHERE user_id = ? AND is_active = 1 AND include_in_budget = 1
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $additionalResult = $stmt->get_result()->fetch_assoc();
+    
+    $totalMonthlyIncome = $monthlySalary + ($additionalResult['total_additional_income'] ?? 0);
+    
     $conn->begin_transaction();
     
     try {
@@ -282,14 +331,14 @@ function updateBudgetAllocation($conn, $userId) {
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         
-        // Create new budget allocation
+        // Create new budget allocation (store total monthly income in monthly_salary field)
         $stmt = $conn->prepare("
             INSERT INTO personal_budget_allocation (
                 user_id, needs_percentage, wants_percentage, savings_percentage, 
                 monthly_salary, is_active, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())
         ");
-        $stmt->bind_param("iiiid", $userId, $needsPercent, $wantsPercent, $savingsPercent, $monthlySalary);
+        $stmt->bind_param("iiiid", $userId, $needsPercent, $wantsPercent, $savingsPercent, $totalMonthlyIncome);
         $stmt->execute();
         
         $conn->commit();
@@ -301,9 +350,12 @@ function updateBudgetAllocation($conn, $userId) {
                 'needs_percent' => $needsPercent,
                 'wants_percent' => $wantsPercent,
                 'savings_percent' => $savingsPercent,
-                'needs_amount' => $monthlySalary * $needsPercent / 100,
-                'wants_amount' => $monthlySalary * $wantsPercent / 100,
-                'savings_amount' => $monthlySalary * $savingsPercent / 100
+                'total_monthly_income' => $totalMonthlyIncome,
+                'base_salary' => $monthlySalary,
+                'additional_income' => ($additionalResult['total_additional_income'] ?? 0),
+                'needs_amount' => round($totalMonthlyIncome * $needsPercent / 100, 2),
+                'wants_amount' => round($totalMonthlyIncome * $wantsPercent / 100, 2),
+                'savings_amount' => round($totalMonthlyIncome * $savingsPercent / 100, 2)
             ]
         ]);
         
@@ -438,6 +490,11 @@ function addIncomeSource($conn, $userId) {
             $stmt2->bind_param("isdssss", $userId, $sourceName, $monthlyAmount, $incomeDate, 
                               $mappedIncomeType, $description, $recurringFreq);
             $stmt2->execute();
+            
+            // If this income source should be included in budget and there's an active allocation, update it
+            if ($includeInBudget) {
+                updateBudgetAllocationForIncomeChange($conn, $userId);
+            }
         }
         
         echo json_encode([
@@ -474,6 +531,15 @@ function deleteIncomeSource($conn, $userId) {
     }
     
     try {
+        // Get the income source details before deletion
+        $stmt = $conn->prepare("
+            SELECT include_in_budget FROM personal_income_sources 
+            WHERE id = ? AND user_id = ? AND is_active = 1
+        ");
+        $stmt->bind_param("ii", $sourceId, $userId);
+        $stmt->execute();
+        $sourceData = $stmt->get_result()->fetch_assoc();
+        
         // Verify ownership and delete
         $stmt = $conn->prepare("
             UPDATE personal_income_sources 
@@ -484,6 +550,11 @@ function deleteIncomeSource($conn, $userId) {
         $stmt->execute();
         
         if ($stmt->affected_rows > 0) {
+            // If this income source was included in budget, update allocation
+            if ($sourceData && $sourceData['include_in_budget']) {
+                updateBudgetAllocationForIncomeChange($conn, $userId);
+            }
+            
             echo json_encode([
                 'success' => true,
                 'message' => 'Income source deleted successfully!'
@@ -675,6 +746,59 @@ function calculateNextPayDate($currentDate, $frequency) {
     }
     
     return $date->format('Y-m-d');
+}
+
+/**
+ * Update budget allocation when income changes
+ */
+function updateBudgetAllocationForIncomeChange($conn, $userId) {
+    // Check if there's an active budget allocation
+    $stmt = $conn->prepare("
+        SELECT id, needs_percentage, wants_percentage, savings_percentage 
+        FROM personal_budget_allocation 
+        WHERE user_id = ? AND is_active = 1 
+        ORDER BY created_at DESC 
+        LIMIT 1
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+    
+    if (!$result) {
+        return; // No active allocation to update
+    }
+    
+    // Calculate new total monthly income
+    $stmt = $conn->prepare("
+        SELECT monthly_salary 
+        FROM salaries 
+        WHERE user_id = ? AND is_active = 1 
+        ORDER BY created_at DESC 
+        LIMIT 1
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $salaryResult = $stmt->get_result()->fetch_assoc();
+    $baseSalary = $salaryResult ? floatval($salaryResult['monthly_salary']) : 0;
+    
+    $stmt = $conn->prepare("
+        SELECT COALESCE(SUM(monthly_amount), 0) as total_additional_income 
+        FROM personal_income_sources 
+        WHERE user_id = ? AND is_active = 1 AND include_in_budget = 1
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $additionalResult = $stmt->get_result()->fetch_assoc();
+    $totalMonthlyIncome = $baseSalary + ($additionalResult['total_additional_income'] ?? 0);
+    
+    // Update the allocation with new total income
+    $stmt = $conn->prepare("
+        UPDATE personal_budget_allocation 
+        SET monthly_salary = ?, updated_at = NOW() 
+        WHERE id = ?
+    ");
+    $stmt->bind_param("di", $totalMonthlyIncome, $result['id']);
+    $stmt->execute();
 }
 
 $conn->close();

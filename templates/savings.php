@@ -809,7 +809,7 @@ window.editGoal = function(goalId) {
 
 window.pauseGoal = function(goalId) {
     if (confirm('Are you sure you want to pause this goal? Auto-save will be disabled.')) {
-        fetch('/budget-app/actions/savings_handler.php', {
+        fetch('/budget/actions/savings_handler.php', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -834,7 +834,7 @@ window.pauseGoal = function(goalId) {
 };
 
 window.resumeGoal = function(goalId) {
-    fetch('/budget-app/actions/savings_handler.php', {
+    fetch('/budget/actions/savings_handler.php', {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
@@ -859,7 +859,7 @@ window.resumeGoal = function(goalId) {
 
 window.setGoalInactive = function(goalId) {
     if (confirm('Are you sure you want to set this goal to inactive? Auto-save will be disabled.')) {
-        fetch('/budget-app/actions/savings_handler.php', {
+        fetch('/budget/actions/savings_handler.php', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -909,7 +909,7 @@ window.viewGoalDetails = function(goalId) {
 window.deleteGoal = function(goalId) {
     if (confirm('Are you sure you want to delete this goal?')) {
         console.log('Delete goal:', goalId);
-        fetch('/budget-app/actions/savings_handler.php', {
+        fetch('/budget/actions/savings_handler.php', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -970,7 +970,7 @@ class SavingsManager {
 
     async loadSavingsOverview() {
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_savings_overview', {
+            const response = await fetch('/budget/actions/savings_handler.php?action=get_savings_overview', {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers: {
@@ -1061,7 +1061,7 @@ class SavingsManager {
 
     async loadSavingsOverview() {
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_savings_overview', {
+            const response = await fetch('/budget/actions/savings_handler.php?action=get_savings_overview', {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers: {
@@ -1086,7 +1086,7 @@ class SavingsManager {
 
     async loadSavingsData() {
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_goals', {
+            const response = await fetch('/budget/actions/savings_handler.php?action=get_goals', {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers: {
@@ -1439,7 +1439,7 @@ class SavingsManager {
 
     async loadRecentActivity() {
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php?action=get_recent_activity', {
+            const response = await fetch('/budget/actions/savings_handler.php?action=get_recent_activity', {
                 method: 'GET',
                 credentials: 'same-origin',
                 headers: {
@@ -1740,7 +1740,7 @@ class SavingsManager {
         }
 
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php', {
+            const response = await fetch('/budget/actions/savings_handler.php', {
                 method: 'POST',
                 credentials: 'same-origin',
                 body: formData
@@ -1800,7 +1800,7 @@ class SavingsManager {
         formData.append('action', 'add_contribution');
 
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php', {
+            const response = await fetch('/budget/actions/savings_handler.php', {
                 method: 'POST',
                 credentials: 'same-origin',
                 body: formData
@@ -1831,7 +1831,7 @@ class SavingsManager {
         formData.append('action', 'update_auto_save');
 
         try {
-            const response = await fetch('/budget-app/actions/savings_handler.php', {
+            const response = await fetch('/budget/actions/savings_handler.php', {
                 method: 'POST',
                 credentials: 'same-origin',
                 body: formData
