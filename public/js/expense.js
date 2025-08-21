@@ -37,35 +37,22 @@ function animateNumber(element, start, end, duration = 2000, prefix = '', suffix
 }
 
 // Function to load fresh expense data and animate
+// Function to load fresh expense data and animate
 async function loadExpenseData() {
     try {
-        const response = await fetch('../api/expense_data.php');
-        const data = await response.json();
-        
-        if (data.success) {
-            // Update global data
-            window.expenseStats = data.expense_stats;
-            window.recentExpenses = data.recent_expenses;
-            expensesData = data.recent_expenses;
-            
-            // Start animations with fresh data
-            setTimeout(() => {
-                animateExpenseOverview();
-            }, 300);
-            
-            // Update charts with fresh data
-            updateChartsWithFreshData(data);
-            
-        } else {
-            console.error('Failed to load expense data:', data.message);
-        }
+        // For now, just animate the existing data from PHP
+        setTimeout(() => {
+            animateExpenseOverview();
+        }, 500);
         
         // Add visibility change listener for refresh when returning to page
         if (typeof document.visibilityState !== 'undefined') {
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
                     // Page became visible again, refresh data
-                    loadExpenseData();
+                    setTimeout(() => {
+                        animateExpenseOverview();
+                    }, 300);
                 }
             });
         }
@@ -500,7 +487,7 @@ document.getElementById('addExpenseForm').addEventListener('submit', function(e)
     const paymentMethod = document.getElementById('paymentMethod').value;
     const notes = document.getElementById('expenseNotes').value;
     
-    if (!category || !amount || amount <= 0 || !description || !date || !paymentMethod) {
+    if (!category || !amount || amount <= 0 || !date || !paymentMethod) {
         showSnackbar('Please fill in all required fields correctly', 'error');
         return;
     }
@@ -537,7 +524,10 @@ function submitExpense(category, amount, description, date, paymentMethod, notes
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showSnackbar(`₵${amount.toFixed(2)} expense added successfully!`, 'success');
+            const formattedAmount = Math.floor(amount) === amount ? 
+                amount.toLocaleString('en-US') : 
+                amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            showSnackbar(`₵${formattedAmount} expense added successfully!`, 'success');
             // Refresh data and animations instead of full page reload
             setTimeout(() => {
                 loadExpenseData();
@@ -783,9 +773,6 @@ window.addEventListener('resize', () => {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    // Start expense data loading and animations
-    loadExpenseData();
-    
     // Show welcome message
     setTimeout(() => {
         if (expensesData.length === 0) {

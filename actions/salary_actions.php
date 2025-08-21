@@ -4,20 +4,51 @@
  * Handles all salary-related operations for personal accounts
  */
 
-session_start();
-header('Content-Type: application/json');
-require_once '../config/connection.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable HTML error output to prevent JSON corruption
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
+
+// Start output buffering to catch any unwanted output
+ob_start();
+
+header('Content-Type: application/json');
+
+// Include database connection with flexible path
+if (file_exists('../config/connection.php')) {
+    require_once '../config/connection.php';
+} elseif (file_exists('config/connection.php')) {
+    require_once 'config/connection.php';
+} else {
+    ob_clean();
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database connection file not found'
+    ]);
+    exit;
+}
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
+    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => 'Unauthorized access - please log in'
+    ]);
+    exit;
+}
+
+// Check if user has personal account type
+$userId = $_SESSION['user_id'];
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] !== 'personal') {
+    ob_clean();
+    echo json_encode([
+        'success' => false,
+        'message' => 'Access denied - personal account required'
     ]);
     exit;
 }
@@ -60,6 +91,7 @@ try {
             break;
         
         default:
+            ob_clean();
             echo json_encode([
                 'success' => false,
                 'message' => 'Invalid action specified'
@@ -67,6 +99,7 @@ try {
             break;
     }
 } catch (Exception $e) {
+    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => 'An error occurred: ' . $e->getMessage()
@@ -86,6 +119,7 @@ function savePrimarySalary($conn, $userId) {
     $autoBudget = isset($_POST['autoBudget']) ? 1 : 0;
     
     if ($salaryAmount <= 0) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Please enter a valid salary amount'
@@ -94,6 +128,7 @@ function savePrimarySalary($conn, $userId) {
     }
     
     if (!$nextPayDate) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Please select your next pay date'
@@ -149,11 +184,9 @@ function savePrimarySalary($conn, $userId) {
             $stmt->execute();
         }
         
-        // Create default budget categories if they don't exist
-        createDefaultCategories($conn, $userId);
-        
         $conn->commit();
         
+        ob_clean();
         echo json_encode([
             'success' => true,
             'message' => 'Salary information saved successfully!',
@@ -175,101 +208,121 @@ function savePrimarySalary($conn, $userId) {
  * Get current salary data for the user
  */
 function getSalaryData($conn, $userId) {
-    // Get salary information
-    $stmt = $conn->prepare("
-        SELECT 
-            monthly_salary,
-            pay_frequency,
-            next_pay_date,
-            created_at,
-            updated_at
-        FROM salaries 
-        WHERE user_id = ? AND is_active = 1 
-        ORDER BY created_at DESC 
-        LIMIT 1
-    ");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $salaryData = $stmt->get_result()->fetch_assoc();
+    try {
+        // Get salary information
+        $stmt = $conn->prepare("
+            SELECT 
+                monthly_salary,
+                pay_frequency,
+                next_pay_date,
+                created_at,
+                updated_at
+            FROM salaries 
+            WHERE user_id = ? AND is_active = 1 
+            ORDER BY created_at DESC 
+            LIMIT 1
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $salaryData = $stmt->get_result()->fetch_assoc();
     
-    // Get budget allocation
-    $stmt = $conn->prepare("
-        SELECT 
-            needs_percentage,
-            wants_percentage,
-            savings_percentage,
-            monthly_salary,
-            needs_amount,
-            wants_amount,
-            savings_amount
-        FROM personal_budget_allocation 
-        WHERE user_id = ? AND is_active = 1 
-        ORDER BY created_at DESC 
-        LIMIT 1
-    ");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $budgetData = $stmt->get_result()->fetch_assoc();
-    
-    // Get income sources
-    $stmt = $conn->prepare("
-        SELECT 
-            id,
-            source_name,
-            income_type,
-            monthly_amount,
-            payment_frequency,
-            payment_method,
-            description,
-            include_in_budget,
-            is_active,
-            created_at
-        FROM personal_income_sources 
-        WHERE user_id = ? AND is_active = 1 
-        ORDER BY created_at DESC
-    ");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $incomeSourcesResult = $stmt->get_result();
-    
-    $incomeSources = [];
-    while ($row = $incomeSourcesResult->fetch_assoc()) {
-        $incomeSources[] = $row;
-    }
-    
-    // Calculate total monthly income breakdown
-    $baseSalary = $salaryData ? floatval($salaryData['monthly_salary']) : 0;
-    $additionalIncome = 0;
-    $totalMonthlyIncome = $baseSalary;
-    
-    foreach ($incomeSources as $source) {
-        if ($source['include_in_budget']) {
-            $additionalIncome += floatval($source['monthly_amount']);
+        
+        // Get budget allocation
+        $stmt = $conn->prepare("
+            SELECT 
+                needs_percentage,
+                wants_percentage,
+                savings_percentage,
+                monthly_salary,
+                needs_amount,
+                wants_amount,
+                savings_amount
+            FROM personal_budget_allocation 
+            WHERE user_id = ? AND is_active = 1 
+            ORDER BY created_at DESC 
+            LIMIT 1
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $budgetData = $stmt->get_result()->fetch_assoc();
+        
+        // Get income sources
+        $stmt = $conn->prepare("
+            SELECT 
+                id,
+                source_name,
+                income_type,
+                monthly_amount,
+                payment_frequency,
+                payment_method,
+                description,
+                include_in_budget,
+                is_active,
+                created_at
+            FROM personal_income_sources 
+            WHERE user_id = ? AND is_active = 1 
+            ORDER BY created_at DESC
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $incomeSourcesResult = $stmt->get_result();
+        
+        $incomeSources = [];
+        while ($row = $incomeSourcesResult->fetch_assoc()) {
+            $incomeSources[] = $row;
         }
-    }
-    $totalMonthlyIncome = $baseSalary + $additionalIncome;
-    
-    // Update budget allocation data with correct total income
-    if ($budgetData) {
-        $budgetData['total_monthly_income'] = $totalMonthlyIncome;
-        $budgetData['base_salary'] = $baseSalary;
-        $budgetData['additional_income'] = $additionalIncome;
-        $budgetData['monthly_income'] = $totalMonthlyIncome; // For backward compatibility
-    }
-    
-    echo json_encode([
-        'success' => true,
-        'data' => [
-            'salary' => $salaryData,
-            'budget_allocation' => $budgetData,
-            'income_sources' => $incomeSources,
-            'income_summary' => [
-                'base_salary' => $baseSalary,
-                'additional_income' => $additionalIncome,
-                'total_monthly_income' => $totalMonthlyIncome
+        
+        // Calculate total monthly income breakdown
+        $baseSalary = $salaryData ? floatval($salaryData['monthly_salary']) : 0;
+        $additionalIncome = 0;
+        $totalMonthlyIncome = $baseSalary;
+        
+        foreach ($incomeSources as $source) {
+            if ($source['include_in_budget']) {
+                $additionalIncome += floatval($source['monthly_amount']);
+            }
+        }
+        $totalMonthlyIncome = $baseSalary + $additionalIncome;
+        
+        // Update budget allocation data with correct total income
+        if ($budgetData) {
+            $budgetData['total_monthly_income'] = $totalMonthlyIncome;
+            $budgetData['base_salary'] = $baseSalary;
+            $budgetData['additional_income'] = $additionalIncome;
+            $budgetData['monthly_income'] = $totalMonthlyIncome; // For backward compatibility
+        }
+        
+        // Add financial overview for compatibility with salary page
+        $financialOverview = [
+            'monthly_income' => $totalMonthlyIncome,
+            'base_salary' => $baseSalary,
+            'additional_income' => $additionalIncome,
+            'total_monthly_income' => $totalMonthlyIncome
+        ];
+        
+        ob_clean();
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'salary' => $salaryData,
+                'budget_allocation' => $budgetData,
+                'income_sources' => $incomeSources,
+                'financial_overview' => $financialOverview,
+                'income_summary' => [
+                    'base_salary' => $baseSalary,
+                    'additional_income' => $additionalIncome,
+                    'total_monthly_income' => $totalMonthlyIncome
+                ]
             ]
-        ]
-    ]);
+        ]);
+        
+    } catch (Exception $e) {
+        ob_clean();
+        echo json_encode([
+            'success' => false,
+            'message' => 'Database error: ' . $e->getMessage()
+        ]);
+    }
 }
 
 /**
@@ -282,6 +335,7 @@ function updateBudgetAllocation($conn, $userId) {
     
     // Validate percentages add up to 100
     if ($needsPercent + $wantsPercent + $savingsPercent !== 100) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Budget allocation must total 100%'
@@ -302,6 +356,7 @@ function updateBudgetAllocation($conn, $userId) {
     $result = $stmt->get_result()->fetch_assoc();
     
     if (!$result) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Please set up your salary information first'
@@ -343,6 +398,7 @@ function updateBudgetAllocation($conn, $userId) {
         
         $conn->commit();
         
+        ob_clean();
         echo json_encode([
             'success' => true,
             'message' => 'Budget allocation updated successfully!',
@@ -378,6 +434,7 @@ function savePaySchedule($conn, $userId) {
     $reminderTime = $_POST['reminderTime'] ?? '09:00';
     
     if (!$nextPayDate || $expectedAmount <= 0) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Please provide valid pay date and amount'
@@ -395,6 +452,7 @@ function savePaySchedule($conn, $userId) {
     $stmt->execute();
     
     if ($stmt->affected_rows === 0) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'No active salary record found. Please set up your salary first.'
@@ -402,6 +460,7 @@ function savePaySchedule($conn, $userId) {
         return;
     }
     
+    ob_clean();
     echo json_encode([
         'success' => true,
         'message' => 'Pay schedule updated successfully!',
@@ -427,6 +486,7 @@ function addIncomeSource($conn, $userId) {
     $includeInBudget = isset($_POST['includeInBudget']) ? 1 : 0;
     
     if (empty($sourceName) || $monthlyAmount <= 0) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Please provide a valid source name and amount'
@@ -497,6 +557,7 @@ function addIncomeSource($conn, $userId) {
             }
         }
         
+        ob_clean();
         echo json_encode([
             'success' => true,
             'message' => 'Income source added successfully!',
@@ -509,6 +570,7 @@ function addIncomeSource($conn, $userId) {
         ]);
         
     } catch (Exception $e) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Failed to add income source: ' . $e->getMessage()
@@ -523,6 +585,7 @@ function deleteIncomeSource($conn, $userId) {
     $sourceId = intval($_POST['source_id'] ?? 0);
     
     if ($sourceId <= 0) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Invalid source ID'
@@ -555,11 +618,13 @@ function deleteIncomeSource($conn, $userId) {
                 updateBudgetAllocationForIncomeChange($conn, $userId);
             }
             
+            ob_clean();
             echo json_encode([
                 'success' => true,
                 'message' => 'Income source deleted successfully!'
             ]);
         } else {
+            ob_clean();
             echo json_encode([
                 'success' => false,
                 'message' => 'Income source not found or already deleted'
@@ -567,6 +632,7 @@ function deleteIncomeSource($conn, $userId) {
         }
         
     } catch (Exception $e) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Failed to delete income source: ' . $e->getMessage()
@@ -578,29 +644,9 @@ function deleteIncomeSource($conn, $userId) {
  * Create default budget categories for new users
  */
 function createDefaultCategories($conn, $userId) {
-    $defaultCategories = [
-        // Needs categories
-        ['Food & Groceries', 'needs', '🍔', '#e74c3c'],
-        ['Utilities', 'needs', '💡', '#f39c12'],
-        
-        // Wants categories
-        ['Entertainment', 'wants', '🎮', '#1abc9c'],
-        ['Subscription Services', 'wants', '📱', '#3498db'],
-        
-        // Savings categories
-        ['Vacation Fund', 'savings', '✈️', '#e67e22'],
-        ['Investment', 'savings', '📈', '#8e44ad']
-    ];
-    
-    foreach ($defaultCategories as $category) {
-        $stmt = $conn->prepare("
-            INSERT IGNORE INTO budget_categories (
-                user_id, name, category_type, icon, color, is_active, created_at
-            ) VALUES (?, ?, ?, ?, ?, 1, NOW())
-        ");
-        $stmt->bind_param("issss", $userId, $category[0], $category[1], $category[2], $category[3]);
-        $stmt->execute();
-    }
+    // No default categories will be created
+    // Users can create their own custom categories
+    return true;
 }
 
 /**
@@ -621,6 +667,7 @@ function confirmSalaryReceived($conn, $userId) {
         $salary = $stmt->get_result()->fetch_assoc();
         
         if (!$salary) {
+            ob_clean();
             echo json_encode([
                 'success' => false,
                 'message' => 'No active salary found'
@@ -654,6 +701,7 @@ function confirmSalaryReceived($conn, $userId) {
         
         $conn->commit();
         
+        ob_clean();
         echo json_encode([
             'success' => true,
             'message' => 'Salary confirmed! Amount added to your income.',
@@ -665,6 +713,7 @@ function confirmSalaryReceived($conn, $userId) {
         
     } catch (Exception $e) {
         $conn->rollback();
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Failed to confirm salary: ' . $e->getMessage()
@@ -689,6 +738,7 @@ function checkSalaryDue($conn, $userId) {
         $salary = $stmt->get_result()->fetch_assoc();
         
         if (!$salary || !$salary['next_pay_date']) {
+            ob_clean();
             echo json_encode([
                 'success' => true,
                 'salary_due' => false,
@@ -704,6 +754,7 @@ function checkSalaryDue($conn, $userId) {
         
         $isDue = $isPastDue || $daysDiff <= 1;
         
+        ob_clean();
         echo json_encode([
             'success' => true,
             'salary_due' => $isDue,
@@ -715,6 +766,7 @@ function checkSalaryDue($conn, $userId) {
         ]);
         
     } catch (Exception $e) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => 'Failed to check salary status: ' . $e->getMessage()

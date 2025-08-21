@@ -223,6 +223,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <option value="wants">Wants (Lifestyle)</option>
                             <option value="savings">Savings & Investments</option>
                         </select>
+                        <small class="form-note">💡 <strong>Tip:</strong> For savings goals, use the <a href="savings.php">Savings</a> page to create and track specific goals. Savings categories here are for budget allocation only.</small>
                     </div>
                     <div class="form-group">
                         <label>Budget Limit</label>

@@ -488,36 +488,9 @@ try {
                 debugLog("Salary record created");
             }
 
-            // Create default budget categories for personal account
-            $defaultCategories = [
-                ['Utilities', 'needs', '⚡', '#f39c12'],
-                ['Transportation', 'needs', '🚗', '#3498db'],
-                ['Entertainment', 'wants', '🎬', '#9b59b6'],
-                ['Dining Out', 'wants', '🍽️', '#e67e22'],
-                ['Emergency Fund', 'savings', '🚨', '#27ae60'],
-                ['Vacation', 'savings', '✈️', '#16a085']
-            ];
-
-            $insertCategoryStmt = $conn->prepare("
-                INSERT INTO budget_categories (
-                    user_id, name, category_type, icon, color, is_active, created_at
-                ) VALUES (?, ?, ?, ?, ?, 1, NOW())
-            ");
-
-            if (!$insertCategoryStmt) {
-                throw new Exception("Failed to prepare category insert: " . $conn->error);
-            }
-
-            foreach ($defaultCategories as $category) {
-                $insertCategoryStmt->bind_param("issss", $userId, $category[0], $category[1], $category[2], $category[3]);
-                
-                if (!$insertCategoryStmt->execute()) {
-                    debugLog("Warning: Failed to create category: " . $category[0]);
-                }
-            }
-            $insertCategoryStmt->close();
-
-            debugLog("Default budget categories created");
+            // Note: Default budget categories removed as requested
+            // Users will create their own categories as needed
+            debugLog("Personal account setup completed - no default categories created");
         }
 
         // Log the registration activity

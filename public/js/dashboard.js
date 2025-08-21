@@ -797,10 +797,25 @@ async function submitExpense(event) {
 
 // Utility functions
 function formatCurrency(amount) {
-    if (amount === null || amount === undefined || isNaN(amount)) {
-        return '0.00';
+    // Handle null, undefined, NaN, or invalid values
+    if (amount === null || amount === undefined || isNaN(amount) || amount === '') {
+        return '0';
     }
-    return parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    // Convert to number and ensure it's valid
+    let numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+        return '0';
+    }
+    
+    // Round to 2 decimal places to avoid floating point precision issues
+    numAmount = Math.round(numAmount * 100) / 100;
+    
+    if (Math.floor(numAmount) === numAmount) {
+        return numAmount.toLocaleString('en-US');
+    } else {
+        return numAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 }
 
 function updateChangeIndicator(elementId, change) {
@@ -1284,19 +1299,19 @@ function showPaymentOptionsModal(memberId, memberName, debtInfo) {
                     <h4>Payment Breakdown:</h4>
                     <div class="breakdown-item">
                         <span>Debt Payment:</span>
-                        <span class="amount ${debtPayment > 0 ? 'debt' : ''}">₵${debtPayment.toFixed(2)}</span>
+                        <span class="amount ${debtPayment > 0 ? 'debt' : ''}">₵${formatCurrency(debtPayment)}</span>
                     </div>
                     <div class="breakdown-item">
                         <span>Monthly Contribution:</span>
-                        <span class="amount ${contribution > 0 ? 'positive' : ''}">₵${contribution.toFixed(2)}</span>
+                        <span class="amount ${contribution > 0 ? 'positive' : ''}">₵${formatCurrency(contribution)}</span>
                     </div>
                     <div class="breakdown-item total">
                         <span>Total:</span>
-                        <span class="amount">₵${amount.toFixed(2)}</span>
+                        <span class="amount">₵${formatCurrency(amount)}</span>
                     </div>
                     ${debtPayment > 0 ? `
                         <div class="remaining-debt">
-                            Remaining debt after payment: ₵${(totalDebt - debtPayment).toFixed(2)}
+                            Remaining debt after payment: ₵${formatCurrency(totalDebt - debtPayment)}
                         </div>
                     ` : ''}
                 </div>

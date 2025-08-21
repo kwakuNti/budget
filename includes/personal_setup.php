@@ -4,6 +4,8 @@
  */
 
 function setupDefaultPersonalCategories($conn, $userId) {
+    // Default categories creation disabled per user request
+    /*
     // Default categories with icons and colors - only 2 per section
     $defaultCategories = [
         // NEEDS
@@ -36,6 +38,8 @@ function setupDefaultPersonalCategories($conn, $userId) {
     }
     
     return count($defaultCategories);
+    */
+    return 0; // No default categories created
 }
 
 function setupDefaultBudgetAllocation($conn, $userId, $monthlySalary = 0) {

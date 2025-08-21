@@ -51,6 +51,12 @@ switch ($action) {
             
             if ($stmt->execute()) {
                 $categoryId = $conn->insert_id;
+                
+                // If this is a savings category, create a corresponding savings goal
+                if ($categoryType === 'savings') {
+                    createSavingsGoalFromCategory($conn, $userId, $name, $budgetLimit, $color);
+                }
+                
                 echo json_encode([
                     'success' => true, 
                     'message' => 'Category added successfully',
@@ -80,11 +86,13 @@ switch ($action) {
                 exit;
             }
 
-            // Check if category belongs to user
-            $stmt = $conn->prepare("SELECT id FROM budget_categories WHERE id = ? AND user_id = ?");
+            // Get the original category details to check if it was a savings category
+            $stmt = $conn->prepare("SELECT name, category_type FROM budget_categories WHERE id = ? AND user_id = ?");
             $stmt->bind_param("ii", $categoryId, $userId);
             $stmt->execute();
-            if ($stmt->get_result()->num_rows === 0) {
+            $originalCategory = $stmt->get_result()->fetch_assoc();
+            
+            if (!$originalCategory) {
                 echo json_encode(['success' => false, 'message' => 'Category not found']);
                 exit;
             }
@@ -107,6 +115,11 @@ switch ($action) {
             $stmt->bind_param("ssssdii", $name, $categoryType, $icon, $color, $budgetLimit, $categoryId, $userId);
             
             if ($stmt->execute() && $stmt->affected_rows > 0) {
+                // If this was or is now a savings category, update corresponding savings goal
+                if ($originalCategory['category_type'] === 'savings' || $categoryType === 'savings') {
+                    updateLinkedSavingsGoal($conn, $userId, $originalCategory['name'], $name, $budgetLimit, $categoryType);
+                }
+                
                 echo json_encode(['success' => true, 'message' => 'Category updated successfully']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Failed to update category']);
@@ -184,4 +197,158 @@ switch ($action) {
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
 }
+
+/**
+ * Update linked savings goal when budget category is modified
+ */
+function updateLinkedSavingsGoal($conn, $userId, $oldName, $newName, $newBudgetLimit, $newCategoryType) {
+    try {
+        // If category is no longer savings type, deactivate the goal
+        if ($newCategoryType !== 'savings') {
+            $stmt = $conn->prepare("
+                UPDATE personal_goals 
+                SET status = 'paused' 
+                WHERE user_id = ? AND goal_name = ?
+            ");
+            $stmt->bind_param("is", $userId, $oldName);
+            $stmt->execute();
+            return;
+        }
+        
+        // Find existing goal with old name
+        $stmt = $conn->prepare("
+            SELECT id FROM personal_goals 
+            WHERE user_id = ? AND goal_name = ?
+        ");
+        $stmt->bind_param("is", $userId, $oldName);
+        $stmt->execute();
+        $goal = $stmt->get_result()->fetch_assoc();
+        
+        if ($goal) {
+            // Update existing goal
+            $stmt = $conn->prepare("
+                UPDATE personal_goals 
+                SET goal_name = ?, target_amount = ? 
+                WHERE id = ?
+            ");
+            $newTargetAmount = $newBudgetLimit * 12; // 12 months worth
+            $stmt->bind_param("sdi", $newName, $newTargetAmount, $goal['id']);
+            $stmt->execute();
+            
+            // Update goal settings
+            $stmt = $conn->prepare("
+                UPDATE personal_goal_settings 
+                SET save_amount = ? 
+                WHERE goal_id = ?
+            ");
+            $stmt->bind_param("di", $newBudgetLimit, $goal['id']);
+            $stmt->execute();
+        } else {
+            // Create new goal if it doesn't exist
+            createSavingsGoalFromCategory($conn, $userId, $newName, $newBudgetLimit, '#34495e');
+        }
+        
+    } catch (Exception $e) {
+        // Silently fail - don't break budget category update
+        error_log("Failed to update linked savings goal: " . $e->getMessage());
+    }
+}
+
+/**
+ * Create a savings goal when a savings category is created
+ */
+function createSavingsGoalFromCategory($conn, $userId, $categoryName, $monthlyBudget, $color) {
+    try {
+        // Check if goal with same name already exists
+        $stmt = $conn->prepare("
+            SELECT id FROM personal_goals 
+            WHERE user_id = ? AND goal_name = ?
+        ");
+        $stmt->bind_param("is", $userId, $categoryName);
+        $stmt->execute();
+        $existingGoal = $stmt->get_result()->fetch_assoc();
+        
+        if ($existingGoal) {
+            // Goal already exists, just return
+            return;
+        }
+        
+        // Set target amount equal to the budget limit as requested
+        $targetAmount = $monthlyBudget;
+        
+        // Determine goal type based on category name
+        $goalType = determineGoalType($categoryName);
+        
+        // Check if status column exists
+        $stmt = $conn->prepare("SHOW COLUMNS FROM personal_goals LIKE 'status'");
+        $stmt->execute();
+        $statusExists = $stmt->get_result()->num_rows > 0;
+        
+        if ($statusExists) {
+            // Create the goal with status
+            $stmt = $conn->prepare("
+                INSERT INTO personal_goals 
+                (user_id, goal_name, target_amount, current_amount, goal_type, priority, status, is_completed) 
+                VALUES (?, ?, ?, 0, ?, 'medium', 'active', 0)
+            ");
+            $stmt->bind_param("isds", $userId, $categoryName, $targetAmount, $goalType);
+        } else {
+            // Create the goal without status
+            $stmt = $conn->prepare("
+                INSERT INTO personal_goals 
+                (user_id, goal_name, target_amount, current_amount, goal_type, priority, is_completed) 
+                VALUES (?, ?, ?, 0, ?, 'medium', 0)
+            ");
+            $stmt->bind_param("isds", $userId, $categoryName, $targetAmount, $goalType);
+        }
+        
+        $stmt->execute();
+        $goalId = $conn->insert_id;
+        
+        // Create goal settings - only enable auto-save if there's a budget amount
+        if ($monthlyBudget > 0) {
+            $stmt = $conn->prepare("
+                INSERT INTO personal_goal_settings 
+                (goal_id, auto_save_enabled, save_method, save_amount, deduct_from_income) 
+                VALUES (?, 1, 'fixed', ?, 1)
+            ");
+            $stmt->bind_param("id", $goalId, $monthlyBudget);
+            $stmt->execute();
+        } else {
+            $stmt = $conn->prepare("
+                INSERT INTO personal_goal_settings 
+                (goal_id, auto_save_enabled, save_method, save_amount, deduct_from_income) 
+                VALUES (?, 0, 'manual', 0, 0)
+            ");
+            $stmt->bind_param("i", $goalId);
+            $stmt->execute();
+        }
+        
+    } catch (Exception $e) {
+        // Silently fail - don't break budget category creation
+        error_log("Failed to create savings goal from category: " . $e->getMessage());
+    }
+}
+
+/**
+ * Determine goal type based on category name
+ */
+function determineGoalType($categoryName) {
+    $name = strtolower($categoryName);
+    
+    if (strpos($name, 'emergency') !== false || strpos($name, 'fund') !== false) {
+        return 'emergency_fund';
+    } elseif (strpos($name, 'vacation') !== false || strpos($name, 'travel') !== false || strpos($name, 'holiday') !== false) {
+        return 'vacation';
+    } elseif (strpos($name, 'car') !== false || strpos($name, 'vehicle') !== false) {
+        return 'car';
+    } elseif (strpos($name, 'house') !== false || strpos($name, 'home') !== false || strpos($name, 'mortgage') !== false) {
+        return 'house';
+    } elseif (strpos($name, 'education') !== false || strpos($name, 'school') !== false || strpos($name, 'college') !== false) {
+        return 'education';
+    } else {
+        return 'other';
+    }
+}
+
 ?>

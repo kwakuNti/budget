@@ -116,21 +116,21 @@ $quickSuggestions = getQuickAddSuggestions($conn, $family_id, 6);
         <div class="expense-stats-grid">
             <div class="expense-stat-card total-expenses">
                 <div class="stat-icon expenses">💸</div>
-                <div class="stat-value">₵<span id="totalExpenses">0.00</span></div>
+                <div class="stat-value">₵<span id="totalExpenses"><?= number_format(floatval($expenseStats['total_expenses']), 2) ?></span></div>
                 <div class="stat-label">Total Expenses (All Time)</div>
                 <div class="stat-change negative">↗ <?= abs($expenseStats['total_change']) ?>% from last month</div>
             </div>
             
             <div class="expense-stat-card monthly-expenses">
                 <div class="stat-icon monthly">📊</div>
-                <div class="stat-value">₵<span id="currentMonthExpenses">0.00</span></div>
+                <div class="stat-value">₵<span id="currentMonthExpenses"><?= number_format($expenseStats['this_month_expenses'], 2) ?></span></div>
                 <div class="stat-label">This Month's Expenses</div>
                 <div class="stat-change negative">↗ <?= abs($expenseStats['monthly_change']) ?>% from last month</div>
             </div>
             
             <div class="expense-stat-card avg-monthly">
                 <div class="stat-icon average">📈</div>
-                <div class="stat-value">₵<span id="avgMonthlyExpenses">0.00</span></div>
+                <div class="stat-value">₵<span id="avgMonthlyExpenses"><?= number_format($expenseStats['average_monthly'], 2) ?></span></div>
                 <div class="stat-label">Monthly Average</div>
                 <div class="stat-change positive">↘ <?= abs($expenseStats['average_change']) ?>% from last month</div>
             </div>
@@ -329,7 +329,7 @@ $quickSuggestions = getQuickAddSuggestions($conn, $family_id, 6);
                     
                     <div class="form-group">
                         <label>Description</label>
-                        <input type="text" id="expenseDescription" placeholder="e.g., Monthly electricity bill" required>
+                        <input type="text" id="expenseDescription" placeholder="e.g., Monthly electricity bill">
                     </div>
                     
                     <div class="form-row">

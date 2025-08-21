@@ -429,6 +429,22 @@ input[type="radio"] {
     margin-bottom: 0.5rem;
 }
 
+.goal-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.status-line {
+    display: flex;
+    align-items: center;
+}
+
+.priority-line {
+    display: flex;
+    align-items: center;
+}
+
 .goal-description {
     font-size: 0.9rem;
     color: var(--text-secondary);

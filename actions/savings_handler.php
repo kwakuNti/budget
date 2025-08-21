@@ -421,39 +421,67 @@ function createGoal($conn, $userId) {
         $stmt->execute();
         $statusExists = $stmt->get_result()->num_rows > 0;
         
-        if ($statusExists) {
-            // Create the goal with status
+        // Create corresponding budget category in savings section FIRST
+        $categoryIcon = getGoalTypeIcon($goalType);
+        $categoryColor = getGoalTypeColor($goalType);
+        
+        // Set budget limit equal to target amount as requested
+        $budgetLimit = floatval($targetAmount);
+        
+        // Check if category already exists with same name
+        $stmt = $conn->prepare("
+            SELECT id FROM budget_categories 
+            WHERE user_id = ? AND name = ? AND category_type = 'savings'
+        ");
+        $stmt->bind_param("is", $userId, $goalName);
+        $stmt->execute();
+        $existingCategory = $stmt->get_result()->fetch_assoc();
+        
+        if (!$existingCategory) {
             $stmt = $conn->prepare("
-                INSERT INTO personal_goals 
-                (user_id, goal_name, target_amount, current_amount, target_date, goal_type, priority, status, is_completed) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'active', 0)
+                INSERT INTO budget_categories 
+                (user_id, name, category_type, icon, color, budget_limit) 
+                VALUES (?, ?, 'savings', ?, ?, ?)
             ");
-            $stmt->bind_param("isdssss", $userId, $goalName, $targetAmount, $initialDeposit, $targetDate, $goalType, $priority);
+            $stmt->bind_param("isssd", $userId, $goalName, $categoryIcon, $categoryColor, $budgetLimit);
+            $stmt->execute();
+            $categoryId = $conn->insert_id;
         } else {
-            // Create the goal without status
+            // Update existing category with new budget limit
+            $stmt = $conn->prepare("
+                UPDATE budget_categories 
+                SET budget_limit = ?, icon = ?, color = ?, is_active = 1
+                WHERE id = ?
+            ");
+            $stmt->bind_param("dssi", $budgetLimit, $categoryIcon, $categoryColor, $existingCategory['id']);
+            $stmt->execute();
+            $categoryId = $existingCategory['id'];
+        }
+        
+        if ($statusExists) {
+            // Create the goal with status and new columns
             $stmt = $conn->prepare("
                 INSERT INTO personal_goals 
-                (user_id, goal_name, target_amount, current_amount, target_date, goal_type, priority, is_completed) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                (user_id, goal_name, target_amount, current_amount, target_date, budget_category_id, goal_type, priority, status, auto_save_enabled, save_method, save_percentage, save_amount, deduct_from_income, is_completed) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, 0)
             ");
-            $stmt->bind_param("isdssss", $userId, $goalName, $targetAmount, $initialDeposit, $targetDate, $goalType, $priority);
+            $autoSaveInt = $autoSaveEnabled ? 1 : 0;
+            $deductInt = $deductFromIncome ? 1 : 0;
+            $stmt->bind_param("isdsisissdsdi", $userId, $goalName, $targetAmount, $initialDeposit, $targetDate, $categoryId, $goalType, $priority, $autoSaveInt, $saveMethod, $savePercentage, $saveAmount, $deductInt);
+        } else {
+            // Create the goal without status but with new columns
+            $stmt = $conn->prepare("
+                INSERT INTO personal_goals 
+                (user_id, goal_name, target_amount, current_amount, target_date, budget_category_id, goal_type, priority, auto_save_enabled, save_method, save_percentage, save_amount, deduct_from_income, is_completed) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            ");
+            $autoSaveInt = $autoSaveEnabled ? 1 : 0;
+            $deductInt = $deductFromIncome ? 1 : 0;
+            $stmt->bind_param("isdsisissdsdi", $userId, $goalName, $targetAmount, $initialDeposit, $targetDate, $categoryId, $goalType, $priority, $autoSaveInt, $saveMethod, $savePercentage, $saveAmount, $deductInt);
         }
         
         $stmt->execute();
         $goalId = $conn->insert_id;
-        
-        // Create goal settings if auto-save is enabled or if we have any settings
-        if ($autoSaveEnabled || $saveMethod !== 'manual') {
-            $stmt = $conn->prepare("
-                INSERT INTO personal_goal_settings 
-                (goal_id, auto_save_enabled, save_method, save_percentage, save_amount, deduct_from_income) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
-            $autoSaveInt = $autoSaveEnabled ? 1 : 0;
-            $deductInt = $deductFromIncome ? 1 : 0;
-            $stmt->bind_param("iisddi", $goalId, $autoSaveInt, $saveMethod, $savePercentage, $saveAmount, $deductInt);
-            $stmt->execute();
-        }
         
         // Add initial deposit if provided
         if ($initialDeposit > 0) {
@@ -628,7 +656,7 @@ function addContribution($conn, $userId) {
     $goalId = intval($_POST['goal_id'] ?? 0);
     $amountRaw = $_POST['amount'] ?? 0;
     $amount = sprintf('%.2f', $amountRaw);
-    $source = $_POST['source'] ?? 'manual';
+    $source = 'manual'; // Default to manual since we removed the source field
     $description = trim($_POST['description'] ?? '');
     
     if (!$goalId || floatval($amount) <= 0) {
@@ -668,6 +696,11 @@ function addContribution($conn, $userId) {
         ");
         $stmt->bind_param("dii", $newAmount, $isCompleted, $goalId);
         $stmt->execute();
+        
+        // NOTE: Removed incorrect expense tracking for savings contributions
+        // Savings should NOT be treated as expenses in the budget system
+        // They are already properly tracked in personal_goal_contributions table
+        // Budget calculations should be: Available = Income - Expenses - Savings
         
         $conn->commit();
         
@@ -800,29 +833,36 @@ function pauseGoal($conn, $userId) {
     $statusExists = $stmt->get_result()->num_rows > 0;
     
     if ($statusExists) {
-        // Update goal status to paused
+        // Update goal status to paused and disable auto-save
         $stmt = $conn->prepare("
             UPDATE personal_goals 
-            SET status = 'paused', updated_at = CURRENT_TIMESTAMP 
+            SET status = 'paused', auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ? AND user_id = ?
+        ");
+        $stmt->bind_param("ii", $goalId, $userId);
+        $stmt->execute();
+    } else {
+        // Just disable auto-save if status column doesn't exist
+        $stmt = $conn->prepare("
+            UPDATE personal_goals 
+            SET auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
             WHERE id = ? AND user_id = ?
         ");
         $stmt->bind_param("ii", $goalId, $userId);
         $stmt->execute();
     }
-    
-    // Always disable auto-save when pausing
-    $stmt = $conn->prepare("
-        UPDATE personal_goal_settings 
-        SET auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
-        WHERE goal_id = ? AND goal_id IN (SELECT id FROM personal_goals WHERE user_id = ?)
-    ");
-    $stmt->bind_param("ii", $goalId, $userId);
-    $stmt->execute();
-    
-    echo json_encode([
-        'success' => true,
-        'message' => 'Goal paused successfully'
-    ]);
+
+    if ($stmt->affected_rows > 0) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Goal paused successfully'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Goal not found or already paused'
+        ]);
+    }
 }
 
 function resumeGoal($conn, $userId) {
@@ -838,7 +878,7 @@ function resumeGoal($conn, $userId) {
     $statusExists = $stmt->get_result()->num_rows > 0;
     
     if ($statusExists) {
-        // Update goal status to active
+        // Update goal status to active and optionally enable auto-save
         $stmt = $conn->prepare("
             UPDATE personal_goals 
             SET status = 'active', updated_at = CURRENT_TIMESTAMP 
@@ -847,11 +887,18 @@ function resumeGoal($conn, $userId) {
         $stmt->bind_param("ii", $goalId, $userId);
         $stmt->execute();
     }
-    
-    echo json_encode([
-        'success' => true,
-        'message' => 'Goal resumed successfully'
-    ]);
+
+    if ($stmt->affected_rows > 0) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Goal resumed successfully'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Goal not found or already active'
+        ]);
+    }
 }
 
 function setGoalInactive($conn, $userId) {
@@ -867,29 +914,36 @@ function setGoalInactive($conn, $userId) {
     $statusExists = $stmt->get_result()->num_rows > 0;
     
     if ($statusExists) {
-        // Update goal status to inactive
+        // Update goal status to inactive and disable auto-save
         $stmt = $conn->prepare("
             UPDATE personal_goals 
-            SET status = 'inactive', updated_at = CURRENT_TIMESTAMP 
+            SET status = 'inactive', auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ? AND user_id = ?
+        ");
+        $stmt->bind_param("ii", $goalId, $userId);
+        $stmt->execute();
+    } else {
+        // Just disable auto-save if status column doesn't exist
+        $stmt = $conn->prepare("
+            UPDATE personal_goals 
+            SET auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
             WHERE id = ? AND user_id = ?
         ");
         $stmt->bind_param("ii", $goalId, $userId);
         $stmt->execute();
     }
-    
-    // Disable auto-save when setting inactive
-    $stmt = $conn->prepare("
-        UPDATE personal_goal_settings 
-        SET auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
-        WHERE goal_id = ? AND goal_id IN (SELECT id FROM personal_goals WHERE user_id = ?)
-    ");
-    $stmt->bind_param("ii", $goalId, $userId);
-    $stmt->execute();
-    
-    echo json_encode([
-        'success' => true,
-        'message' => 'Goal set to inactive successfully'
-    ]);
+
+    if ($stmt->affected_rows > 0) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Goal set to inactive successfully'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Goal not found'
+        ]);
+    }
 }
 
 function updateGoal($conn, $userId) {
@@ -1341,6 +1395,36 @@ function getSavingsOverview($conn, $userId) {
     } catch (Exception $e) {
         throw new Exception('Failed to get savings overview: ' . $e->getMessage());
     }
+}
+
+/**
+ * Get icon for goal type
+ */
+function getGoalTypeIcon($goalType) {
+    $icons = [
+        'emergency_fund' => '🚨',
+        'vacation' => '✈️',
+        'car' => '🚗',
+        'house' => '🏠',
+        'education' => '🎓',
+        'other' => '💰'
+    ];
+    return $icons[$goalType] ?? '💰';
+}
+
+/**
+ * Get color for goal type
+ */
+function getGoalTypeColor($goalType) {
+    $colors = [
+        'emergency_fund' => '#e74c3c',  // Red
+        'vacation' => '#3498db',        // Blue
+        'car' => '#2ecc71',            // Green
+        'house' => '#f39c12',          // Orange
+        'education' => '#9b59b6',      // Purple
+        'other' => '#34495e'           // Dark gray
+    ];
+    return $colors[$goalType] ?? '#34495e';
 }
 
 ?>

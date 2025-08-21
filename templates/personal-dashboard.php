@@ -7,6 +7,20 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check user type and redirect family users to family dashboard
+require_once '../config/connection.php';
+$userId = $_SESSION['user_id'];
+$stmt = $conn->prepare("SELECT user_type FROM users WHERE id = ?");
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+
+if (!$user || $user['user_type'] !== 'personal') {
+    // Redirect family users to family dashboard
+    header('Location: ../index.php');
+    exit;
+}
+
 // Get user information from session
 $user_first_name = $_SESSION['first_name'] ?? 'User';
 $user_full_name = $_SESSION['full_name'] ?? 'User';
@@ -873,72 +887,239 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
         }
 
-        /* Budget Template Preview Modal styles */
+        /* Budget Template Preview Modal styles - Minimalistic & Clean */
         .budget-template-hero {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             color: #fff;
-            border-radius: 16px;
-            padding: 16px 16px 12px 16px;
-            margin-bottom: 14px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .budget-template-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
         .budget-template-hero h4 {
-            margin: 0 0 6px 0;
-            font-size: 1.1rem;
-            font-weight: 800;
+            margin: 0 0 8px 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 2;
         }
+        
         .budget-template-hero small {
-            opacity: 0.95;
+            opacity: 0.85;
+            font-size: 1rem;
+            font-weight: 400;
+            position: relative;
+            z-index: 2;
         }
+        
         .allocation-bar {
             display: flex;
             width: 100%;
-            height: 14px;
-            border-radius: 10px;
+            height: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            background: var(--border-color);
-            margin: 10px 0 4px 0;
-            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.2);
+            margin: 24px 0 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
         }
+        
         .allocation-segment {
             height: 100%;
+            transition: all 0.3s ease;
+            position: relative;
         }
-        .allocation-segment.needs { background: rgba(59,130,246,0.9); }
-        .allocation-segment.wants { background: rgba(245,158,11,0.9); }
-        .allocation-segment.savings { background: rgba(16,185,129,0.9); }
+        
+        .allocation-segment::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+        }
+        
+        .allocation-segment.needs { 
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        .allocation-segment.wants { 
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        .allocation-segment.savings { 
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
         .allocation-legend {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 10px;
+            gap: 16px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 2;
         }
+        
         .legend-item {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.25);
-            border-radius: 10px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
         }
-        .legend-left { display: flex; align-items: center; gap: 8px; }
-        .legend-dot { width: 10px; height: 10px; border-radius: 999px; }
+        
+        .legend-item:hover {
+            background: rgba(255,255,255,0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .legend-left { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .legend-dot { 
+            width: 16px; 
+            height: 16px; 
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            margin-bottom: 4px;
+        }
         .legend-dot.needs { background: #3b82f6; }
         .legend-dot.wants { background: #f59e0b; }
         .legend-dot.savings { background: #10b981; }
-        .legend-label { font-weight: 700; font-size: 0.9rem; }
-        .legend-amount { font-weight: 700; }
-        .pill {
-            background: rgba(255,255,255,0.18);
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.25);
+        
+        .legend-label { 
+            font-weight: 600; 
+            font-size: 0.9rem;
+            margin-bottom: 4px;
         }
-        .empty-template-state { text-align: center; padding: 20px 12px; }
-        .empty-template-state h4 { margin: 10px 0 6px 0; }
-        .empty-template-state p { color: var(--text-secondary); margin: 0 0 12px 0; }
+        
+        .legend-amount { 
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+        
+        .pill {
+            background: rgba(255,255,255,0.25);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .empty-template-state { 
+            text-align: center; 
+            padding: 48px 32px;
+            color: var(--text-secondary);
+            background: var(--card-background);
+            border-radius: 16px;
+            border: 2px dashed var(--border-color);
+        }
+        
+        .empty-template-state h4 { 
+            margin: 16px 0 12px 0;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .empty-template-state p { 
+            color: var(--text-secondary); 
+            margin: 0 0 24px 0;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        /* Modal improvements */
+        #budgetTemplateViewModal .modal-content {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        
+        #budgetTemplateViewModal .modal-header {
+            background: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 24px 32px 20px;
+        }
+        
+        #budgetTemplateViewModal .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        #budgetTemplateViewModal .modal-body {
+            padding: 0 32px 24px;
+        }
+        
+        #budgetTemplateViewModal .modal-actions {
+            padding: 20px 32px 32px;
+            gap: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        #budgetTemplateViewModal .modal-actions .btn-secondary {
+            background: var(--background-color);
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        #budgetTemplateViewModal .modal-actions .btn-secondary:hover {
+            background: var(--text-secondary);
+            color: white;
+            border-color: var(--text-secondary);
+        }
+        
+        #budgetTemplateViewModal .modal-actions .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: 2px solid var(--primary-color);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        #budgetTemplateViewModal .modal-actions .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -1544,6 +1725,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         function calculateAutoSavings(data) {
             // Return actual total savings for the current month
+            if (data.savings_overview) {
+                return data.savings_overview.monthly_contributions || 0;
+            }
             const overview = data.financial_overview;
             return overview.total_savings_this_month || 0;
         }
@@ -1591,12 +1775,25 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             // Savings status
             const savingsPercentageEl = document.getElementById('savingsPercentage');
             if (savingsPercentageEl) {
-                const totalSaved = overview.total_savings_this_month || 0;
-                const allocation = data.budget_allocation;
+                let totalSaved = 0;
+                let targetSavings = 0;
                 
-                if (allocation && overview.monthly_income > 0) {
-                    const targetSavings = (overview.monthly_income * (allocation.savings_percentage || 20)) / 100;
-                    const progressPercentage = targetSavings > 0 ? (totalSaved / targetSavings * 100).toFixed(1) : 0;
+                if (data.savings_overview) {
+                    totalSaved = data.savings_overview.monthly_contributions || 0;
+                    targetSavings = data.savings_overview.monthly_target || 0;
+                } else {
+                    totalSaved = overview.total_savings_this_month || 0;
+                    const allocation = data.budget_allocation;
+                    if (allocation && overview.monthly_income > 0) {
+                        const savingsAllocation = allocation.find(a => a.category_type === 'savings');
+                        if (savingsAllocation) {
+                            targetSavings = savingsAllocation.allocated_amount || 0;
+                        }
+                    }
+                }
+                
+                if (targetSavings > 0) {
+                    const progressPercentage = (totalSaved / targetSavings * 100).toFixed(1);
                     
                     if (totalSaved >= targetSavings) {
                         savingsPercentageEl.textContent = `${progressPercentage}% of target (Goal achieved!)`;

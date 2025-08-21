@@ -221,6 +221,24 @@ try {
             if ($stmt->execute()) {
                 $categoryId = $conn->insert_id;
                 
+                // If this is a savings category, create a corresponding savings goal
+                if ($category_type === 'savings') {
+                    try {
+                        // Create a savings goal with the same name and target amount as budget limit
+                        $goalStmt = $conn->prepare("
+                            INSERT INTO personal_goals 
+                            (user_id, goal_name, target_amount, goal_type, priority, auto_save_enabled, 
+                             save_method, save_amount, budget_category_id, status, created_at) 
+                            VALUES (?, ?, ?, 'other', 'medium', 1, 'fixed', ?, ?, 'active', NOW())
+                        ");
+                        $goalStmt->bind_param("isddi", $userId, $name, $budget_limit, $budget_limit, $categoryId);
+                        $goalStmt->execute();
+                    } catch (Exception $e) {
+                        // Log the error but don't fail the category creation
+                        error_log("Failed to create savings goal for category {$name}: " . $e->getMessage());
+                    }
+                }
+                
                 // Get the newly created category
                 $getStmt = $conn->prepare("
                     SELECT id, name, category_type, icon, color, budget_limit, created_at
@@ -234,7 +252,7 @@ try {
                 
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Category added successfully',
+                    'message' => 'Category added successfully' . ($category_type === 'savings' ? ' and savings goal created' : ''),
                     'category' => [
                         'id' => intval($newCategory['id']),
                         'name' => $newCategory['name'],

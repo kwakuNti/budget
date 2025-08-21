@@ -4,17 +4,37 @@
  * Provides all data needed for the personal dashboard
  */
 
-session_start();
-header('Content-Type: application/json');
-require_once '../config/connection.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable HTML error output to prevent JSON corruption
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
+
+// Start output buffering to catch any unwanted output
+ob_start();
+
+header('Content-Type: application/json');
+
+// Include database connection with flexible path
+if (file_exists('../config/connection.php')) {
+    require_once '../config/connection.php';
+} elseif (file_exists('config/connection.php')) {
+    require_once 'config/connection.php';
+} else {
+    ob_clean();
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database connection file not found'
+    ]);
+    exit;
+}
 
 // Check if user is logged in and has personal account
 if (!isset($_SESSION['user_id'])) {
+    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => 'Unauthorized access - please log in'
@@ -30,6 +50,7 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user || $user['user_type'] !== 'personal') {
+    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => 'Access denied - personal account required'
@@ -43,7 +64,8 @@ try {
         'id' => $userId,
         'first_name' => $user['first_name'],
         'last_name' => $user['last_name'],
-        'email' => $user['email']
+        'email' => $user['email'],
+        'initials' => strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1))
     ];
     
     // Salary Information (SCHEDULED - for reference only)
@@ -169,20 +191,21 @@ try {
     // CORRECTED: Calculate total monthly income from CONFIRMED sources only
     $monthlyIncome = $totalConfirmedIncome + $confirmedSalaryAmount;
     
-    // Get monthly expenses (FIXED - removed is_active)
+    // Get monthly expenses (CORRECTED - exclude savings categories)
     $stmt = $conn->prepare("
-        SELECT COALESCE(SUM(amount), 0) as total_expenses
-        FROM personal_expenses 
-        WHERE user_id = ? 
-        AND DATE_FORMAT(expense_date, '%Y-%m') = ?
+        SELECT COALESCE(SUM(pe.amount), 0) as total_expenses
+        FROM personal_expenses pe
+        LEFT JOIN budget_categories bc ON pe.category_id = bc.id
+        WHERE pe.user_id = ? 
+        AND DATE_FORMAT(pe.expense_date, '%Y-%m') = ?
+        AND (bc.category_type != 'savings' OR bc.category_type IS NULL)
     ");
     $stmt->bind_param("is", $userId, $currentMonth);
     $stmt->execute();
     $expenseResult = $stmt->get_result()->fetch_assoc();
     $monthlyExpenses = floatval($expenseResult['total_expenses']);
     
-    // Available balance
-    $availableBalance = $monthlyIncome - $monthlyExpenses;
+    // Note: availableBalance will be calculated after monthlySavingsContributions is known
     
     // Recent Transactions (FIXED - include all required fields for frontend)
     $stmt = $conn->prepare("
@@ -258,9 +281,14 @@ try {
     $goalsResult = $stmt->get_result();
     
     $savingsGoals = [];
+    $totalCurrentSavings = 0;
+    $totalTargetSavings = 0;
     while ($row = $goalsResult->fetch_assoc()) {
         $progressPercentage = $row['target_amount'] > 0 ? 
             min(100, ($row['current_amount'] / $row['target_amount']) * 100) : 0;
+            
+        $totalCurrentSavings += floatval($row['current_amount']);
+        $totalTargetSavings += floatval($row['target_amount']);
             
         $savingsGoals[] = [
             'id' => intval($row['id']),
@@ -275,6 +303,34 @@ try {
         ];
     }
     
+    // Get savings contributions for current month
+    $stmt = $conn->prepare("
+        SELECT COALESCE(SUM(pgc.amount), 0) as monthly_contributions
+        FROM personal_goal_contributions pgc
+        JOIN personal_goals pg ON pgc.goal_id = pg.id
+        WHERE pg.user_id = ? 
+        AND DATE_FORMAT(pgc.contribution_date, '%Y-%m') = ?
+    ");
+    $stmt->bind_param("is", $userId, $currentMonth);
+    $stmt->execute();
+    $monthlyContributionsResult = $stmt->get_result()->fetch_assoc();
+    $monthlySavingsContributions = floatval($monthlyContributionsResult['monthly_contributions']);
+    
+    // Calculate available balance now that we have all components
+    $availableBalance = $monthlyIncome - $monthlyExpenses - $monthlySavingsContributions;
+    
+    // Calculate monthly savings target from budget allocation
+    $monthlySavingsTarget = 0;
+    if ($budgetAllocationRaw && $monthlyIncome > 0) {
+        $monthlySavingsTarget = $monthlyIncome * ($budgetAllocationRaw['savings_percentage'] / 100);
+    }
+    
+    // Calculate savings percentage
+    $savingsPercentage = 0;
+    if ($monthlySavingsTarget > 0) {
+        $savingsPercentage = ($monthlySavingsContributions / $monthlySavingsTarget) * 100;
+    }
+    
     // Response Construction with CORRECTED CONFIRMED INCOME LOGIC
     $responseData = [
         'success' => true,
@@ -287,8 +343,9 @@ try {
         'confirmed_income' => $confirmedIncomeList,
         'financial_overview' => [
             'monthly_income' => $monthlyIncome, // Now only confirmed income
-            'monthly_expenses' => $monthlyExpenses,
-            'available_balance' => $availableBalance,
+            'monthly_expenses' => $monthlyExpenses, // Excludes savings
+            'monthly_savings' => $monthlySavingsContributions, // Separate savings tracking
+            'available_balance' => $availableBalance, // Income - Expenses - Savings
             'confirmed_salary' => $confirmedSalaryAmount,
             'confirmed_additional_income' => $totalConfirmedIncome,
             'total_confirmed_income' => $monthlyIncome,
@@ -298,15 +355,28 @@ try {
             'confirmed_income_count' => count($confirmedIncomeList)
         ],
         'recent_transactions' => $recentTransactions,
-        'savings_goals' => $savingsGoals
+        'savings_goals' => $savingsGoals,
+        'savings_overview' => [
+            'monthly_contributions' => $monthlySavingsContributions,
+            'monthly_target' => $monthlySavingsTarget,
+            'savings_percentage' => round($savingsPercentage, 1),
+            'total_current_savings' => $totalCurrentSavings,
+            'total_target_savings' => $totalTargetSavings,
+            'active_goals_count' => count($savingsGoals),
+            'on_track_goals' => array_filter($savingsGoals, function($goal) { return $goal['is_on_track']; })
+        ]
     ];
     
+    ob_clean();
     echo json_encode($responseData);
     
 } catch (Exception $e) {
+    ob_clean();
     echo json_encode([
         'success' => false,
         'message' => 'Error retrieving dashboard data: ' . $e->getMessage()
     ]);
 }
+
+$conn->close();
 ?>

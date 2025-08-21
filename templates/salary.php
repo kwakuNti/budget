@@ -7,6 +7,13 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check if user has personal account
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] !== 'personal') {
+    // Redirect family users to family dashboard
+    header('Location: dashboard.php');
+    exit;
+}
+
 // Get user information from session
 $user_first_name = $_SESSION['first_name'] ?? 'User';
 $user_full_name = $_SESSION['full_name'] ?? 'User';
@@ -1877,9 +1884,100 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </div>
 
     <!-- Snackbar -->
-    <div id="snackbar"></div>
+    <!-- Updated snackbar will be created dynamically -->
 
     <script>
+        // Animation function for counting numbers
+        function animateNumber(element, start, end, duration = 2000, prefix = '', suffix = '') {
+            if (!element) return;
+            
+            const startTime = performance.now();
+            const difference = end - start;
+            
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function for smooth animation
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = start + (difference * easeOutQuart);
+                
+                if (suffix === '%') {
+                    element.textContent = prefix + Math.round(current) + suffix;
+                } else {
+                    element.textContent = prefix + current.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + suffix;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                }
+            }
+            
+            requestAnimationFrame(step);
+        }
+
+        // Function to load fresh salary data via AJAX
+        async function loadSalaryData() {
+            try {
+                const response = await fetch('../actions/salary_actions.php?action=get_salary_data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Add a small delay to ensure DOM is fully ready for animations
+                    setTimeout(() => {
+                        updateSalaryUIWithAnimation(data);
+                    }, 100);
+                } else {
+                    console.error('Failed to load salary data:', data.message);
+                    // Fallback to non-animated update
+                    if (typeof updateSalaryUI === 'function') {
+                        updateSalaryUI(data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading salary data:', error);
+                // Show empty state or error message if needed
+                showEmptyBudgetState();
+            }
+        }
+
+        // Function to update salary UI with animations
+        function updateSalaryUIWithAnimation(data) {
+            const salaryData = data.salary || {};
+            const financialOverview = data.financial_overview || {};
+            
+            // Animate Primary Salary Amount
+            const primarySalaryEl = document.getElementById('primarySalaryAmount');
+            if (primarySalaryEl) {
+                const salaryAmount = parseFloat(salaryData.monthly_salary) || 0;
+                animateNumber(primarySalaryEl, 0, salaryAmount, 2500, '₵');
+            }
+            
+            // Animate Current Salary Card
+            const currentSalaryEl = document.getElementById('currentSalary');
+            if (currentSalaryEl) {
+                const currentSalary = parseFloat(salaryData.monthly_salary) || 0;
+                animateNumber(currentSalaryEl, 0, currentSalary, 2000, '₵');
+            }
+            
+            // Animate Additional Income
+            const additionalIncomeEl = document.getElementById('additionalIncome');
+            if (additionalIncomeEl) {
+                const monthlyIncome = parseFloat(financialOverview.monthly_income) || 0;
+                const monthlySalary = parseFloat(salaryData.monthly_salary) || 0;
+                const additional = Math.max(0, monthlyIncome - monthlySalary);
+                animateNumber(additionalIncomeEl, 0, additional, 1800, '₵');
+            }
+            
+            // Continue with existing updateSalaryUI logic for non-animated elements
+            if (typeof updateSalaryUI === 'function') {
+                updateSalaryUI(data);
+            }
+        }
+
         // Theme Management
         function changeTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
@@ -2609,19 +2707,39 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         // Snackbar function
-        function showSnackbar(message, type = '') {
-            const snackbar = document.getElementById('snackbar');
-            snackbar.textContent = message;
-            snackbar.className = 'show';
-            
-            if (type) {
-                snackbar.classList.add(type);
+        function showSnackbar(message, type = 'info') {
+            // Remove existing snackbar if any
+            const existingSnackbar = document.querySelector('.snackbar');
+            if (existingSnackbar) {
+                existingSnackbar.remove();
             }
+
+            // Create new snackbar
+            const snackbar = document.createElement('div');
+            snackbar.className = `snackbar ${type}`;
             
+            const icons = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            snackbar.innerHTML = `
+                <span class="snackbar-icon">${icons[type] || icons.info}</span>
+                <span class="snackbar-message">${message}</span>
+            `;
+            
+            document.body.appendChild(snackbar);
+            
+            // Show snackbar
+            setTimeout(() => snackbar.classList.add('show'), 100);
+            
+            // Hide snackbar after 4 seconds
             setTimeout(() => {
-                snackbar.className = snackbar.className.replace('show', '');
-                snackbar.classList.remove(type);
-            }, 3000);
+                snackbar.classList.remove('show');
+                setTimeout(() => snackbar.remove(), 300);
+            }, 4000);
         }
 
         // Core JavaScript functions
@@ -3268,6 +3386,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             updateBudgetPreview();
             updateTotalAllocation();
             setupModalListeners();  // Add modal event listeners
+            
+            // Initialize with delayed data load to ensure DOM is ready
+            setTimeout(() => {
+                loadSalaryData();
+            }, 200);
+            
+            // Add visibility change listener for auto-refresh
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // Page became visible again, refresh data
+                    setTimeout(() => {
+                        loadSalaryData();
+                    }, 300);
+                }
+            });
             
             // Handle Primary Salary form submission
             const primarySalaryForm = document.getElementById('primarySalaryForm');

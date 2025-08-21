@@ -642,6 +642,44 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </div>
 
     <script>
+        // Animation function for counting numbers
+        function animateNumber(element, start, end, duration = 2000, prefix = '', suffix = '') {
+            if (!element) return;
+            
+            const startTime = performance.now();
+            const range = end - start;
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function for smooth animation
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = start + (range * easeOutQuart);
+                
+                // Format number with appropriate decimal places
+                const formattedNumber = current.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                element.textContent = prefix + formattedNumber + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                } else {
+                    // Ensure final value is exact
+                    const finalFormatted = end.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    element.textContent = prefix + finalFormatted + suffix;
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             // Set today's date as default
@@ -666,6 +704,18 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             loadCategoryBreakdown();
             loadRecentExpenses();
             initializeCharts();
+        });
+
+        // Add visibility change listener for auto-refresh when returning to page
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Page became visible again, refresh data with animations
+                setTimeout(() => {
+                    loadExpenseSummary();
+                    loadCategoryBreakdown();
+                    loadRecentExpenses();
+                }, 300);
+            }
         });
 
         // Toggle user menu
@@ -813,19 +863,22 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     updateSummaryCards(data.summary);
                 } else {
                     console.error('Failed to load expense summary:', data.message);
-                    showNotification('Failed to load expense summary', 'error');
+                    showSnackbar('Failed to load expense summary', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error loading expense summary:', error);
-                showNotification('Failed to load expense summary', 'error');
+                showSnackbar('Failed to load expense summary', 'error');
             });
         }
 
         // Update summary cards with real data
         function updateSummaryCards(summary) {
-            // Update total spent
-            document.getElementById('totalSpent').textContent = `₵${summary.total_expenses.toFixed(2)}`;
+            // Use animations like personal dashboard
+            animateNumber(document.getElementById('totalSpent'), 0, summary.total_expenses || 0, 2000, '₵');
+            animateNumber(document.getElementById('needsSpent'), 0, summary.needs.spent || 0, 2000, '₵');
+            animateNumber(document.getElementById('wantsSpent'), 0, summary.wants.spent || 0, 2000, '₵');
+            animateNumber(document.getElementById('dailyAverage'), 0, summary.daily_average || 0, 2000, '₵');
             
             // Update month change
             const monthChange = document.getElementById('monthChange');
@@ -836,8 +889,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             monthChange.textContent = changeText;
             monthChange.className = `summary-change ${summary.month_change >= 0 ? 'warning' : 'positive'}`;
             
-            // Update needs
-            document.getElementById('needsSpent').textContent = `₵${summary.needs.spent.toFixed(2)}`;
+            // Update needs budget info
             const needsRemaining = Math.max(0, summary.needs.remaining);
             document.getElementById('needsBudget').textContent = 
                 `₵${needsRemaining.toFixed(2)} left of ₵${summary.needs.budget.toFixed(2)}`;
@@ -847,8 +899,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 : 0;
             document.getElementById('needsProgress').style.width = `${needsPercentage}%`;
             
-            // Update wants
-            document.getElementById('wantsSpent').textContent = `₵${summary.wants.spent.toFixed(2)}`;
+            // Update wants budget info
             const wantsRemaining = Math.max(0, summary.wants.remaining);
             document.getElementById('wantsBudget').textContent = 
                 `₵${wantsRemaining.toFixed(2)} left of ₵${summary.wants.budget.toFixed(2)}`;
@@ -1006,6 +1057,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const percentage = category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
                 const statusClass = category.status || (percentage >= 100 ? 'over' : percentage >= 80 ? 'warning' : 'good');
                 
+                // Format remaining amount text based on whether over budget or not
+                const remainingAmount = Math.abs(category.remaining);
+                const remainingText = category.remaining >= 0 ? 
+                    `₵${remainingAmount.toFixed(2)} left` : 
+                    `₵${remainingAmount.toFixed(2)} exceeded`;
+                
                 categoryElement.innerHTML = `
                     <div class="category-header">
                         <span class="category-icon">${category.icon || '📝'}</span>
@@ -1018,7 +1075,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="category-details">
                         <div class="detail-row">
                             <span>Budget: ₵${category.budget.toFixed(2)}</span>
-                            <span class="status ${statusClass}">₵${category.remaining.toFixed(2)} left</span>
+                            <span class="status ${statusClass}">${remainingText}</span>
                         </div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${Math.min(100, percentage).toFixed(1)}%"></div>
@@ -1128,7 +1185,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             
             // Validate required fields
             if (!amount || !category_id || !description || !expense_date) {
-                showNotification('Please fill in all required fields', 'error');
+                showSnackbar('Please fill in all required fields', 'error');
                 return;
             }
             
@@ -1156,7 +1213,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification('Expense added successfully!', 'success');
+                    showSnackbar('Expense added successfully!', 'success');
                     closeModal('addExpenseModal');
                     event.target.reset();
                     
@@ -1169,12 +1226,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     // Also refresh categories to update budget indicators
                     loadCategories();
                 } else {
-                    showNotification(data.message || 'Failed to add expense', 'error');
+                    showSnackbar(data.message || 'Failed to add expense', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Failed to add expense. Please try again.', 'error');
+                showSnackbar('Failed to add expense. Please try again.', 'error');
             })
             .finally(() => {
                 // Restore button state
@@ -1186,14 +1243,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function editExpense(id) {
             // In real app, load expense data and show edit modal
             console.log('Editing expense:', id);
-            showNotification('Edit functionality coming soon!', 'info');
+            showSnackbar('Edit functionality coming soon!', 'info');
         }
 
         function deleteExpense(id) {
             if (confirm('Are you sure you want to delete this expense?')) {
                 // In real app, delete from database
                 console.log('Deleting expense:', id);
-                showNotification('Expense deleted successfully!', 'success');
+                showSnackbar('Expense deleted successfully!', 'success');
             }
         }
 
@@ -1472,29 +1529,43 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function loadMoreExpenses() {
             // In real app, load more expenses from server
             console.log('Loading more expenses...');
-            showNotification('Loading more expenses...', 'info');
+            showSnackbar('Loading more expenses...', 'info');
         }
 
-        function showNotification(message, type) {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <span class="notification-message">${message}</span>
-                <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+        // Snackbar notification function (standardized from personal dashboard)
+        function showSnackbar(message, type = 'info') {
+            // Remove existing snackbar if any
+            const existingSnackbar = document.querySelector('.snackbar');
+            if (existingSnackbar) {
+                existingSnackbar.remove();
+            }
+
+            // Create new snackbar
+            const snackbar = document.createElement('div');
+            snackbar.className = `snackbar ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            snackbar.innerHTML = `
+                <span class="snackbar-icon">${icons[type] || icons.info}</span>
+                <span class="snackbar-message">${message}</span>
             `;
             
-            // Add to page
-            document.body.appendChild(notification);
+            document.body.appendChild(snackbar);
             
-            // Show notification
-            setTimeout(() => notification.classList.add('show'), 100);
+            // Show snackbar
+            setTimeout(() => snackbar.classList.add('show'), 100);
             
-            // Auto remove after 5 seconds
+            // Hide snackbar after 4 seconds
             setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 5000);
+                snackbar.classList.remove('show');
+                setTimeout(() => snackbar.remove(), 300);
+            }, 4000);
         }
     </script>
 </body>

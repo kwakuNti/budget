@@ -25,7 +25,7 @@ function formatCurrency(amount) {
     // Round to 2 decimal places to avoid floating point precision issues
     numAmount = Math.round(numAmount * 100) / 100;
     
-    return `₵${numAmount.toFixed(2)}`;
+    return `₵${numAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 }
 
 function formatPercent(value) {
@@ -426,13 +426,17 @@ function updateBudgetStatusText(income, budgeted, spent) {
     
     if (budgetSurplusEl) {
         const surplus = income - budgeted;
-        budgetSurplusEl.textContent = surplus >= 0 ? `₵${surplus.toFixed(2)} surplus` : `₵${Math.abs(surplus).toFixed(2)} over budget`;
+        const surplusFormatted = Math.floor(surplus) === surplus ? surplus.toLocaleString('en-US') : surplus.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const absSurplusFormatted = Math.floor(Math.abs(surplus)) === Math.abs(surplus) ? Math.abs(surplus).toLocaleString('en-US') : Math.abs(surplus).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        budgetSurplusEl.textContent = surplus >= 0 ? `₵${surplusFormatted} surplus` : `₵${absSurplusFormatted} over budget`;
         budgetSurplusEl.className = surplus >= 0 ? 'change positive' : 'change negative';
     }
     
     if (spendingVarianceEl) {
         const variance = budgeted - spent;
-        spendingVarianceEl.textContent = variance >= 0 ? `₵${variance.toFixed(2)} under budget` : `₵${Math.abs(variance).toFixed(2)} over budget`;
+        const varianceFormatted = Math.floor(variance) === variance ? variance.toLocaleString('en-US') : variance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const absVarianceFormatted = Math.floor(Math.abs(variance)) === Math.abs(variance) ? Math.abs(variance).toLocaleString('en-US') : Math.abs(variance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        spendingVarianceEl.textContent = variance >= 0 ? `₵${varianceFormatted} under budget` : `₵${absVarianceFormatted} over budget`;
         spendingVarianceEl.className = variance >= 0 ? 'change positive' : 'change negative';
     }
     
@@ -1396,7 +1400,21 @@ function updateBudgetOverview() {
     const totalIncome = budgetData.total_monthly_income || 0;
     const totalPlanned = summary.total_planned || 0;
     const totalActual = summary.total_actual || 0;
-    const budgetPerformance = summary.budget_performance || 0;
+    
+    // Calculate budget performance with better logic
+    let budgetPerformance = 0;
+    if (totalPlanned > 0) {
+        if (totalActual === 0) {
+            budgetPerformance = 100; // Perfect control
+        } else if (totalActual <= totalPlanned) {
+            budgetPerformance = ((totalPlanned - totalActual) / totalPlanned) * 100;
+        } else {
+            // Over budget - performance decreases based on how much over
+            const overspent = totalActual - totalPlanned;
+            const overspentPercentage = (overspent / totalPlanned) * 100;
+            budgetPerformance = Math.max(0, 100 - overspentPercentage);
+        }
+    }
 
     // Update overview cards with animation if animateNumber function exists
     if (typeof animateNumber === 'function') {
@@ -1422,33 +1440,56 @@ function updateBudgetOverview() {
         if (budgetPerformanceEl) budgetPerformanceEl.textContent = formatPercent(budgetPerformance);
     }
 
-    // Update variance displays
+    // Update variance displays with better status logic
     const budgetSurplusEl = document.getElementById('budgetSurplus');
     const spendingVarianceEl = document.getElementById('spendingVariance');
     const performanceLabelEl = document.getElementById('performanceLabel');
     
     const surplus = summary.available_balance || 0;
     if (budgetSurplusEl) {
-        budgetSurplusEl.textContent = surplus >= 0 ? `₵${surplus.toFixed(2)} surplus` : `₵${Math.abs(surplus).toFixed(2)} deficit`;
+        budgetSurplusEl.textContent = surplus >= 0 ? 
+            `₵${surplus.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} surplus` : 
+            `₵${Math.abs(surplus).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} deficit`;
         budgetSurplusEl.className = surplus >= 0 ? 'change positive' : 'change negative';
     }
 
     const variance = summary.total_variance || 0;
     if (spendingVarianceEl) {
-        spendingVarianceEl.textContent = variance >= 0 ? `₵${variance.toFixed(2)} under budget` : `₵${Math.abs(variance).toFixed(2)} over budget`;
-        spendingVarianceEl.className = variance >= 0 ? 'change positive' : 'change negative';
+        if (totalActual === 0 && totalPlanned > 0) {
+            spendingVarianceEl.textContent = `₵${totalPlanned.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} unused`;
+            spendingVarianceEl.className = 'change positive';
+        } else if (variance > 0) {
+            spendingVarianceEl.textContent = `₵${variance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} remaining`;
+            spendingVarianceEl.className = 'change positive';
+        } else if (variance === 0) {
+            spendingVarianceEl.textContent = 'Budget limit reached';
+            spendingVarianceEl.className = 'change warning';
+        } else {
+            spendingVarianceEl.textContent = `₵${Math.abs(variance).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} over budget`;
+            spendingVarianceEl.className = 'change negative';
+        }
     }
 
     if (performanceLabelEl) {
-        const performance = summary.budget_performance || 0;
-        if (performance >= 95) {
-            performanceLabelEl.textContent = 'Excellent tracking';
-        } else if (performance >= 80) {
-            performanceLabelEl.textContent = 'Good tracking';
-        } else if (performance >= 60) {
-            performanceLabelEl.textContent = 'Fair tracking';
+        if (totalPlanned === 0) {
+            performanceLabelEl.textContent = 'No budget set';
+        } else if (totalActual === 0) {
+            performanceLabelEl.textContent = 'Perfect control';
         } else {
-            performanceLabelEl.textContent = 'Needs improvement';
+            const spentPercentage = (totalActual / totalPlanned) * 100;
+            if (spentPercentage <= 50) {
+                performanceLabelEl.textContent = 'Excellent control';
+            } else if (spentPercentage <= 80) {
+                performanceLabelEl.textContent = 'Good spending';
+            } else if (spentPercentage <= 95) {
+                performanceLabelEl.textContent = 'Approaching limit';
+            } else if (spentPercentage < 100) {
+                performanceLabelEl.textContent = 'Near limit';
+            } else if (spentPercentage === 100) {
+                performanceLabelEl.textContent = 'Limit reached';
+            } else {
+                performanceLabelEl.textContent = 'Over budget';
+            }
         }
     }
 
@@ -1561,27 +1602,41 @@ function renderBudgetCategories() {
         const typeCategories = budgetData.categories.filter(cat => cat.category_type === type);
         const typeInfo = categoryTypes[type];
         
-        // Get totals from the API data (category_type_totals from budget_data.php)
-        let typeTotals = budgetData.category_type_totals?.[type] || {
-            planned: 0,
-            actual: 0,
-            count: 0,
-            variance: 0,
-            progress_percentage: 0
-        };
-        
-        // If we don't have API totals, calculate them from categories
-        if (!budgetData.category_type_totals) {
+        // Handle savings type specially - get data from savings_data instead of categories
+        let typeTotals;
+        if (type === 'savings') {
+            // Use savings_data from API for savings information
+            const savingsData = budgetData.savings_data || {};
             typeTotals = {
-                planned: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0),
-                actual: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.actual_spent || 0), 0),
-                count: typeCategories.length,
+                planned: savingsData.planned_savings || 0,
+                actual: savingsData.actual_savings || 0,
+                count: 0, // No expense categories for savings
+                variance: savingsData.savings_variance || 0,
+                progress_percentage: savingsData.savings_percentage || 0
+            };
+        } else {
+            // Get totals from the API data (category_type_totals from budget_data.php)
+            typeTotals = budgetData.category_type_totals?.[type] || {
+                planned: 0,
+                actual: 0,
+                count: 0,
                 variance: 0,
                 progress_percentage: 0
             };
-            typeTotals.variance = typeTotals.planned - typeTotals.actual;
-            typeTotals.progress_percentage = typeTotals.planned > 0 ? 
-                Math.round((typeTotals.actual / typeTotals.planned) * 100) : 0;
+            
+            // If we don't have API totals, calculate them from categories
+            if (!budgetData.category_type_totals) {
+                typeTotals = {
+                    planned: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.budget_limit || 0), 0),
+                    actual: typeCategories.reduce((sum, cat) => sum + parseFloat(cat.actual_spent || 0), 0),
+                    count: typeCategories.length,
+                    variance: 0,
+                    progress_percentage: 0
+                };
+                typeTotals.variance = typeTotals.planned - typeTotals.actual;
+                typeTotals.progress_percentage = typeTotals.planned > 0 ? 
+                    Math.round((typeTotals.actual / typeTotals.planned) * 100) : 0;
+            }
         }
         
         // For backward compatibility, map to old field names that the rest of the function expects
@@ -1701,12 +1756,99 @@ function createCategorySection(type, typeInfo, totals, categories) {
             </div>
         </div>
         <div class="category-content">
-            ${createCategoryTable(categories)}
-            <button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>
+            ${type === 'savings' ? createSavingsMessage() : createCategoryTable(categories)}
+            ${type !== 'savings' ? `<button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>` : ''}
         </div>
     `;
     
     return section;
+}
+
+// Helper function to create savings message for budget page
+function createSavingsMessage() {
+    return `
+        <div class="savings-message">
+            <div class="message-icon">💰</div>
+            <h4>Savings Management</h4>
+            <p>Savings goals and contributions are managed separately from expense tracking.</p>
+            <div class="savings-info">
+                <div class="info-item">
+                    <span class="label">Planned Savings:</span>
+                    <span class="value">${formatCurrency(budgetData.savings_data?.planned_savings || 0)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Current Contributions:</span>
+                    <span class="value">${formatCurrency(budgetData.savings_data?.actual_savings || 0)}</span>
+                </div>
+            </div>
+            <div class="savings-actions">
+                <a href="savings.php" class="btn-primary">Manage Savings Goals</a>
+                <button onclick="showSavingsInfo()" class="btn-secondary">Learn More</button>
+            </div>
+        </div>
+    `;
+}
+
+// Function to show savings information modal
+function showSavingsInfo() {
+    showSnackbar('💡 Savings goals help you track specific financial objectives like emergency funds, vacation savings, or major purchases. Use the Savings page to create and manage your goals.', 'info');
+}
+
+// Helper function to calculate category status with better logic
+function getCategoryStatus(spent, limit) {
+    if (!limit || limit === 0) {
+        return {
+            status: 'no_limit',
+            text: 'No limit set',
+            class: 'neutral'
+        };
+    }
+    
+    const percentage = (spent / limit) * 100;
+    
+    if (spent === 0) {
+        return {
+            status: 'unused',
+            text: 'Not used',
+            class: 'good'
+        };
+    } else if (percentage < 50) {
+        return {
+            status: 'low',
+            text: 'Low usage',
+            class: 'good'
+        };
+    } else if (percentage < 80) {
+        return {
+            status: 'moderate',
+            text: 'Moderate usage',
+            class: 'good'
+        };
+    } else if (percentage < 95) {
+        return {
+            status: 'high',
+            text: 'High usage',
+            class: 'warning'
+        };
+    } else if (percentage < 99.99) {  // Changed from < 100 to < 99.99
+        return {
+            status: 'near_limit',
+            text: 'Near limit',
+            class: 'warning'
+        };
+    } else if (percentage >= 99.99 && percentage <= 100.01) { // When spending equals or very close to limit
+        return {
+            status: 'limit_reached',
+            text: 'Limit reached',
+            class: 'danger'
+        };
+    } else {
+        return {
+            status: 'over_budget',
+            text: 'Over budget',
+            class: 'danger'
+        };
+    }
 }
 
 // Helper functions for status display
@@ -1714,13 +1856,19 @@ function getStatusClass(status) {
     const statusClasses = {
         'over_allocation': 'status-danger',
         'over_budget': 'status-danger',
+        'limit_reached': 'status-danger',
         'over_allocated': 'status-warning',
         'near_limit': 'status-warning',
+        'high': 'status-warning',
         'on_track': 'status-success',
         'good': 'status-success',
-        'under_budget': 'status-info'
+        'moderate': 'status-success',
+        'low': 'status-success',
+        'unused': 'status-success',
+        'no_limit': 'status-neutral',
+        'neutral': 'status-neutral'
     };
-    return statusClasses[status] || 'status-info';
+    return statusClasses[status] || 'status-neutral';
 }
 
 function getStatusText(status) {
@@ -1764,24 +1912,14 @@ function createCategoryTable(categories) {
         const percentageUsed = budgetLimit > 0 ? (spentAmount / budgetLimit) * 100 : 0;
         const expenseCount = category.transaction_count || 0;
         
-        // Calculate status based on spending vs budget
-        let categoryStatus;
-        if (spentAmount > budgetLimit) {
-            categoryStatus = 'over_budget';
-        } else if (percentageUsed >= 90) {
-            categoryStatus = 'near_limit';
-        } else if (percentageUsed >= 70) {
-            categoryStatus = 'on_track';
-        } else {
-            categoryStatus = 'good';
-        }
-        
-        const statusClass = getStatusClass(categoryStatus);
-        const statusText = getStatusText(categoryStatus);
+        // Use the new status calculation function
+        const statusInfo = getCategoryStatus(spentAmount, budgetLimit);
+        const statusClass = getStatusClass(statusInfo.status);
+        const statusText = statusInfo.text;
         const varianceClass = variance >= 0 ? 'positive' : 'negative';
         
         tableHTML += `
-            <div class="budget-item ${categoryStatus === 'over_budget' ? 'over-budget' : ''}" data-category-id="${category.id}">
+            <div class="budget-item ${statusInfo.status === 'over_budget' ? 'over-budget' : ''}" data-category-id="${category.id}">
                 <div class="col-item">
                     <span class="item-icon" style="color: ${category.color}">${category.icon}</span>
                     <div class="item-info">
@@ -1793,9 +1931,9 @@ function createCategoryTable(categories) {
                     <span class="editable-amount" onclick="makeEditable(this, ${category.id}, 'budget_limit')">${formatCurrency(budgetLimit)}</span>
                 </div>
                 <div class="col-actual">
-                    <span class="spent-amount ${categoryStatus === 'over_budget' ? 'over-budget' : ''}">${formatCurrency(spentAmount)}</span>
+                    <span class="spent-amount ${statusInfo.status === 'over_budget' ? 'over-budget' : ''}">${formatCurrency(spentAmount)}</span>
                     <div class="usage-bar">
-                        <div class="usage-fill ${categoryStatus === 'over_budget' ? 'over-budget' : ''}" 
+                        <div class="usage-fill ${statusInfo.status === 'over_budget' ? 'over-budget' : ''}" 
                              style="width: ${Math.min(percentageUsed, 100)}%"></div>
                     </div>
                     <small>${formatPercent(percentageUsed)} used</small>

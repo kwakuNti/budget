@@ -175,6 +175,7 @@ function getCategories($conn, $user_id) {
             FROM budget_categories c
             LEFT JOIN personal_expenses e ON c.id = e.category_id AND e.user_id = c.user_id
             WHERE c.user_id = ? AND c.is_active = 1
+                AND c.category_type != 'savings'
             GROUP BY c.id, c.name, c.category_type, c.icon, c.color, c.budget_limit
             ORDER BY c.category_type, c.name
         ");
@@ -185,15 +186,15 @@ function getCategories($conn, $user_id) {
         
         $categories = [
             'needs' => [],
-            'wants' => [],
-            'savings' => []
+            'wants' => []
+            // Removed 'savings' => [] - savings are handled via goals, not expense categories
         ];
         
-        // Track section-level spending
+        // Track section-level spending (exclude savings)
         $section_spending = [
             'needs' => 0,
-            'wants' => 0,
-            'savings' => 0
+            'wants' => 0
+            // Removed 'savings' => 0 - savings tracked separately via goals
         ];
         
         while ($row = $result->fetch_assoc()) {

@@ -355,6 +355,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <option value="car">🚗 Car</option>
                             <option value="house">🏠 House</option>
                             <option value="education">🎓 Education</option>
+                            <option value="retirement">🏖️ Retirement</option>
+                            <option value="investment">📈 Investment</option>
+                            <option value="debt_payoff">💳 Debt Payoff</option>
+                            <option value="business">💼 Business</option>
+                            <option value="technology">💻 Technology</option>
+                            <option value="health">🏥 Health</option>
+                            <option value="entertainment">🎬 Entertainment</option>
+                            <option value="shopping">🛍️ Shopping</option>
+                            <option value="travel">✈️ Travel</option>
+                            <option value="wedding">💒 Wedding</option>
                             <option value="other">🎯 Other</option>
                         </select>
                     </div>
@@ -471,16 +481,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <div class="form-group">
                 <label>Amount (₵)</label>
                 <input type="number" name="amount" id="depositAmount" step="0.01" placeholder="0.00" required>
-            </div>
-            <div class="form-group">
-                <label>Source</label>
-                <select name="source" id="depositSource" required>
-                    <option value="">Select source</option>
-                    <option value="manual">Manual Transfer</option>
-                    <option value="salary">From Salary</option>
-                    <option value="bonus">Bonus/Extra Income</option>
-                    <option value="other">Other</option>
-                </select>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeModal('depositModal')">Cancel</button>
@@ -724,6 +724,33 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         </div>
     </div>
     <script>
+        // Animation function for counting numbers
+        function animateNumber(element, start, end, duration, prefix = '', suffix = '') {
+            const startTime = performance.now();
+            const difference = end - start;
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function for smooth animation
+                const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+                
+                const current = start + (difference * easeOutCubic);
+                const formattedNumber = current.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                element.textContent = `${prefix}${formattedNumber}${suffix}`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+
         // Global functions for modal and goal actions - defined immediately
 window.showNewGoalModal = function() {
     const modal = document.getElementById('newGoalModal');
@@ -1013,7 +1040,7 @@ class SavingsManager {
         // Update Total Savings
         const totalSavingsAmount = document.getElementById('totalSavingsAmount');
         if (totalSavingsAmount) {
-            totalSavingsAmount.textContent = `₵${data.total_savings.toFixed(2)}`;
+            animateNumber(totalSavingsAmount, 0, data.total_savings, 2500, '₵');
         }
 
         const totalSavingsChange = document.getElementById('totalSavingsChange');
@@ -1036,7 +1063,7 @@ class SavingsManager {
         // Update Savings Rate
         const savingsRateAmount = document.getElementById('savingsRateAmount');
         if (savingsRateAmount) {
-            savingsRateAmount.textContent = `${data.savings_rate}%`;
+            animateNumber(savingsRateAmount, 0, data.savings_rate, 2200, '', '%');
         }
 
         const savingsRateChange = document.getElementById('savingsRateChange');
@@ -1377,8 +1404,10 @@ class SavingsManager {
                         <div class="goal-info">
                             <h4>${goalIcon} ${goal.goal_name}</h4>
                             <div class="goal-meta">
-                                ${statusBadge}
-                                <span class="priority-badge ${goal.priority}">${goal.priority.toUpperCase()}</span>
+                                <div class="status-line">${statusBadge}</div>
+                                <div class="priority-line">
+                                    <span class="priority-badge ${goal.priority}">${goal.priority.toUpperCase()}</span>
+                                </div>
                             </div>
                         </div>
                         <div class="goal-menu">
@@ -1396,9 +1425,9 @@ class SavingsManager {
                             </div>
                         </div>
                         <div class="progress-details">
-                            <div class="current-amount">₵${parseFloat(goal.current_amount).toFixed(2)}</div>
-                            <div class="target-amount">of ₵${parseFloat(goal.target_amount).toFixed(2)}</div>
-                            <div class="remaining">${isCompleted ? 'Goal Achieved! 🎉' : `₵${remaining.toFixed(2)} to go`}</div>
+                            <div class="current-amount">${formatCurrency(goal.current_amount)}</div>
+                            <div class="target-amount">of ${formatCurrency(goal.target_amount)}</div>
+                            <div class="remaining">${isCompleted ? 'Goal Achieved! 🎉' : `₵${remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} to go`}</div>
                         </div>
                     </div>
 
@@ -1520,9 +1549,9 @@ class SavingsManager {
             return { text: 'Completed', class: 'achievement' };
         }
         if (activity.amount > 0) {
-            return { text: `+₵${parseFloat(activity.amount).toFixed(2)}`, class: 'positive' };
+            return { text: `+${formatCurrency(activity.amount)}`, class: 'positive' };
         }
-        return { text: '₵0.00', class: 'neutral' };
+        return { text: formatCurrency(0), class: 'neutral' };
     }
 
     formatDate(dateString) {
@@ -1550,7 +1579,7 @@ class SavingsManager {
             if (goal.current_amount < goal.target_amount) { // Only show incomplete goals
                 const option = document.createElement('option');
                 option.value = goal.id;
-                option.textContent = `${this.getGoalIcon(goal.goal_type)} ${goal.goal_name} (₵${parseFloat(goal.current_amount).toFixed(2)} / ₵${parseFloat(goal.target_amount).toFixed(2)})`;
+                option.textContent = `${this.getGoalIcon(goal.goal_type)} ${goal.goal_name} (${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)})`;
                 goalSelect.appendChild(option);
             }
         });
@@ -1579,7 +1608,7 @@ class SavingsManager {
         // Update the monthly target amount display
         const targetAmountElement = document.getElementById('monthlyTargetAmount');
         if (targetAmountElement) {
-            targetAmountElement.textContent = `₵${totalMonthlyTarget.toFixed(2)}`;
+            animateNumber(targetAmountElement, 0, totalMonthlyTarget, 2000, '₵');
         }
 
         // Update the percentage display to show combined percentage
@@ -1646,7 +1675,8 @@ class SavingsManager {
         // Update Budget Allocation Amount
         const allocationAmountElement = document.getElementById('budgetAllocationAmount');
         if (allocationAmountElement) {
-            allocationAmountElement.textContent = `₵${this.budgetAllocation.allocated_savings.toFixed(2)}`;
+            const allocatedSavings = this.budgetAllocation.allocated_savings || 0;
+            animateNumber(allocationAmountElement, 0, allocatedSavings, 1800, '₵');
         }
 
         // Update Budget Allocation Percentage
@@ -1698,7 +1728,7 @@ class SavingsManager {
         const targetPercentageElement = document.getElementById('monthlyTargetPercentage');
         
         if (targetAmountElement) {
-            targetAmountElement.textContent = `₵${this.budgetAllocation.allocated_savings.toFixed(2)}`;
+            targetAmountElement.textContent = formatCurrency(this.budgetAllocation.allocated_savings);
         }
 
         if (targetPercentageElement) {
@@ -1716,7 +1746,7 @@ class SavingsManager {
             const remaining = allocatedAmount - totalGoalContributions;
             
             monthlyProgressFill.style.width = `${Math.min(progressPercentage, 100)}%`;
-            monthlyProgressText.textContent = `₵${totalGoalContributions.toFixed(2)} committed • ₵${remaining.toFixed(2)} available`;
+            monthlyProgressText.textContent = `${formatCurrency(totalGoalContributions)} committed • ${formatCurrency(remaining)} available`;
         }
 
         const targetBreakdownElement = document.getElementById('targetBreakdown');
@@ -1925,7 +1955,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load saved theme
     const savedTheme = localStorage.getItem('personalTheme') || 'default';
     changeTheme(savedTheme);
+    
+    // Add visibility change listener for auto-refresh
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && window.savingsManager) {
+            console.log('Page became visible, refreshing savings data');
+            window.savingsManager.loadSavingsData();
+        }
+    });
 });
+
+// Utility function for consistent currency formatting
+function formatCurrency(amount) {
+    // Handle null, undefined, NaN, or invalid values
+    if (amount === null || amount === undefined || isNaN(amount) || amount === '') {
+        return '₵0.00';
+    }
+    
+    // Convert to number and ensure it's valid
+    let numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+        return '₵0.00';
+    }
+    
+    // Round to 2 decimal places to avoid floating point precision issues
+    numAmount = Math.round(numAmount * 100) / 100;
+    
+    return `₵${numAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+}
 
 console.log('Savings inline JS loaded - Global functions available');
 
