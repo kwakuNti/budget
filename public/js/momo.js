@@ -1,7 +1,5 @@
 // MoMo Account Management JavaScript - FIXED VERSION
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('MoMo JavaScript initializing...');
-    console.log('Window momoData:', window.momoData);
     
     initializeMoMoPage();
     setupEventListeners();
@@ -28,7 +26,6 @@ function initializeMoMoPage() {
     // Initialize phone number formatting
     initializePhoneFormatting();
     
-    console.log('MoMo page initialized successfully');
 }
 
 const sidebar = document.getElementById('sidebar');
@@ -82,7 +79,6 @@ function setupEventListeners() {
         sidebarToggle.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Sidebar toggle clicked');
             toggleSidebar();
         });
         
@@ -135,7 +131,6 @@ function toggleSidebar() {
     
     if (sidebar) {
         sidebar.classList.toggle('active');
-        console.log('Sidebar toggled. Active:', sidebar.classList.contains('active'));
     }
 }
 

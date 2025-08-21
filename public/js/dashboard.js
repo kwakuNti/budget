@@ -21,7 +21,6 @@ async function loadDashboardData() {
         
         // Get the response text first so we can inspect it
         const responseText = await response.text();
-        console.log('Raw response:', responseText); // Debug log
         
         try {
             // Try to parse it as JSON
@@ -49,7 +48,6 @@ async function loadDashboardData() {
 
 // Update UI with loaded data
 function updateDashboardUI() {
-    console.log('Updating UI with data:', dashboardData); // Debug log
     updateStatistics();
     updateQuickStats();
     updateMembers();
@@ -63,7 +61,6 @@ function updateDashboardUI() {
 // Update statistics cards
 function updateStatistics() {
     const stats = dashboardData.stats;
-    console.log('Stats data:', stats); // Debug log
 
     // Total Pool
     const totalPoolEl = document.getElementById('totalPool');
@@ -118,7 +115,6 @@ function updateQuickStats() {
 // Update cycle information
 function updateCycleInformation() {
     const cycle = dashboardData.currentCycle;
-    console.log('Cycle data:', cycle); // Debug log
     
     if (!cycle) {
         console.warn('No current cycle data found');
@@ -560,12 +556,7 @@ async function submitQuickContribution(event) {
         formData.append('notes', notes);
         formData.append('payment_method', 'momo');
 
-        console.log('Submitting quick contribution:', {
-            member_id: memberOnlyId,
-            amount: amount,
-            notes: notes,
-            action: 'add_contribution'
-        });
+
 
         const response = await fetch('../api/contribution_handler.php', {
             method: 'POST',
@@ -573,7 +564,6 @@ async function submitQuickContribution(event) {
         });
 
         const responseText = await response.text();
-        console.log('Quick contribute response:', responseText);
 
         const data = JSON.parse(responseText);
 
@@ -691,20 +681,14 @@ async function submitContribution(event) {
         formData.append('notes', notes);
         formData.append('payment_method', 'momo'); // Default payment method
 
-        console.log('Submitting contribution:', {
-            member_id: memberId,
-            amount: amount,
-            notes: notes,
-            action: 'add_contribution'
-        });
+
 
         const response = await fetch('../api/contribution_handler.php', {
             method: 'POST',
             body: formData
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
+
 
         // Check if response is ok
         if (!response.ok) {
@@ -713,7 +697,6 @@ async function submitContribution(event) {
 
         // Get response text first
         const responseText = await response.text();
-        console.log('Raw response:', responseText);
 
         // Try to parse JSON
         let data;
@@ -725,7 +708,6 @@ async function submitContribution(event) {
             throw new Error('Invalid JSON response from server');
         }
 
-        console.log('Parsed response:', data);
 
         if (data.success) {
             showSnackbar(data.message, 'success');

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Budget Display</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .savings-category { background: white; padding: 10px; margin: 5px 0; border-radius: 4px; border-left: 4px solid #10b981; }
+    </style>
+</head>
+<body>
+    <h1>Budget Display Test</h1>
+    
+    <div class="test-section">
+        <h2>Current Savings Categories</h2>
+        <div id="savingsTest"></div>
+    </div>
+
+    <script>
+        // Simulate the savings categories data from our API test
+        const savingsCategories = [
+            {
+                "id": 37,
+                "name": "h (Savings)",
+                "category_type": "savings",
+                "icon": "🎯",
+                "color": "#10b981",
+                "budget_limit": 0.42,
+                "actual_spent": 0,
+                "transaction_count": 0,
+                "variance": 0.42,
+                "progress_percentage": 0,
+                "goal_id": 4,
+                "current_amount": 0,
+                "target_amount": 5,
+                "auto_save_enabled": false,
+                "auto_save_amount": 0
+            },
+            {
+                "id": 36,
+                "name": "iphone (Savings)",
+                "category_type": "savings",
+                "icon": "🎯",
+                "color": "#10b981",
+                "budget_limit": 8.08,
+                "actual_spent": 50,
+                "transaction_count": 1,
+                "variance": -41.92,
+                "progress_percentage": 100,
+                "goal_id": 1,
+                "current_amount": 50,
+                "target_amount": 97,
+                "auto_save_enabled": false,
+                "auto_save_amount": 0
+            },
+            {
+                "id": 30,
+                "name": "mac (Savings)",
+                "category_type": "savings",
+                "icon": "💻",
+                "color": "#2980b9",
+                "budget_limit": 66.5,
+                "actual_spent": 0,
+                "transaction_count": 0,
+                "variance": 66.5,
+                "progress_percentage": 0,
+                "goal_id": 2,
+                "current_amount": 0,
+                "target_amount": 798,
+                "auto_save_enabled": false,
+                "auto_save_amount": 0
+            }
+        ];
+
+        function formatCurrency(amount) {
+            return `₵${parseFloat(amount).toFixed(2)}`;
+        }
+
+        function displaySavingsCategories() {
+            const container = document.getElementById('savingsTest');
+            
+            if (savingsCategories.length === 0) {
+                container.innerHTML = '<p>No savings categories found</p>';
+                return;
+            }
+
+            container.innerHTML = '<h3>Savings Goals in Budget Allocation:</h3>';
+            
+            savingsCategories.forEach(category => {
+                const div = document.createElement('div');
+                div.className = 'savings-category';
+                
+                const displayName = category.name.replace(' (Savings)', '');
+                const progressBar = `
+                    <div style="background: #e0e0e0; height: 10px; border-radius: 5px; margin: 5px 0;">
+                        <div style="background: ${category.color}; height: 100%; width: ${category.progress_percentage}%; border-radius: 5px;"></div>
+                    </div>
+                `;
+                
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${category.icon} ${displayName}</strong>
+                            <div style="font-size: 0.9em; color: #666;">
+                                Target: ${formatCurrency(category.target_amount)} | 
+                                Current: ${formatCurrency(category.current_amount)} | 
+                                Monthly Plan: ${formatCurrency(category.budget_limit)}
+                            </div>
+                            ${progressBar}
+                            <div style="font-size: 0.8em; color: #888;">
+                                Progress: ${category.progress_percentage.toFixed(1)}% | 
+                                This Month: ${formatCurrency(category.actual_spent)} contributed
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold; color: ${category.progress_percentage >= 100 ? '#10b981' : '#666'};">
+                                ${formatCurrency(category.actual_spent)} / ${formatCurrency(category.budget_limit)}
+                            </div>
+                            <div style="font-size: 0.8em; color: ${category.variance < 0 ? '#e74c3c' : '#10b981'};">
+                                ${category.variance >= 0 ? '+' : ''}${formatCurrency(category.variance)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            // Add summary
+            const totalPlanned = savingsCategories.reduce((sum, cat) => sum + cat.budget_limit, 0);
+            const totalActual = savingsCategories.reduce((sum, cat) => sum + cat.actual_spent, 0);
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.cssText = 'margin-top: 15px; padding: 10px; background: #e8f5e8; border-radius: 4px;';
+            summaryDiv.innerHTML = `
+                <strong>Savings Summary:</strong><br>
+                Monthly Plan: ${formatCurrency(totalPlanned)} | 
+                This Month: ${formatCurrency(totalActual)} | 
+                ${totalPlanned > 0 ? `Progress: ${((totalActual / totalPlanned) * 100).toFixed(1)}%` : 'No plans set'}
+            `;
+            container.appendChild(summaryDiv);
+        }
+
+        // Display the categories when page loads
+        displaySavingsCategories();
+    </script>
+</body>
+</html>

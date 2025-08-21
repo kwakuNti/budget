@@ -29,7 +29,6 @@ async function loadMonthlyGoalDashboard() {
         }
 
         const text = await response.text();
-        console.log('Raw response:', text); // Debug log
         
         let data;
         try {
@@ -2002,7 +2001,6 @@ async function handleQuickContribution(e) {
         });
         
         const text = await response.text();
-        console.log('Contribution response:', text);
         
         let data;
         try {

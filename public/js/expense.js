@@ -94,7 +94,6 @@ function animateExpenseOverview() {
 function updateChartsData() {
     // Placeholder for chart updates
     // You could fetch fresh chart data here and update the charts
-    console.log('Updating charts data...');
 }
 
 // Function to update charts with fresh data from API
@@ -112,7 +111,6 @@ function updateChartsWithFreshData(data) {
             categoryChart.update();
         }
         
-        console.log('Charts updated with fresh data');
     } catch (error) {
         console.error('Error updating charts:', error);
     }

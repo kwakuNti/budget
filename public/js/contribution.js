@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create chart after DOM is loaded and Chart.js is available
     if (typeof Chart !== 'undefined' && typeof chartData !== 'undefined') {
-        console.log('Creating chart with data:', chartData);
         createMemberComparisonChart();
     } else {
         console.error('Chart.js or chartData not available');
@@ -200,7 +199,6 @@ function createMemberComparisonChart() {
         return;
     }
 
-    console.log('Chart data:', chartData);
 
     // Destroy existing chart if it exists
     if (window.memberChart) {
@@ -263,7 +261,6 @@ function createMemberComparisonChart() {
                 }
             }
         });
-        console.log('Chart created successfully');
     } catch (error) {
         console.error('Error creating chart:', error);
     }

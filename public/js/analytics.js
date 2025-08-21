@@ -36,7 +36,6 @@ function initializeAnalytics() {
 function createMonthlyPerformanceChart() {
     const ctx = document.getElementById('monthlyPerformanceChart');
     if (!ctx || !window.analyticsData) {
-        console.log('Chart canvas or data not found');
         return;
     }
 
@@ -189,7 +188,6 @@ function createMonthlyPerformanceChart() {
 function createSavingsChart() {
     const ctx = document.getElementById('savingsChart');
     if (!ctx || !window.analyticsData) {
-        console.log('Savings chart canvas or data not found');
         return;
     }
 
@@ -298,7 +296,6 @@ function createSavingsChart() {
 function generateMemberHeatmap() {
     const heatmapContainer = document.getElementById('memberHeatmap');
     if (!heatmapContainer || !window.analyticsData) {
-        console.log('Heatmap container or data not found');
         return;
     }
 

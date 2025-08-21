@@ -20,6 +20,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Savings - Nkansah Budget Manager</title>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/savings.css">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Header -->
@@ -224,90 +226,32 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Auto-Save Settings -->
             <section class="auto-save-section">
                 <div class="section-header">
-                    <h3>⚙️ Auto-Save Settings</h3>
-                    <button class="view-all" onclick="showAutoSaveModal()">Configure</button>
+                    <h3>⚙️ Smart Auto-Save System</h3>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="processAutoSave()" title="Process auto-save now">⚡ Process Now</button>
+                        <button class="view-all" onclick="showAutoSaveModal()">Configure Settings</button>
+                    </div>
                 </div>
 
-                <div class="auto-save-grid">
-                    <div class="auto-save-card">
-                        <div class="auto-save-header">
-                            <div class="auto-save-info">
-                                <h4>Salary Auto-Save</h4>
-                                <p>Automatically save from each salary</p>
-                            </div>
-                            <div class="auto-save-toggle">
-                                <input type="checkbox" id="salaryAutoSave" checked>
-                                <label for="salaryAutoSave" class="toggle-switch"></label>
-                            </div>
-                        </div>
-                        <div class="auto-save-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Amount:</span>
-                                <span class="detail-value">₵700.00 (20%)</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Next Save:</span>
-                                <span class="detail-value">Jan 28, 2025</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Total Saved:</span>
-                                <span class="detail-value">₵8,400.00</span>
-                            </div>
-                        </div>
+                <div class="auto-save-overview" id="autoSaveOverview">
+                    <div class="loading-placeholder">
+                        <div class="loading-spinner"></div>
+                        <p>Loading auto-save configuration...</p>
                     </div>
+                </div>
+            </section>
 
-                    <div class="auto-save-card">
-                        <div class="auto-save-header">
-                            <div class="auto-save-info">
-                                <h4>Round-Up Savings</h4>
-                                <p>Round up purchases to nearest ₵5</p>
-                            </div>
-                            <div class="auto-save-toggle">
-                                <input type="checkbox" id="roundUpSave" checked>
-                                <label for="roundUpSave" class="toggle-switch"></label>
-                            </div>
-                        </div>
-                        <div class="auto-save-details">
-                            <div class="detail-item">
-                                <span class="detail-label">This Month:</span>
-                                <span class="detail-value">₵23.50</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Average/Month:</span>
-                                <span class="detail-value">₵18.75</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Total Saved:</span>
-                                <span class="detail-value">₵225.00</span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Savings Challenges -->
+            <section class="challenges-section">
+                <div class="section-header">
+                    <h3>🏆 Savings Challenges</h3>
+                    <button class="view-all" onclick="showCreateChallengeModal()">Create Challenge</button>
+                </div>
 
-                    <div class="auto-save-card">
-                        <div class="auto-save-header">
-                            <div class="auto-save-info">
-                                <h4>Weekly Challenge</h4>
-                                <p>Save ₵20 every week</p>
-                            </div>
-                            <div class="auto-save-toggle">
-                                <input type="checkbox" id="weeklySave">
-                                <label for="weeklySave" class="toggle-switch"></label>
-                            </div>
-                        </div>
-                        <div class="auto-save-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Weekly Amount:</span>
-                                <span class="detail-value">₵20.00</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Next Save:</span>
-                                <span class="detail-value">Every Monday</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Status:</span>
-                                <span class="detail-value inactive">Inactive</span>
-                            </div>
-                        </div>
+                <div class="challenges-grid" id="challengesGrid">
+                    <div class="loading-placeholder">
+                        <div class="loading-spinner"></div>
+                        <p>Loading challenges...</p>
                     </div>
                 </div>
             </section>
@@ -350,22 +294,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <label>Goal Type</label>
                         <select name="goal_type" id="goalType" required>
                             <option value="">Choose type</option>
-                            <option value="emergency_fund">🚨 Emergency Fund</option>
-                            <option value="vacation">🏖️ Vacation</option>
-                            <option value="car">🚗 Car</option>
-                            <option value="house">🏠 House</option>
-                            <option value="education">🎓 Education</option>
-                            <option value="retirement">🏖️ Retirement</option>
-                            <option value="investment">📈 Investment</option>
-                            <option value="debt_payoff">💳 Debt Payoff</option>
-                            <option value="business">💼 Business</option>
-                            <option value="technology">💻 Technology</option>
-                            <option value="health">🏥 Health</option>
-                            <option value="entertainment">🎬 Entertainment</option>
-                            <option value="shopping">🛍️ Shopping</option>
-                            <option value="travel">✈️ Travel</option>
-                            <option value="wedding">💒 Wedding</option>
-                            <option value="other">🎯 Other</option>
+                            <!-- Options will be populated dynamically from database -->
                         </select>
                     </div>
                 </div>
@@ -494,52 +423,53 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <div id="autoSaveModal" class="modal">
         <div class="modal-content large">
             <div class="modal-header">
-                <h3>Auto-Save Configuration</h3>
+                <h3>Smart Auto-Save Configuration</h3>
                 <span class="close" onclick="closeModal('autoSaveModal')">&times;</span>
             </div>
-            <form class="modal-form" onsubmit="updateAutoSave(event)">
+            <form class="modal-form" onsubmit="saveAutoSaveConfig(event)">
                 <div class="form-section">
-                    <h4>Salary Auto-Save</h4>
+                    <h4>🎯 Auto-Save Settings</h4>
                     <div class="auto-save-config">
                         <div class="config-header">
                             <div class="config-info">
-                                <h5>Save from each salary payment</h5>
-                                <p>Automatically transfer a portion of your salary to savings</p>
+                                <h5>Enable Automatic Savings</h5>
+                                <p>Automatically distribute your savings allocation to active goals</p>
                             </div>
                             <div class="config-toggle">
-                                <input type="checkbox" id="configSalaryAutoSave" checked>
-                                <label for="configSalaryAutoSave" class="toggle-switch"></label>
+                                <input type="checkbox" id="autoSaveEnabled">
+                                <label for="autoSaveEnabled" class="toggle-switch"></label>
                             </div>
                         </div>
-                        <div class="config-details">
+                        <div class="config-details" id="autoSaveDetails">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Percentage of Salary</label>
-                                    <div class="input-with-slider">
-                                        <input type="range" id="salaryPercentage" min="0" max="50" value="20" class="config-slider">
-                                        <span class="slider-value">20%</span>
-                                    </div>
+                                    <label>Save Frequency</label>
+                                    <select id="saveFrequency">
+                                        <option value="weekly">Weekly</option>
+                                        <option value="biweekly">Bi-weekly</option>
+                                        <option value="monthly" selected>Monthly</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Amount (₵3,500 salary)</label>
-                                    <input type="number" id="salaryAmount" value="700" readonly>
+                                    <label>Save Day</label>
+                                    <select id="saveDay">
+                                        <option value="1">1st of month</option>
+                                        <option value="15">15th of month</option>
+                                        <option value="30">30th of month</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Distribute to Goals</label>
-                                <div class="goal-distribution">
-                                    <div class="distribution-item">
-                                        <span>🚨 Emergency Fund</span>
-                                        <input type="number" value="500" min="0" step="50">
-                                    </div>
-                                    <div class="distribution-item">
-                                        <span>🏖️ Vacation Fund</span>
-                                        <input type="number" value="150" min="0" step="50">
-                                    </div>
-                                    <div class="distribution-item">
-                                        <span>🚗 Car Fund</span>
-                                        <input type="number" value="50" min="0" step="50">
-                                    </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="emergencyFundPriority" checked>
+                                        Prioritize Emergency Fund
+                                    </label>
+                                    <small>Fill emergency fund first before other goals</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Emergency Fund Target</label>
+                                    <input type="number" id="emergencyFundTarget" value="1000" step="0.01" min="0">
                                 </div>
                             </div>
                         </div>
@@ -547,43 +477,25 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
 
                 <div class="form-section">
-                    <h4>Round-Up Savings</h4>
+                    <h4>💡 Round-Up Savings</h4>
                     <div class="auto-save-config">
                         <div class="config-header">
                             <div class="config-info">
-                                <h5>Round up purchases</h5>
-                                <p>Round up expenses to the nearest amount and save the difference</p>
+                                <h5>Round up expenses</h5>
+                                <p>Round up expenses and save the spare change</p>
                             </div>
                             <div class="config-toggle">
-                                <input type="checkbox" id="configRoundUpSave" checked>
-                                <label for="configRoundUpSave" class="toggle-switch"></label>
+                                <input type="checkbox" id="roundUpEnabled">
+                                <label for="roundUpEnabled" class="toggle-switch"></label>
                             </div>
                         </div>
                         <div class="config-details">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Round up to nearest</label>
-                                    <select id="roundUpAmount">
-                                        <option value="1">₵1.00</option>
-                                        <option value="5" selected>₵5.00</option>
-                                        <option value="10">₵10.00</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Maximum per transaction</label>
-                                    <select id="roundUpMax">
-                                        <option value="5">₵5.00</option>
-                                        <option value="10" selected>₵10.00</option>
-                                        <option value="20">₵20.00</option>
-                                    </select>
-                                </div>
-                            </div>
                             <div class="form-group">
-                                <label>Send round-ups to</label>
-                                <select id="roundUpGoal">
-                                    <option value="emergency" selected>🚨 Emergency Fund</option>
-                                    <option value="vacation">🏖️ Vacation Fund</option>
-                                    <option value="car">🚗 Car Fund</option>
+                                <label>Round up to nearest</label>
+                                <select id="roundUpThreshold">
+                                    <option value="1">₵1.00</option>
+                                    <option value="5" selected>₵5.00</option>
+                                    <option value="10">₵10.00</option>
                                 </select>
                             </div>
                         </div>
@@ -591,48 +503,88 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
 
                 <div class="form-section">
-                    <h4>Challenge Savings</h4>
-                    <div class="auto-save-config">
-                        <div class="config-header">
-                            <div class="config-info">
-                                <h5>Weekly savings challenge</h5>
-                                <p>Save a fixed amount every week to build consistency</p>
-                            </div>
-                            <div class="config-toggle">
-                                <input type="checkbox" id="configWeeklySave">
-                                <label for="configWeeklySave" class="toggle-switch"></label>
-                            </div>
-                        </div>
-                        <div class="config-details">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Weekly Amount (₵)</label>
-                                    <input type="number" id="weeklyAmount" value="20" step="5" min="5">
-                                </div>
-                                <div class="form-group">
-                                    <label>Save on</label>
-                                    <select id="weeklyDay">
-                                        <option value="monday" selected>Monday</option>
-                                        <option value="tuesday">Tuesday</option>
-                                        <option value="wednesday">Wednesday</option>
-                                        <option value="thursday">Thursday</option>
-                                        <option value="friday">Friday</option>
-                                        <option value="saturday">Saturday</option>
-                                        <option value="sunday">Sunday</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Destination Goal</label>
-                                <select id="weeklyGoal">
-                                    <option value="emergency">🚨 Emergency Fund</option>
-                                    <option value="vacation" selected>🏖️ Vacation Fund</option>
-                                    <option value="car">🚗 Car Fund</option>
-                                </select>
-                            </div>
+                    <h4>📊 Goal Allocation Priority</h4>
+                    <div class="goal-allocation-list" id="goalAllocationList">
+                        <div class="loading-placeholder">
+                            <p>Loading goals...</p>
                         </div>
                     </div>
                 </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('autoSaveModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Challenge Modal -->
+    <div id="createChallengeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Savings Challenge</h3>
+                <span class="close" onclick="closeModal('createChallengeModal')">&times;</span>
+            </div>
+            <form class="modal-form" onsubmit="createChallenge(event)">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Challenge Type</label>
+                        <select id="challengeType" onchange="updateChallengeForm()">
+                            <option value="save_amount">Save Specific Amount</option>
+                            <option value="no_spend">No-Spend Challenge</option>
+                            <option value="reduce_category">Reduce Category Spending</option>
+                            <option value="round_up">Round-Up Challenge</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Challenge Title</label>
+                        <input type="text" id="challengeTitle" placeholder="e.g., Save ₵500 in January" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="challengeDescription" placeholder="Describe your challenge goals and motivation"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Target Amount</label>
+                            <input type="number" id="challengeTargetAmount" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Reward Amount</label>
+                            <input type="number" id="challengeRewardAmount" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" id="challengeStartDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" id="challengeEndDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="categoryGroup" style="display: none;">
+                        <label>Target Category</label>
+                        <select id="challengeCategory">
+                            <option value="">Select category...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createChallengeModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Challenge</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeModal('autoSaveModal')">Cancel</button>
@@ -653,10 +605,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="goal-details-content">
                     <div class="goal-summary">
                         <div class="summary-left">
-                            <div class="goal-icon-large" id="goalIconLarge">🚨</div>
+                            <div class="goal-icon-large" id="goalIconLarge">🎯</div>
                             <div class="goal-basic-info">
-                                <h4 id="goalTitleLarge">Emergency Fund</h4>
-                                <p id="goalDescriptionLarge">6 months of expenses for financial security</p>
+                                <h4 id="goalTitleLarge">Goal Name</h4>
+                                <p id="goalDescriptionLarge">Goal description will be loaded dynamically</p>
                             </div>
                         </div>
                         <div class="summary-right">
@@ -723,6 +675,241 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
         </div>
     </div>
+
+    <!-- Comprehensive Auto-Save Configuration Modal -->
+    <div id="comprehensiveAutoSaveModal" class="modal">
+        <div class="modal-content extra-large">
+            <div class="modal-header">
+                <h3>🤖 Comprehensive Auto-Save Configuration</h3>
+                <span class="close" onclick="closeModal('comprehensiveAutoSaveModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="autosave-config-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="showTab('global-settings')">Global Settings</button>
+                        <button class="tab-btn" onclick="showTab('goal-specific')">Goal-Specific</button>
+                        <button class="tab-btn" onclick="showTab('conditions')">Advanced Conditions</button>
+                        <button class="tab-btn" onclick="showTab('history')">Execution History</button>
+                    </div>
+
+                    <!-- Global Settings Tab -->
+                    <div id="global-settings" class="tab-content active">
+                        <h4>🌐 Global Auto-Save Settings</h4>
+                        <div class="autosave-toggle">
+                            <label class="switch">
+                                <input type="checkbox" id="globalAutoSaveEnabled">
+                                <span class="slider round"></span>
+                            </label>
+                            <span>Enable Global Auto-Save</span>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>💰 Default Save Amount</label>
+                                <div class="input-group">
+                                    <span class="input-prefix">₵</span>
+                                    <input type="number" id="defaultSaveAmount" placeholder="100.00" step="0.01">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>📊 Default Save Percentage</label>
+                                <div class="input-group">
+                                    <input type="number" id="defaultSavePercentage" placeholder="10" min="1" max="100">
+                                    <span class="input-suffix">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="trigger-section">
+                            <h5>🎯 Auto-Save Triggers</h5>
+                            <div class="trigger-grid">
+                                <label class="trigger-option">
+                                    <input type="checkbox" id="triggerSalary">
+                                    <span class="checkmark"></span>
+                                    <div class="trigger-info">
+                                        <strong>💼 Salary Added</strong>
+                                        <small>Save when salary is added to account</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="trigger-option">
+                                    <input type="checkbox" id="triggerAdditional">
+                                    <span class="checkmark"></span>
+                                    <div class="trigger-info">
+                                        <strong>💸 Additional Income</strong>
+                                        <small>Save when any additional income is received</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="trigger-option">
+                                    <input type="checkbox" id="triggerScheduled">
+                                    <span class="checkmark"></span>
+                                    <div class="trigger-info">
+                                        <strong>⏰ Scheduled</strong>
+                                        <small>Save on specific dates/times</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="trigger-option">
+                                    <input type="checkbox" id="triggerExpense">
+                                    <span class="checkmark"></span>
+                                    <div class="trigger-info">
+                                        <strong>🛒 After Expense</strong>
+                                        <small>Round-up savings after expenses</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="allocation-section">
+                            <h5>📈 Goal Allocation Method</h5>
+                            <div class="allocation-options">
+                                <label class="radio-option">
+                                    <input type="radio" name="allocationMethod" value="equal" checked>
+                                    <span class="radio-checkmark"></span>
+                                    <div class="option-info">
+                                        <strong>⚖️ Equal Split</strong>
+                                        <small>Divide amount equally among all active goals</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="radio-option">
+                                    <input type="radio" name="allocationMethod" value="priority">
+                                    <span class="radio-checkmark"></span>
+                                    <div class="option-info">
+                                        <strong>🎯 Priority-Based</strong>
+                                        <small>Allocate based on goal priority levels</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="radio-option">
+                                    <input type="radio" name="allocationMethod" value="percentage">
+                                    <span class="radio-checkmark"></span>
+                                    <div class="option-info">
+                                        <strong>📊 Percentage-Based</strong>
+                                        <small>Custom percentage allocation per goal</small>
+                                    </div>
+                                </label>
+                                
+                                <label class="radio-option">
+                                    <input type="radio" name="allocationMethod" value="single">
+                                    <span class="radio-checkmark"></span>
+                                    <div class="option-info">
+                                        <strong>🎯 Single Goal</strong>
+                                        <small>Save to one specific goal only</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goal-Specific Settings Tab -->
+                    <div id="goal-specific" class="tab-content">
+                        <h4>🎯 Goal-Specific Auto-Save Rules</h4>
+                        <div class="goal-rules-list" id="goalRulesList">
+                            <!-- Goal rules will be loaded dynamically -->
+                        </div>
+                        <button type="button" class="btn-secondary" onclick="addGoalRule()">+ Add Goal Rule</button>
+                    </div>
+
+                    <!-- Advanced Conditions Tab -->
+                    <div id="conditions" class="tab-content">
+                        <h4>🔧 Advanced Conditions & Limits</h4>
+                        
+                        <div class="conditions-grid">
+                            <div class="condition-group">
+                                <h5>💰 Amount Limits</h5>
+                                <div class="form-group">
+                                    <label>Minimum Save Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-prefix">₵</span>
+                                        <input type="number" id="minSaveAmount" placeholder="5.00" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Maximum Save Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-prefix">₵</span>
+                                        <input type="number" id="maxSaveAmount" placeholder="1000.00" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="condition-group">
+                                <h5>⏰ Time Conditions</h5>
+                                <div class="form-group">
+                                    <label>Schedule Type</label>
+                                    <select id="scheduleType">
+                                        <option value="">No Schedule</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="biweekly">Bi-Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="custom">Custom Dates</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Preferred Time</label>
+                                    <input type="time" id="preferredTime" value="09:00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="condition-group">
+                            <h5>🚦 Execution Conditions</h5>
+                            <div class="condition-checks">
+                                <label class="check-option">
+                                    <input type="checkbox" id="checkAccountBalance">
+                                    <span class="checkmark"></span>
+                                    <span>Only save if account balance is sufficient</span>
+                                </label>
+                                <label class="check-option">
+                                    <input type="checkbox" id="checkMonthlyBudget">
+                                    <span class="checkmark"></span>
+                                    <span>Respect monthly budget limits</span>
+                                </label>
+                                <label class="check-option">
+                                    <input type="checkbox" id="pauseOnOverspend">
+                                    <span class="checkmark"></span>
+                                    <span>Pause auto-save if overspending detected</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Execution History Tab -->
+                    <div id="history" class="tab-content">
+                        <h4>📊 Auto-Save Execution History</h4>
+                        <div class="history-stats">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalAutoSaved">₵0.00</div>
+                                <div class="stat-label">Total Auto-Saved</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalExecutions">0</div>
+                                <div class="stat-label">Total Executions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="avgSaveAmount">₵0.00</div>
+                                <div class="stat-label">Average Amount</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-list" id="autoSaveHistory">
+                            <!-- History will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal('comprehensiveAutoSaveModal')">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveComprehensiveAutoSaveConfig()">💾 Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Animation function for counting numbers
         function animateNumber(element, start, end, duration, prefix = '', suffix = '') {
@@ -779,13 +966,14 @@ window.showDepositModal = function() {
 };
 
 window.showAutoSaveModal = function() {
-    const modal = document.getElementById('autoSaveModal');
+    const modal = document.getElementById('comprehensiveAutoSaveModal');
     if (modal) {
         modal.style.display = 'flex';
         modal.classList.add('show');
         setTimeout(() => modal.style.opacity = '1', 10);
+        loadComprehensiveAutoSaveConfig();
     } else {
-        console.error('Auto-save modal not found');
+        console.error('Comprehensive auto-save modal not found');
     }
 };
 
@@ -801,7 +989,6 @@ window.closeModal = function(modalId) {
 };
 
 window.editGoal = function(goalId) {
-    console.log('Edit goal:', goalId);
     // Find the goal data
     const goal = window.savingsManager.currentGoals.find(g => g.id === goalId);
     if (goal) {
@@ -835,29 +1022,43 @@ window.editGoal = function(goalId) {
 };
 
 window.pauseGoal = function(goalId) {
-    if (confirm('Are you sure you want to pause this goal? Auto-save will be disabled.')) {
-        fetch('/budget/actions/savings_handler.php', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=pause_goal&goal_id=${goalId}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                if (window.savingsManager) {
-                    window.savingsManager.loadSavingsData();
-                    window.savingsManager.loadSavingsOverview();
+    Swal.fire({
+        title: 'Pause Goal?',
+        text: 'Are you sure you want to pause this goal? Auto-save will be disabled.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, pause it',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/budget/actions/savings_handler.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=pause_goal&goal_id=${goalId}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (window.savingsManager) {
+                        window.savingsManager.loadSavingsData();
+                        window.savingsManager.loadSavingsOverview();
+                    }
+                    showSnackbar('Goal paused successfully', 'success');
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to pause goal', 'error');
                 }
-                window.savingsManager?.showSnackbar('Goal paused successfully', 'success');
-            } else {
-                alert(data.message || 'Failed to pause goal');
-            }
-        })
-        .catch(err => console.error('Pause goal error:', err));
-    }
+            })
+            .catch(err => {
+                console.error('Pause goal error:', err);
+                Swal.fire('Error', 'Failed to pause goal', 'error');
+            });
+        }
+    });
 };
 
 window.resumeGoal = function(goalId) {
@@ -876,105 +1077,907 @@ window.resumeGoal = function(goalId) {
                 window.savingsManager.loadSavingsData();
                 window.savingsManager.loadSavingsOverview();
             }
-            window.savingsManager?.showSnackbar('Goal resumed successfully', 'success');
+            showSnackbar('Goal resumed successfully', 'success');
         } else {
-            alert(data.message || 'Failed to resume goal');
+            Swal.fire('Error', data.message || 'Failed to resume goal', 'error');
         }
     })
-    .catch(err => console.error('Resume goal error:', err));
+    .catch(err => {
+        console.error('Resume goal error:', err);
+        Swal.fire('Error', 'Failed to resume goal', 'error');
+    });
 };
 
 window.setGoalInactive = function(goalId) {
-    if (confirm('Are you sure you want to set this goal to inactive? Auto-save will be disabled.')) {
-        fetch('/budget/actions/savings_handler.php', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=set_goal_inactive&goal_id=${goalId}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                if (window.savingsManager) {
-                    window.savingsManager.loadSavingsData();
-                    window.savingsManager.loadSavingsOverview();
+    Swal.fire({
+        title: 'Set Goal Inactive?',
+        text: 'Are you sure you want to set this goal to inactive? Auto-save will be disabled.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, set inactive',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/budget/actions/savings_handler.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=set_goal_inactive&goal_id=${goalId}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (window.savingsManager) {
+                        window.savingsManager.loadSavingsData();
+                        window.savingsManager.loadSavingsOverview();
+                    }
+                    showSnackbar('Goal set to inactive', 'success');
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to set goal inactive', 'error');
                 }
-                window.savingsManager?.showSnackbar('Goal set to inactive', 'success');
-            } else {
-                alert(data.message || 'Failed to set goal inactive');
-            }
-        })
-        .catch(err => console.error('Set goal inactive error:', err));
+            })
+            .catch(err => {
+                console.error('Set goal inactive error:', err);
+                Swal.fire('Error', 'Failed to set goal inactive', 'error');
+            });
+        }
+    });
+};
+
+// Helper function to update goal status in the UI without page refresh
+function updateGoalStatus(goalId, newStatus) {
+    const goalCard = document.querySelector(`[data-goal-id="${goalId}"]`);
+    if (!goalCard) return;
+    
+    // Update the data attribute
+    goalCard.dataset.status = newStatus;
+    
+    // Remove existing status classes
+    goalCard.classList.remove('active-status', 'paused-status', 'inactive-status');
+    
+    // Add new status class
+    goalCard.classList.add(`${newStatus}-status`);
+    
+    // Update status badge
+    const statusBadge = goalCard.querySelector('.status-badge');
+    if (statusBadge) {
+        statusBadge.className = `status-badge ${newStatus}`;
+        switch(newStatus) {
+            case 'active':
+                statusBadge.innerHTML = '🟢 Active';
+                break;
+            case 'paused':
+                statusBadge.innerHTML = '⏸️ Paused';
+                break;
+            case 'inactive':
+                statusBadge.innerHTML = '⭕ Inactive';
+                break;
+        }
     }
-};
+    
+    // Update action menu
+    updateGoalActionMenu(goalCard, newStatus);
+    
+    // Update in the goals data if savingsManager exists
+    if (window.savingsManager && window.savingsManager.currentGoals) {
+        const goalIndex = window.savingsManager.currentGoals.findIndex(g => g.id == goalId);
+        if (goalIndex !== -1) {
+            window.savingsManager.currentGoals[goalIndex].status = newStatus;
+        }
+    }
+    
+    // Show visual feedback with animation
+    goalCard.style.transform = 'scale(0.95)';
+    goalCard.style.transition = 'all 0.2s ease';
+    setTimeout(() => {
+        goalCard.style.transform = 'scale(1)';
+        // Add a subtle glow effect
+        goalCard.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.3)';
+        setTimeout(() => {
+            goalCard.style.boxShadow = '';
+        }, 1000);
+    }, 150);
+    
+    // Update auto-save overview since goal status affects auto-save
+    if (typeof loadAutoSaveOverview === 'function') {
+        setTimeout(() => loadAutoSaveOverview(), 500);
+    }
+}
 
-window.pauseGoal = function(goalId) {
-    console.log('Pause goal:', goalId);
-    // Implementation will be added
-};
+function updateGoalActionMenu(goalCard, status) {
+    const actionsDropdown = goalCard.querySelector('.goal-actions-dropdown');
+    if (!actionsDropdown) return;
+    
+    const goalId = goalCard.dataset.goalId;
+    
+    // Create menu options based on status
+    let menuOptions = '';
+    if (status === 'active') {
+        menuOptions = `
+            <a href="#" onclick="editGoal(${goalId})">Edit Goal</a>
+            <a href="#" onclick="pauseGoal(${goalId})">Pause Goal</a>
+            <a href="#" onclick="setGoalInactive(${goalId})">Set Inactive</a>
+            <a href="#" onclick="addToGoal(${goalId})">Add Money</a>
+            <hr>
+            <a href="#" onclick="deleteGoal(${goalId})" class="danger">Delete Goal</a>
+        `;
+    } else if (status === 'paused') {
+        menuOptions = `
+            <a href="#" onclick="editGoal(${goalId})">Edit Goal</a>
+            <a href="#" onclick="resumeGoal(${goalId})">Resume Goal</a>
+            <a href="#" onclick="setGoalInactive(${goalId})">Set Inactive</a>
+            <a href="#" onclick="addToGoal(${goalId})">Add Money</a>
+            <hr>
+            <a href="#" onclick="deleteGoal(${goalId})" class="danger">Delete Goal</a>
+        `;
+    } else { // inactive
+        menuOptions = `
+            <a href="#" onclick="editGoal(${goalId})">Edit Goal</a>
+            <a href="#" onclick="resumeGoal(${goalId})">Activate Goal</a>
+            <a href="#" onclick="addToGoal(${goalId})">Add Money</a>
+            <hr>
+            <a href="#" onclick="deleteGoal(${goalId})" class="danger">Delete Goal</a>
+        `;
+    }
+    
+    actionsDropdown.innerHTML = menuOptions;
+}
 
-window.resumeGoal = function(goalId) {
-    console.log('Resume goal:', goalId);
-    // Implementation will be added
-};
+function updateGoalActionButtons(goalCard, status) {
+    const actionsDropdown = goalCard.querySelector('.goal-actions-dropdown');
+    if (!actionsDropdown) return;
+    
+    // Find existing action buttons
+    const pauseButton = actionsDropdown.querySelector('[onclick*="pauseGoal"]');
+    const resumeButton = actionsDropdown.querySelector('[onclick*="resumeGoal"]');
+    const inactiveButton = actionsDropdown.querySelector('[onclick*="setGoalInactive"]');
+    
+    // Hide all status action buttons first
+    if (pauseButton) pauseButton.style.display = 'none';
+    if (resumeButton) resumeButton.style.display = 'none';
+    if (inactiveButton) inactiveButton.style.display = 'none';
+    
+    // Show appropriate buttons based on status
+    switch (status) {
+        case 'active':
+            if (pauseButton) pauseButton.style.display = 'block';
+            if (inactiveButton) inactiveButton.style.display = 'block';
+            break;
+        case 'paused':
+        case 'inactive':
+            if (resumeButton) resumeButton.style.display = 'block';
+            break;
+    }
+}
 
 window.addToGoal = function(goalId) {
-    console.log('Add to goal:', goalId);
     showDepositModal();
 };
 
 window.viewGoalDetails = function(goalId) {
-    console.log('View goal details:', goalId);
     const modal = document.getElementById('goalDetailsModal');
     if (modal) {
         modal.style.display = 'flex';
     }
 };
 
-window.deleteGoal = function(goalId) {
-    if (confirm('Are you sure you want to delete this goal?')) {
-        console.log('Delete goal:', goalId);
-        fetch('/budget/actions/savings_handler.php', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=delete_goal&goal_id=${goalId}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                if (window.savingsManager) {
-                    window.savingsManager.loadSavingsData();
-                    window.savingsManager.loadSavingsOverview();
-                }
-            } else {
-                alert(data.message || 'Failed to delete goal');
-            }
-        })
-        .catch(err => console.error('Delete goal error:', err));
+// Auto-Save System Functions
+
+window.showCreateChallengeModal = function() {
+    const modal = document.getElementById('createChallengeModal');
+    if (modal) {
+        // Set default dates
+        const today = new Date();
+        const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        document.getElementById('challengeStartDate').value = today.toISOString().split('T')[0];
+        document.getElementById('challengeEndDate').value = nextWeek.toISOString().split('T')[0];
+        
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        setTimeout(() => modal.style.opacity = '1', 10);
     }
 };
 
+function loadAutoSaveConfig() {
+    fetch('/budget/api/comprehensive_autosave.php?action=get_autosave_config')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayAutoSaveConfiguration(data.data);
+            } else {
+                console.error('Failed to load auto-save config:', data.message);
+                document.getElementById('autoSaveOverview').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load auto-save configuration</p>
+                        <button class="btn btn-primary btn-sm" onclick="loadAutoSaveConfig()">Retry</button>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading auto-save config:', error);
+            document.getElementById('autoSaveOverview').innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading auto-save configuration</p>
+                    <button class="btn btn-primary btn-sm" onclick="loadAutoSaveConfig()">Retry</button>
+                </div>
+            `;
+        });
+}
+
+function displayAutoSaveConfiguration(data) {
+    const { global_config, goal_configs, goals } = data;
+    const overview = document.getElementById('autoSaveOverview');
+    
+    const isEnabled = global_config && global_config.enabled;
+    
+    let html = `
+        <div class="auto-save-status ${isEnabled ? 'enabled' : 'disabled'}">
+            <div class="status-indicator">
+                <i class="fas fa-circle ${isEnabled ? 'text-success' : 'text-muted'}"></i>
+                <span class="status-text">${isEnabled ? 'Active' : 'Disabled'}</span>
+            </div>
+            <div class="status-details">
+                ${isEnabled ? 
+                    `<p>Auto-save is configured to save ${global_config.save_type === 'percentage' ? global_config.save_percentage + '%' : '₵' + global_config.save_amount} 
+                     ${global_config.trigger_salary ? 'when salary is received' : ''}
+                     ${global_config.trigger_additional_income ? ', additional income' : ''}
+                     ${global_config.trigger_schedule ? ', on schedule (' + global_config.schedule_frequency + ')' : ''}</p>` : 
+                    '<p>Configure auto-save to automatically allocate money to your savings goals.</p>'
+                }
+            </div>
+        </div>
+    `;
+    
+    if (isEnabled && goals.length > 0) {
+        html += `
+            <div class="goals-allocation">
+                <h4>Goal Management (${global_config.allocation_method ? global_config.allocation_method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Priority Based'})</h4>
+                <div class="goals-list">
+        `;
+        
+        goals.forEach(goal => {
+            const progressPercentage = goal.progress_percentage || 0;
+            const hasAutoSave = goal_configs.find(gc => gc.goal_id == goal.id);
+            
+            html += `
+                <div class="goal-allocation-item">
+                    <div class="goal-info">
+                        <span class="goal-name">${goal.title}</span>
+                        <span class="goal-status status-${goal.status}">${goal.status}</span>
+                        ${hasAutoSave ? '<i class="fas fa-robot auto-save-icon" title="Auto-save enabled for this goal"></i>' : ''}
+                    </div>
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(progressPercentage, 100)}%"></div>
+                        </div>
+                        <span class="progress-text">₵${parseFloat(goal.current_amount || 0).toFixed(2)} / ₵${parseFloat(goal.target_amount).toFixed(2)}</span>
+                    </div>
+                    <div class="goal-actions">
+                        <button class="btn-icon ${goal.status === 'paused' ? 'btn-success' : 'btn-warning'}" 
+                                onclick="${goal.status === 'paused' ? 'resumeGoal' : 'pauseGoal'}(${goal.id})"
+                                title="${goal.status === 'paused' ? 'Resume' : 'Pause'} goal">
+                            <i class="fas fa-${goal.status === 'paused' ? 'play' : 'pause'}"></i>
+                        </button>
+                        <button class="btn-icon btn-secondary" 
+                                onclick="setGoalInactive(${goal.id})"
+                                title="Set goal inactive">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    overview.innerHTML = html;
+}
+
+function updateSaveDayOptions(frequency, currentDay) {
+    const saveDaySelect = document.getElementById('saveDay');
+    saveDaySelect.innerHTML = '';
+    
+    if (frequency === 'weekly' || frequency === 'biweekly') {
+        // Days of week
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        days.forEach((day, index) => {
+            const option = document.createElement('option');
+            option.value = index + 1;
+            option.textContent = day;
+            if (index + 1 === currentDay) option.selected = true;
+            saveDaySelect.appendChild(option);
+        });
+    } else {
+        // Days of month
+        for (let i = 1; i <= 31; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i + getOrdinalSuffix(i) + ' of month';
+            if (i === currentDay) option.selected = true;
+            saveDaySelect.appendChild(option);
+        }
+    }
+}
+
+function getOrdinalSuffix(day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
+}
+
+function populateGoalAllocationList(goals) {
+    const container = document.getElementById('goalAllocationList');
+    
+    if (goals.length === 0) {
+        container.innerHTML = '<p>No active goals found. Create some goals first to configure auto-save allocation.</p>';
+        return;
+    }
+    
+    let html = '';
+    goals.forEach(goal => {
+        const progressWidth = goal.progress_percentage;
+        const isAutoSaveEnabled = goal.auto_save_enabled;
+        
+        html += `
+            <div class="goal-allocation-item">
+                <div class="goal-info">
+                    <h5>${goal.goal_name}</h5>
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressWidth}%"></div>
+                        </div>
+                        <span class="progress-text">${progressWidth}% (₵${goal.current_amount.toLocaleString()} / ₵${goal.target_amount.toLocaleString()})</span>
+                    </div>
+                </div>
+                <div class="goal-allocation-controls">
+                    <label class="toggle-label">
+                        <input type="checkbox" ${isAutoSaveEnabled ? 'checked' : ''} onchange="toggleGoalAutoSave(${goal.id}, this.checked)">
+                        Auto-save enabled
+                    </label>
+                    ${isAutoSaveEnabled ? `
+                        <div class="allocation-method">
+                            <select onchange="updateGoalSaveMethod(${goal.id}, this.value)">
+                                <option value="percentage" ${goal.save_method === 'percentage' ? 'selected' : ''}>Percentage</option>
+                                <option value="fixed" ${goal.save_method === 'fixed' ? 'selected' : ''}>Fixed Amount</option>
+                            </select>
+                            ${goal.save_method === 'percentage' ? 
+                                `<input type="number" value="${goal.save_percentage}" min="0" max="100" step="0.1" onchange="updateGoalSaveAmount(${goal.id}, this.value, 'percentage')">%` :
+                                `<input type="number" value="${goal.save_amount}" min="0" step="0.01" onchange="updateGoalSaveAmount(${goal.id}, this.value, 'fixed')">₵`
+                            }
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function toggleAutoSaveDetails() {
+    const enabled = document.getElementById('autoSaveEnabled').checked;
+    const details = document.getElementById('autoSaveDetails');
+    details.style.display = enabled ? 'block' : 'none';
+}
+
+function saveAutoSaveConfig(event) {
+    event.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('action', 'update_config');
+    formData.append('enabled', document.getElementById('autoSaveEnabled').checked);
+    formData.append('save_frequency', document.getElementById('saveFrequency').value);
+    formData.append('save_day', document.getElementById('saveDay').value);
+    formData.append('round_up_enabled', document.getElementById('roundUpEnabled').checked);
+    formData.append('round_up_threshold', document.getElementById('roundUpThreshold').value);
+    formData.append('emergency_fund_priority', document.getElementById('emergencyFundPriority').checked);
+    formData.append('emergency_fund_target', document.getElementById('emergencyFundTarget').value);
+    
+    fetch('/budget/api/autosave_config.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar('Auto-save configuration updated successfully', 'success');
+            closeModal('autoSaveModal');
+            loadAutoSaveOverview();
+        } else {
+            showSnackbar(data.message || 'Failed to update configuration', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving config:', error);
+        showSnackbar('Error saving configuration', 'error');
+    });
+}
+
+function createChallenge(event) {
+    event.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('action', 'create_challenge');
+    formData.append('challenge_type', document.getElementById('challengeType').value);
+    formData.append('title', document.getElementById('challengeTitle').value);
+    formData.append('description', document.getElementById('challengeDescription').value);
+    formData.append('target_amount', document.getElementById('challengeTargetAmount').value);
+    formData.append('start_date', document.getElementById('challengeStartDate').value);
+    formData.append('end_date', document.getElementById('challengeEndDate').value);
+    formData.append('reward_amount', document.getElementById('challengeRewardAmount').value);
+    
+    const categoryField = document.getElementById('challengeCategory');
+    if (categoryField.style.display !== 'none' && categoryField.value) {
+        formData.append('target_category_id', categoryField.value);
+    }
+    
+    fetch('/budget/api/autosave_config.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar('Challenge created successfully!', 'success');
+            closeModal('createChallengeModal');
+            loadChallenges();
+        } else {
+            showSnackbar(data.message || 'Failed to create challenge', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating challenge:', error);
+        showSnackbar('Error creating challenge', 'error');
+    });
+}
+
+function updateChallengeForm() {
+    const challengeType = document.getElementById('challengeType').value;
+    const categoryGroup = document.getElementById('categoryGroup');
+    const targetAmountField = document.getElementById('challengeTargetAmount');
+    
+    // Show/hide category selection based on challenge type
+    if (challengeType === 'reduce_category') {
+        categoryGroup.style.display = 'block';
+        targetAmountField.placeholder = 'Reduction target (e.g., 50.00)';
+    } else {
+        categoryGroup.style.display = 'none';
+        targetAmountField.placeholder = challengeType === 'save_amount' ? 'Amount to save' : '0.00';
+    }
+}
+
+function loadAutoSaveOverview() {
+    fetch('/budget/api/autosave_config.php?action=get_config')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderAutoSaveOverview(data.config, data.goals);
+            }
+        })
+        .catch(error => console.error('Error loading overview:', error));
+}
+
+function renderAutoSaveOverview(config, goals) {
+    const container = document.getElementById('autoSaveOverview');
+    
+    if (!config.enabled) {
+        container.innerHTML = `
+            <div class="auto-save-disabled">
+                <div class="disabled-icon">⏸️</div>
+                <h4>Auto-Save is Disabled</h4>
+                <p>Enable auto-save to automatically distribute your savings to goals</p>
+                <button class="btn btn-primary" onclick="showAutoSaveModal()">Enable Auto-Save</button>
+            </div>
+        `;
+        return;
+    }
+    
+    const activeGoals = goals.filter(g => g.auto_save_enabled);
+    const totalAutoSaveAmount = activeGoals.reduce((sum, g) => sum + (g.save_method === 'percentage' ? g.save_percentage : g.save_amount), 0);
+    
+    let html = `
+        <div class="auto-save-status">
+            <div class="status-card enabled">
+                <div class="status-icon">✅</div>
+                <div class="status-info">
+                    <h4>Auto-Save Active</h4>
+                    <p>Frequency: ${config.save_frequency.charAt(0).toUpperCase() + config.save_frequency.slice(1)}</p>
+                    <p>${activeGoals.length} goal${activeGoals.length !== 1 ? 's' : ''} configured</p>
+                </div>
+                <div class="status-actions">
+                    <button class="btn btn-sm btn-primary" onclick="showAutoSaveModal()">Configure</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auto-save-goals">
+            <h5>Configured Goals</h5>
+            <div class="goals-list">
+    `;
+    
+    if (activeGoals.length === 0) {
+        html += '<p>No goals configured for auto-save. <a href="#" onclick="showAutoSaveModal()">Configure now</a></p>';
+    } else {
+        activeGoals.forEach(goal => {
+            const amount = goal.save_method === 'percentage' ? 
+                `${goal.save_percentage}% of savings` : 
+                `₵${goal.save_amount.toLocaleString()}`;
+            
+            html += `
+                <div class="goal-item">
+                    <span class="goal-name">${goal.goal_name}</span>
+                    <span class="goal-amount">${amount}</span>
+                </div>
+            `;
+        });
+    }
+    
+    html += '</div></div>';
+    container.innerHTML = html;
+}
+
+function loadChallenges() {
+    fetch('/budget/api/autosave_config.php?action=get_challenges')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderChallenges(data.challenges);
+            }
+        })
+        .catch(error => console.error('Error loading challenges:', error));
+}
+
+function renderChallenges(challenges) {
+    const container = document.getElementById('challengesGrid');
+    
+    if (challenges.length === 0) {
+        container.innerHTML = `
+            <div class="no-challenges">
+                <div class="empty-icon">🎯</div>
+                <h4>No Active Challenges</h4>
+                <p>Create savings challenges to make saving more fun and engaging</p>
+                <button class="btn btn-primary" onclick="showCreateChallengeModal()">Create First Challenge</button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    challenges.forEach(challenge => {
+        const statusClass = challenge.status === 'completed' ? 'completed' : 
+                           challenge.status === 'failed' ? 'failed' : 'active';
+        const progressWidth = challenge.progress_percentage;
+        const daysLeft = Math.ceil(challenge.days_remaining);
+        
+        html += `
+            <div class="challenge-card ${statusClass}">
+                <div class="challenge-header">
+                    <h4>${challenge.title}</h4>
+                    <span class="challenge-status">${challenge.status}</span>
+                </div>
+                <div class="challenge-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressWidth}%"></div>
+                    </div>
+                    <div class="progress-text">
+                        ₵${challenge.current_amount.toLocaleString()} / ₵${challenge.target_amount.toLocaleString()} (${progressWidth}%)
+                    </div>
+                </div>
+                <div class="challenge-details">
+                    <p>${challenge.description}</p>
+                    <div class="challenge-meta">
+                        <span>Type: ${challenge.challenge_type.replace('_', ' ')}</span>
+                        <span>${daysLeft} days left</span>
+                    </div>
+                </div>
+                <div class="challenge-actions">
+                    ${challenge.status === 'active' ? `
+                        <button class="btn btn-sm btn-primary" onclick="addChallengeProgress(${challenge.id})">Add Progress</button>
+                        <button class="btn btn-sm btn-secondary" onclick="abandonChallenge(${challenge.id})">Abandon</button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Event listeners for auto-save functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Load initial data
+    loadAutoSaveOverview();
+    loadChallenges();
+    
+    // Save frequency change handler
+    const saveFrequencySelect = document.getElementById('saveFrequency');
+    if (saveFrequencySelect) {
+        saveFrequencySelect.addEventListener('change', function() {
+            updateSaveDayOptions(this.value, 1);
+        });
+    }
+    
+    // Auto-save enabled toggle
+    const autoSaveEnabledToggle = document.getElementById('autoSaveEnabled');
+    if (autoSaveEnabledToggle) {
+        autoSaveEnabledToggle.addEventListener('change', toggleAutoSaveDetails);
+    }
+});
+
+// Additional helper functions for the auto-save system
+function toggleGoalAutoSave(goalId, enabled) {
+    const formData = new FormData();
+    formData.append('action', 'update_auto_save');
+    formData.append('goal_id', goalId);
+    formData.append('auto_save_enabled', enabled);
+    
+    fetch('/budget/actions/savings_handler.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar('Goal auto-save updated', 'success');
+            loadAutoSaveConfig(); // Reload the config to update UI
+        } else {
+            showSnackbar(data.message || 'Failed to update auto-save', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating auto-save:', error);
+        showSnackbar('Error updating auto-save', 'error');
+    });
+}
+
+function updateGoalSaveMethod(goalId, method) {
+    // This will be called when save method dropdown changes
+    const formData = new FormData();
+    formData.append('action', 'update_auto_save');
+    formData.append('goal_id', goalId);
+    formData.append('save_method', method);
+    
+    fetch('/budget/actions/savings_handler.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadAutoSaveConfig(); // Reload to update the form
+        } else {
+            showSnackbar(data.message || 'Failed to update save method', 'error');
+        }
+    })
+    .catch(error => console.error('Error updating save method:', error));
+}
+
+function updateGoalSaveAmount(goalId, amount, type) {
+    const formData = new FormData();
+    formData.append('action', 'update_auto_save');
+    formData.append('goal_id', goalId);
+    
+    if (type === 'percentage') {
+        formData.append('save_percentage', amount);
+    } else {
+        formData.append('save_amount', amount);
+    }
+    
+    fetch('/budget/actions/savings_handler.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar('Save amount updated', 'success');
+        } else {
+            showSnackbar(data.message || 'Failed to update amount', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating save amount:', error);
+        showSnackbar('Error updating save amount', 'error');
+    });
+}
+
+function addChallengeProgress(challengeId) {
+    Swal.fire({
+        title: 'Add Progress',
+        html: `
+            <div class="swal-form">
+                <input type="number" id="swal-amount" class="swal2-input" placeholder="Enter amount (₵)" min="0" step="0.01">
+                <input type="text" id="swal-description" class="swal2-input" placeholder="Description (optional)">
+            </div>
+        `,
+        confirmButtonText: 'Add Progress',
+        showCancelButton: true,
+        preConfirm: () => {
+            const amount = document.getElementById('swal-amount').value;
+            const description = document.getElementById('swal-description').value || '';
+            
+            if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+                Swal.showValidationMessage('Please enter a valid amount');
+                return false;
+            }
+            
+            return { amount: amount, description: description };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { amount, description } = result.value;
+            
+            const formData = new FormData();
+            formData.append('action', 'add_challenge_progress');
+            formData.append('challenge_id', challengeId);
+            formData.append('amount', amount);
+            formData.append('description', description);
+            
+            fetch('/budget/api/autosave_config.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSnackbar(data.message, data.is_completed ? 'success' : 'info');
+                    loadChallenges(); // Reload challenges
+                } else {
+                    showSnackbar(data.message || 'Failed to add progress', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding progress:', error);
+                showSnackbar('Error adding progress', 'error');
+            });
+        }
+    });
+}
+
+function abandonChallenge(challengeId) {
+    Swal.fire({
+        title: 'Abandon Challenge?',
+        text: 'Are you sure you want to abandon this challenge? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, abandon it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('action', 'abandon_challenge');
+            formData.append('challenge_id', challengeId);
+            
+            fetch('/budget/api/autosave_config.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSnackbar('Challenge abandoned', 'info');
+                    loadChallenges();
+                } else {
+                    showSnackbar(data.message || 'Failed to abandon challenge', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error abandoning challenge:', error);
+                showSnackbar('Error abandoning challenge', 'error');
+            });
+        }
+    });
+}
+
+function processAutoSave() {
+    fetch('/budget/api/autosave_config.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=process_autosave'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar(`Auto-save processed! Saved ₵${data.total_saved.toLocaleString()} to ${data.goals_processed} goals`, 'success');
+            // Reload data to show updated amounts
+            if (window.savingsManager) {
+                window.savingsManager.loadData();
+            }
+        } else {
+            showSnackbar(data.message || 'Failed to process auto-save', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error processing auto-save:', error);
+        showSnackbar('Error processing auto-save', 'error');
+    });
+}
+
+window.deleteGoal = function(goalId) {
+    Swal.fire({
+        title: 'Delete Goal?',
+        text: 'Are you sure you want to delete this goal? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/budget/actions/savings_handler.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=delete_goal&goal_id=${goalId}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (window.savingsManager) {
+                        window.savingsManager.loadSavingsData();
+                        window.savingsManager.loadSavingsOverview();
+                    }
+                    showSnackbar('Goal deleted successfully', 'success');
+                } else {
+                    showSnackbar(data.message || 'Failed to delete goal', 'error');
+                }
+            })
+            .catch(err => console.error('Delete goal error:', err));
+        }
+    });
+};
+
 window.archiveGoal = function(goalId) {
-    console.log('Archive goal:', goalId);
     // Implementation will be added
 };
 
 window.toggleGoalMenu = function(btn) {
+    const dropdown = btn.nextElementSibling;
+    const isVisible = dropdown.classList.contains('show');
+    
     // Close all other dropdowns first
-    document.querySelectorAll('.goal-dropdown').forEach(dropdown => {
-        if (dropdown !== btn.nextElementSibling) {
-            dropdown.classList.remove('show');
+    document.querySelectorAll('.goal-actions-dropdown.show').forEach(d => {
+        if (d !== dropdown) {
+            d.classList.remove('show');
         }
     });
     
-    const dropdown = btn.nextElementSibling;
-    if (dropdown) {
-        dropdown.classList.toggle('show');
+    // Toggle current dropdown
+    if (!isVisible) {
+        dropdown.classList.add('show');
+        
+        // Close dropdown when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }, 10);
+    } else {
+        dropdown.classList.remove('show');
     }
 };
 
@@ -1006,7 +2009,6 @@ class SavingsManager {
             });
             
             const data = await response.json();
-            console.log('Savings overview loaded:', data);
             
             if (data.success) {
                 this.updateSavingsOverviewDisplay(data.data);
@@ -1097,7 +2099,6 @@ class SavingsManager {
             });
             
             const data = await response.json();
-            console.log('Savings overview loaded:', data);
             
             if (data.success) {
                 this.updateSavingsOverviewDisplay(data.data);
@@ -1122,7 +2123,6 @@ class SavingsManager {
             });
             
             const data = await response.json();
-            console.log('Savings data loaded:', data);
             
             if (data.success) {
                 this.currentGoals = data.goals || [];
@@ -1131,6 +2131,8 @@ class SavingsManager {
                 this.updateGoalsDisplay();
                 this.updateMonthlyTargetDisplay();
                 this.updateBudgetAllocationDisplay();
+                // Populate goal dropdowns with loaded goals
+                populateGoalDropdowns();
                 // this.updateAutoSaveStatus(); // Commented out for now
             } else {
                 console.error('Failed to load savings data:', data.message);
@@ -1312,7 +2314,6 @@ class SavingsManager {
     updateGoalsDisplay() {
         const goalsList = document.getElementById('goalsGrid');
         if (!goalsList) {
-            console.log('Goals grid element not found');
             return;
         }
 
@@ -1412,7 +2413,7 @@ class SavingsManager {
                         </div>
                         <div class="goal-menu">
                             <button class="menu-btn" onclick="toggleGoalMenu(this)">⋯</button>
-                            <div class="goal-dropdown">
+                            <div class="goal-actions-dropdown">
                                 ${menuOptions}
                             </div>
                         </div>
@@ -1461,6 +2462,16 @@ class SavingsManager {
             'car': '🚗',
             'house': '🏠',
             'education': '🎓',
+            'retirement': '🏖️',
+            'investment': '📈',
+            'debt_payoff': '💳',
+            'business': '💼',
+            'technology': '💻',
+            'health': '🏥',
+            'entertainment': '🎬',
+            'shopping': '🛍️',
+            'travel': '✈️',
+            'wedding': '💒',
             'other': '🎯'
         };
         return icons[goalType] || '🎯';
@@ -1477,7 +2488,6 @@ class SavingsManager {
             });
             
             const data = await response.json();
-            console.log('Recent activity loaded:', data);
             
             if (data.success) {
                 this.updateRecentActivityDisplay(data.data || []);
@@ -1494,7 +2504,6 @@ class SavingsManager {
     updateRecentActivityDisplay(activities) {
         const activityList = document.getElementById('activityList');
         if (!activityList) {
-            console.log('Activity list element not found');
             return;
         }
 
@@ -1763,14 +2772,33 @@ class SavingsManager {
         const formData = new FormData(e.target);
         const goalId = formData.get('goal_id');
         
+        // Debug: Log all form data
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: "${value}" (type: ${typeof value}, length: ${value.length})`);
+        }
+        
+        // Special focus on goal_type
+        const goalType = formData.get('goal_type');
+        const goalTypeSelect = document.getElementById('goalType');
+        
+        
+        if (goalTypeSelect) {
+            for (let i = 0; i < goalTypeSelect.options.length; i++) {
+                const option = goalTypeSelect.options[i];
+                console.log(`    ${i}: value="${option.value}", text="${option.text}"`);
+            }
+        }
+        
         if (goalId) {
             formData.append('action', 'update_goal');
         } else {
-            formData.append('action', 'create_goal');
+            formData.append('action', 'test_create_goal');
         }
 
         try {
-            const response = await fetch('/budget/actions/savings_handler.php', {
+            // Use different endpoints for create vs update
+            const endpoint = goalId ? '/budget/actions/savings_handler.php' : '/budget/test_new_goal_creation.php';
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 credentials: 'same-origin',
                 body: formData
@@ -1949,8 +2977,10 @@ class SavingsManager {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing SavingsManager');
     window.savingsManager = new SavingsManager();
+    
+    // Load goal types dynamically
+    loadGoalTypes();
     
     // Load saved theme
     const savedTheme = localStorage.getItem('personalTheme') || 'default';
@@ -1959,11 +2989,137 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add visibility change listener for auto-refresh
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && window.savingsManager) {
-            console.log('Page became visible, refreshing savings data');
             window.savingsManager.loadSavingsData();
         }
     });
 });
+
+// Function to load goal types from database
+async function loadGoalTypes() {
+    try {
+        const response = await fetch('../api/goal_types.php');
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get the raw text first to see what we're actually receiving
+        const text = await response.text();
+        
+        // Try to parse as JSON
+        const data = JSON.parse(text);
+        
+        if (data.success && data.goal_types) {
+            const goalTypeSelect = document.getElementById('goalType');
+            
+            // Clear existing options except the first one (Choose type)
+            while (goalTypeSelect.children.length > 1) {
+                goalTypeSelect.removeChild(goalTypeSelect.lastChild);
+            }
+            
+            // Add goal type options
+            data.goal_types.forEach(goalType => {
+                const option = document.createElement('option');
+                option.value = goalType.value;
+                option.textContent = goalType.display;
+                goalTypeSelect.appendChild(option);
+            });
+            
+            
+            // Debug: List all loaded goal types
+            data.goal_types.forEach((goalType, index) => {
+                console.log(`  ${index}: value="${goalType.value}", display="${goalType.display}"`);
+            });
+        } else {
+            console.error('Failed to load goal types:', data.message);
+            // Show error but don't populate with hardcoded values
+            const goalTypeSelect = document.getElementById('goalType');
+            if (goalTypeSelect) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Error loading goal types - please refresh';
+                goalTypeSelect.appendChild(option);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading goal types:', error);
+        // Show error but don't populate with hardcoded values
+        const goalTypeSelect = document.getElementById('goalType');
+        if (goalTypeSelect) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Network error - please refresh';
+            goalTypeSelect.appendChild(option);
+        }
+    }
+}
+
+// Function to populate goal dropdowns with user's existing goals
+function populateGoalDropdowns() {
+    if (!window.savingsManager || !window.savingsManager.currentGoals) {
+        return;
+    }
+    
+    const goals = window.savingsManager.currentGoals;
+    
+    // Populate round-up goal dropdown
+    const roundUpGoal = document.getElementById('roundUpGoal');
+    if (roundUpGoal) {
+        // Clear existing options except first one
+        while (roundUpGoal.children.length > 1) {
+            roundUpGoal.removeChild(roundUpGoal.lastChild);
+        }
+        
+        goals.forEach(goal => {
+            if (goal.status === 'active') {
+                const option = document.createElement('option');
+                option.value = goal.id;
+                option.textContent = `${window.savingsManager.getGoalIcon(goal.goal_type)} ${goal.goal_name}`;
+                roundUpGoal.appendChild(option);
+            }
+        });
+    }
+    
+    // Populate weekly goal dropdown
+    const weeklyGoal = document.getElementById('weeklyGoal');
+    if (weeklyGoal) {
+        // Clear existing options except first one
+        while (weeklyGoal.children.length > 1) {
+            weeklyGoal.removeChild(weeklyGoal.lastChild);
+        }
+        
+        goals.forEach(goal => {
+            if (goal.status === 'active') {
+                const option = document.createElement('option');
+                option.value = goal.id;
+                option.textContent = `${window.savingsManager.getGoalIcon(goal.goal_type)} ${goal.goal_name}`;
+                weeklyGoal.appendChild(option);
+            }
+        });
+    }
+    
+    // Populate goal distribution section
+    const goalDistribution = document.getElementById('goalDistribution');
+    if (goalDistribution) {
+        if (goals.length === 0) {
+            goalDistribution.innerHTML = `
+                <div class="distribution-placeholder">
+                    <p>Create some goals first to see distribution options</p>
+                </div>
+            `;
+        } else {
+            goalDistribution.innerHTML = goals
+                .filter(goal => goal.status === 'active')
+                .map(goal => `
+                    <div class="distribution-item">
+                        <span>${window.savingsManager.getGoalIcon(goal.goal_type)} ${goal.goal_name}</span>
+                        <input type="number" value="0" min="0" step="50" data-goal-id="${goal.id}">
+                    </div>
+                `).join('');
+        }
+    }
+}
 
 // Utility function for consistent currency formatting
 function formatCurrency(amount) {
@@ -1984,7 +3140,6 @@ function formatCurrency(amount) {
     return `₵${numAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 }
 
-console.log('Savings inline JS loaded - Global functions available');
 
 // Theme functionality
 function toggleThemeSelector() {
@@ -2039,6 +3194,334 @@ document.addEventListener('click', function(event) {
         }
     });
 });
+
+// Comprehensive Auto-Save Functions
+function showTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function loadComprehensiveAutoSaveConfig() {
+    fetch('/budget/api/comprehensive_autosave.php?action=get_config')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const config = data.config;
+                
+                // Load global settings
+                document.getElementById('globalAutoSaveEnabled').checked = config.global_enabled || false;
+                document.getElementById('defaultSaveAmount').value = config.default_amount || '';
+                document.getElementById('defaultSavePercentage').value = config.default_percentage || '';
+                
+                // Load triggers
+                document.getElementById('triggerSalary').checked = config.triggers?.includes('salary') || false;
+                document.getElementById('triggerAdditional').checked = config.triggers?.includes('additional') || false;
+                document.getElementById('triggerScheduled').checked = config.triggers?.includes('scheduled') || false;
+                document.getElementById('triggerExpense').checked = config.triggers?.includes('expense') || false;
+                
+                // Load allocation method
+                if (config.allocation_method) {
+                    document.querySelector(`input[name="allocationMethod"][value="${config.allocation_method}"]`).checked = true;
+                }
+                
+                // Load conditions
+                document.getElementById('minSaveAmount').value = config.min_amount || '';
+                document.getElementById('maxSaveAmount').value = config.max_amount || '';
+                document.getElementById('scheduleType').value = config.schedule_type || '';
+                document.getElementById('preferredTime').value = config.preferred_time || '09:00';
+                
+                document.getElementById('checkAccountBalance').checked = config.check_balance || false;
+                document.getElementById('checkMonthlyBudget').checked = config.check_budget || false;
+                document.getElementById('pauseOnOverspend').checked = config.pause_on_overspend || false;
+                
+                loadGoalRules();
+                loadAutoSaveStats();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading comprehensive auto-save config:', error);
+            showSnackbar('Error loading auto-save configuration', 'error');
+        });
+}
+
+function loadGoalRules() {
+    fetch('/budget/api/comprehensive_autosave.php?action=get_goal_rules')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('goalRulesList');
+                container.innerHTML = '';
+                
+                data.rules.forEach(rule => {
+                    const ruleElement = createGoalRuleElement(rule);
+                    container.appendChild(ruleElement);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading goal rules:', error);
+        });
+}
+
+function createGoalRuleElement(rule) {
+    const div = document.createElement('div');
+    div.className = 'goal-rule-item';
+    div.innerHTML = `
+        <div class="rule-header">
+            <h6>${rule.goal_name}</h6>
+            <button type="button" class="btn-delete" onclick="deleteGoalRule(${rule.id})">×</button>
+        </div>
+        <div class="rule-settings">
+            <div class="form-group">
+                <label>Save Amount/Percentage</label>
+                <div class="input-group">
+                    <input type="number" value="${rule.amount || ''}" placeholder="Amount" step="0.01">
+                    <span>or</span>
+                    <input type="number" value="${rule.percentage || ''}" placeholder="%" min="1" max="100">
+                    <span>%</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Priority Level</label>
+                <select>
+                    <option value="1" ${rule.priority === 1 ? 'selected' : ''}>High</option>
+                    <option value="2" ${rule.priority === 2 ? 'selected' : ''}>Medium</option>
+                    <option value="3" ${rule.priority === 3 ? 'selected' : ''}>Low</option>
+                </select>
+            </div>
+        </div>
+    `;
+    return div;
+}
+
+function addGoalRule() {
+    Swal.fire({
+        title: 'Add Goal Auto-Save Rule',
+        html: `
+            <div class="swal-form">
+                <select id="swal-goal" class="swal2-select">
+                    <option value="">Choose a goal...</option>
+                </select>
+                <input type="number" id="swal-rule-amount" class="swal2-input" placeholder="Fixed amount (₵)" step="0.01">
+                <input type="number" id="swal-rule-percentage" class="swal2-input" placeholder="Percentage (%)" min="1" max="100">
+                <select id="swal-priority" class="swal2-select">
+                    <option value="1">High Priority</option>
+                    <option value="2">Medium Priority</option>
+                    <option value="3">Low Priority</option>
+                </select>
+            </div>
+        `,
+        confirmButtonText: 'Add Rule',
+        showCancelButton: true,
+        didOpen: () => {
+            // Load goals for dropdown
+            fetch('/budget/api/comprehensive_autosave.php?action=get_goals')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('swal-goal');
+                        data.goals.forEach(goal => {
+                            const option = document.createElement('option');
+                            option.value = goal.id;
+                            option.textContent = goal.goal_name;
+                            select.appendChild(option);
+                        });
+                    }
+                });
+        },
+        preConfirm: () => {
+            const goalId = document.getElementById('swal-goal').value;
+            const amount = document.getElementById('swal-rule-amount').value;
+            const percentage = document.getElementById('swal-rule-percentage').value;
+            const priority = document.getElementById('swal-priority').value;
+            
+            if (!goalId) {
+                Swal.showValidationMessage('Please select a goal');
+                return false;
+            }
+            
+            if (!amount && !percentage) {
+                Swal.showValidationMessage('Please enter either an amount or percentage');
+                return false;
+            }
+            
+            return { goalId, amount, percentage, priority };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('action', 'add_goal_rule');
+            formData.append('goal_id', result.value.goalId);
+            formData.append('amount', result.value.amount);
+            formData.append('percentage', result.value.percentage);
+            formData.append('priority', result.value.priority);
+            
+            fetch('/budget/api/comprehensive_autosave.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSnackbar('Goal rule added successfully', 'success');
+                    loadGoalRules();
+                } else {
+                    showSnackbar(data.message || 'Failed to add goal rule', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding goal rule:', error);
+                showSnackbar('Error adding goal rule', 'error');
+            });
+        }
+    });
+}
+
+function deleteGoalRule(ruleId) {
+    Swal.fire({
+        title: 'Delete Rule?',
+        text: 'Are you sure you want to delete this auto-save rule?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('action', 'delete_goal_rule');
+            formData.append('rule_id', ruleId);
+            
+            fetch('/budget/api/comprehensive_autosave.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSnackbar('Rule deleted successfully', 'success');
+                    loadGoalRules();
+                } else {
+                    showSnackbar(data.message || 'Failed to delete rule', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting rule:', error);
+                showSnackbar('Error deleting rule', 'error');
+            });
+        }
+    });
+}
+
+function loadAutoSaveStats() {
+    fetch('/budget/api/comprehensive_autosave.php?action=get_stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('totalAutoSaved').textContent = '₵' + (data.stats.total_saved || '0.00');
+                document.getElementById('totalExecutions').textContent = data.stats.total_executions || '0';
+                document.getElementById('avgSaveAmount').textContent = '₵' + (data.stats.avg_amount || '0.00');
+                
+                loadAutoSaveHistory();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading auto-save stats:', error);
+        });
+}
+
+function loadAutoSaveHistory() {
+    fetch('/budget/api/comprehensive_autosave.php?action=get_history')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const container = document.getElementById('autoSaveHistory');
+                container.innerHTML = '';
+                
+                if (data.history.length === 0) {
+                    container.innerHTML = '<p class="no-data">No auto-save history found.</p>';
+                    return;
+                }
+                
+                data.history.forEach(item => {
+                    const historyElement = document.createElement('div');
+                    historyElement.className = 'history-item';
+                    historyElement.innerHTML = `
+                        <div class="history-date">${new Date(item.executed_at).toLocaleDateString()}</div>
+                        <div class="history-description">
+                            <strong>₵${item.total_amount}</strong> saved to ${item.goals_count} goal(s)
+                            <small>Triggered by: ${item.trigger_type}</small>
+                        </div>
+                        <div class="history-status ${item.status}">${item.status}</div>
+                    `;
+                    container.appendChild(historyElement);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading auto-save history:', error);
+        });
+}
+
+function saveComprehensiveAutoSaveConfig() {
+    const config = {
+        global_enabled: document.getElementById('globalAutoSaveEnabled').checked,
+        default_amount: document.getElementById('defaultSaveAmount').value,
+        default_percentage: document.getElementById('defaultSavePercentage').value,
+        
+        triggers: [],
+        allocation_method: document.querySelector('input[name="allocationMethod"]:checked').value,
+        
+        min_amount: document.getElementById('minSaveAmount').value,
+        max_amount: document.getElementById('maxSaveAmount').value,
+        schedule_type: document.getElementById('scheduleType').value,
+        preferred_time: document.getElementById('preferredTime').value,
+        
+        check_balance: document.getElementById('checkAccountBalance').checked,
+        check_budget: document.getElementById('checkMonthlyBudget').checked,
+        pause_on_overspend: document.getElementById('pauseOnOverspend').checked
+    };
+    
+    // Collect triggers
+    if (document.getElementById('triggerSalary').checked) config.triggers.push('salary');
+    if (document.getElementById('triggerAdditional').checked) config.triggers.push('additional');
+    if (document.getElementById('triggerScheduled').checked) config.triggers.push('scheduled');
+    if (document.getElementById('triggerExpense').checked) config.triggers.push('expense');
+    
+    const formData = new FormData();
+    formData.append('action', 'save_config');
+    formData.append('config', JSON.stringify(config));
+    
+    fetch('/budget/api/comprehensive_autosave.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSnackbar('Auto-save configuration saved successfully!', 'success');
+            closeModal('comprehensiveAutoSaveModal');
+            loadAutoSaveOverview(); // Refresh the overview
+        } else {
+            showSnackbar(data.message || 'Failed to save configuration', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving configuration:', error);
+        showSnackbar('Error saving configuration', 'error');
+    });
+}
+
     </script>
 </body>
 </html>

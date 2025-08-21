@@ -1577,6 +1577,8 @@ function clearAllocation() {
 }
 
 function renderBudgetCategories() {
+    console.log('renderBudgetCategories called with budgetData:', budgetData);
+    
     if (!budgetData || !budgetData.categories || budgetData.categories.length === 0) {
         showEmptyState();
         return;
@@ -1599,7 +1601,21 @@ function renderBudgetCategories() {
     };
 
     Object.keys(categoryTypes).forEach(type => {
-        const typeCategories = budgetData.categories.filter(cat => cat.category_type === type);
+        // Get categories for this type - use categoriesByType for organized data
+        let typeCategories;
+        if (budgetData.categories_by_type && budgetData.categories_by_type[type]) {
+            typeCategories = budgetData.categories_by_type[type];
+        } else {
+            // Fallback to filtering from flat categories array (for backward compatibility)
+            typeCategories = budgetData.categories ? budgetData.categories.filter(cat => cat.category_type === type) : [];
+        }
+        
+        // Ensure typeCategories is always an array
+        if (!Array.isArray(typeCategories)) {
+            console.warn(`renderBudgetCategories: typeCategories for ${type} is not an array:`, typeCategories);
+            typeCategories = [];
+        }
+        
         const typeInfo = categoryTypes[type];
         
         // Handle savings type specially - get data from savings_data instead of categories
@@ -1756,33 +1772,38 @@ function createCategorySection(type, typeInfo, totals, categories) {
             </div>
         </div>
         <div class="category-content">
-            ${type === 'savings' ? createSavingsMessage() : createCategoryTable(categories)}
-            ${type !== 'savings' ? `<button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>` : ''}
+            ${type === 'savings' ? (categories.length > 0 ? createSavingsCategoryTable(categories) : createSavingsMessage(totals)) : createCategoryTable(categories)}
+            ${type !== 'savings' ? `<button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>` : 
+              (categories.length > 0 ? '<div class="savings-actions" style="margin-top: 1rem;"><a href="savings.php" class="btn-primary">Manage All Goals</a></div>' : '<div class="savings-actions"><a href="savings.php" class="btn-primary">Create Your First Goal</a></div>')}
         </div>
     `;
     
     return section;
 }
 
-// Helper function to create savings message for budget page
-function createSavingsMessage() {
+// Helper function to create savings message for budget page when no goals exist
+function createSavingsMessage(totals) {
+    // Get savings data from the passed totals
+    const plannedSavings = totals?.planned || 0;
+    const actualSavings = totals?.actual || 0;
+    
     return `
         <div class="savings-message">
             <div class="message-icon">💰</div>
-            <h4>Savings Management</h4>
-            <p>Savings goals and contributions are managed separately from expense tracking.</p>
+            <h4>Start Saving with Goals</h4>
+            <p>Create specific savings goals to track your progress and allocate your savings budget effectively.</p>
             <div class="savings-info">
                 <div class="info-item">
-                    <span class="label">Planned Savings:</span>
-                    <span class="value">${formatCurrency(budgetData.savings_data?.planned_savings || 0)}</span>
+                    <span class="label">Savings Budget Available:</span>
+                    <span class="value">${formatCurrency(plannedSavings)}</span>
                 </div>
                 <div class="info-item">
-                    <span class="label">Current Contributions:</span>
-                    <span class="value">${formatCurrency(budgetData.savings_data?.actual_savings || 0)}</span>
+                    <span class="label">Current Month Savings:</span>
+                    <span class="value">${formatCurrency(actualSavings)}</span>
                 </div>
             </div>
             <div class="savings-actions">
-                <a href="savings.php" class="btn-primary">Manage Savings Goals</a>
+                <a href="savings.php" class="btn-primary">Create Your First Goal</a>
                 <button onclick="showSavingsInfo()" class="btn-secondary">Learn More</button>
             </div>
         </div>
@@ -1885,6 +1906,12 @@ function getStatusText(status) {
 }
 
 function createCategoryTable(categories) {
+    // Ensure categories is an array
+    if (!categories || !Array.isArray(categories)) {
+        console.warn('createCategoryTable: categories is not an array:', categories);
+        categories = []; // Set to empty array
+    }
+    
     if (categories.length === 0) {
         return `
             <div class="empty-category">
@@ -1950,6 +1977,98 @@ function createCategoryTable(categories) {
                     <button class="action-btn primary" onclick="addExpenseToCategory(${category.id}, '${category.name}')" title="Add Expense">💰</button>
                     <button class="action-btn" onclick="viewCategoryExpenses(${category.id}, '${category.name}')" title="View Expenses">📊</button>
                     <button class="action-btn danger" onclick="deleteCategory(${category.id})" title="Delete Category">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+
+    tableHTML += '</div>';
+    return tableHTML;
+}
+
+// Specialized function to create savings category table with appropriate terminology
+function createSavingsCategoryTable(categories) {
+    if (categories.length === 0) {
+        return `
+            <div class="empty-category">
+                <p>No savings goals created yet. Create your first goal to start tracking your savings progress.</p>
+            </div>
+        `;
+    }
+
+    let tableHTML = `
+        <div class="budget-table savings-table">
+            <div class="table-header">
+                <div class="col-item">Savings Goal</div>
+                <div class="col-target">Target Amount</div>
+                <div class="col-actual">Contributed</div>
+                <div class="col-progress">Progress</div>
+                <div class="col-status">Status</div>
+                <div class="col-actions">Actions</div>
+            </div>
+    `;
+
+    categories.forEach(category => {
+        const monthlyTarget = parseFloat(category.budget_limit || 0);
+        const contributed = parseFloat(category.actual_spent || 0); // 'actual_spent' is actually contributed for savings
+        const variance = contributed - monthlyTarget;
+        const percentageAchieved = monthlyTarget > 0 ? (contributed / monthlyTarget) * 100 : 0;
+        const contributionCount = category.transaction_count || 0;
+        const goalId = category.goal_id;
+        const targetAmount = parseFloat(category.target_amount || 0);
+        const currentAmount = parseFloat(category.current_amount || 0);
+        const overallProgress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+        
+        // For savings, we want different status logic based on overall progress
+        let statusInfo;
+        if (currentAmount === 0) {
+            statusInfo = { status: 'not_started', text: 'Not Started', class: 'neutral' };
+        } else if (overallProgress >= 100) {
+            statusInfo = { status: 'goal_achieved', text: 'Goal Achieved', class: 'success' };
+        } else if (overallProgress >= 75) {
+            statusInfo = { status: 'on_track', text: 'On Track', class: 'good' };
+        } else if (overallProgress >= 25) {
+            statusInfo = { status: 'moderate', text: 'In Progress', class: 'warning' };
+        } else {
+            statusInfo = { status: 'low', text: 'Just Started', class: 'info' };
+        }
+        
+        const varianceClass = variance >= 0 ? 'positive' : 'negative';
+        
+        // Create goal name without (Savings) suffix for display
+        const displayName = category.name.replace(' (Savings)', '');
+        
+        tableHTML += `
+            <div class="budget-item savings-item" data-category-id="${category.id}" data-goal-id="${goalId}">
+                <div class="col-item">
+                    <span class="item-icon" style="color: ${category.color}">${category.icon}</span>
+                    <div class="item-info">
+                        <h5>${displayName}</h5>
+                        <p>${contributionCount} contribution${contributionCount !== 1 ? 's' : ''} this month</p>
+                    </div>
+                </div>
+                <div class="col-target">
+                    <span class="target-amount">${formatCurrency(targetAmount)}</span>
+                    <small>Goal target</small>
+                </div>
+                <div class="col-actual">
+                    <span class="contributed-amount">${formatCurrency(currentAmount)}</span>
+                    <small>Total saved</small>
+                </div>
+                <div class="col-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${Math.min(overallProgress, 100)}%"></div>
+                    </div>
+                    <span class="progress-text">${overallProgress.toFixed(1)}%</span>
+                </div>
+                <div class="col-status">
+                    <span class="status-badge ${statusInfo.class}">${statusInfo.text}</span>
+                </div>
+                <div class="col-actions">
+                    <button class="action-btn" onclick="editSavingsGoal(${goalId})" title="Edit Goal">✏️</button>
+                    <button class="action-btn primary" onclick="addToSavingsGoal(${goalId}, '${displayName}')" title="Add Money">💰</button>
+                    <button class="action-btn" onclick="viewGoalDetails(${goalId}, '${displayName}')" title="View Details">📊</button>
+                    <button class="action-btn secondary" onclick="goToSavingsPage()" title="Manage in Savings">🎯</button>
                 </div>
             </div>
         `;
@@ -2472,7 +2591,6 @@ async function initializePage() {
     // Load budget data
     await loadBudgetData();
     
-    console.log('Budget page initialized successfully');
 }
 
 // Wait for DOM to be ready
@@ -2545,3 +2663,22 @@ window.showAddCategoryModal = (categoryType = '') => {
 window.closeModal = closeModal;
 window.toggleUserMenu = toggleUserMenu;
 window.switchView = switchView;
+
+// Savings-specific functions for budget integration
+window.editSavingsGoal = function(goalId) {
+    window.open(`savings.php?edit=${goalId}`, '_blank');
+};
+
+window.addToSavingsGoal = function(goalId, goalName) {
+    if (confirm(`Add money to your "${goalName}" savings goal?`)) {
+        window.open(`savings.php?contribute=${goalId}`, '_blank');
+    }
+};
+
+window.viewGoalDetails = function(goalId, goalName) {
+    window.open(`savings.php?goal=${goalId}`, '_blank');
+};
+
+window.goToSavingsPage = function() {
+    window.open('savings.php', '_blank');
+};

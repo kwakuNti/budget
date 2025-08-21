@@ -108,39 +108,94 @@ try {
     $totalVariance = $totalPlanned - $totalActual;
     $budgetPerformance = $totalPlanned > 0 ? round(($totalActual / $totalPlanned) * 100, 1) : 0;
 
-    // Get actual savings from goal contributions (not expenses)
+    // Get savings categories (goals) with their contributions
     $stmt = $conn->prepare("
-        SELECT COALESCE(SUM(pgc.amount), 0) as actual_savings
-        FROM personal_goal_contributions pgc
-        JOIN personal_goals pg ON pgc.goal_id = pg.id
-        WHERE pg.user_id = ? 
-        AND MONTH(pgc.contribution_date) = MONTH(CURRENT_DATE())
-        AND YEAR(pgc.contribution_date) = YEAR(CURRENT_DATE())
+        SELECT 
+            bc.id,
+            bc.name,
+            bc.category_type,
+            bc.icon,
+            bc.color,
+            bc.budget_limit,
+            pg.id as goal_id,
+            pg.current_amount,
+            pg.target_amount,
+            pg.auto_save_enabled,
+            pg.save_amount,
+            COALESCE(SUM(pgc.amount), 0) as actual_contributed,
+            COUNT(pgc.id) as contribution_count
+        FROM budget_categories bc
+        LEFT JOIN personal_goals pg ON bc.id = pg.budget_category_id AND pg.user_id = ?
+        LEFT JOIN personal_goal_contributions pgc ON pg.id = pgc.goal_id 
+            AND MONTH(pgc.contribution_date) = MONTH(CURRENT_DATE())
+            AND YEAR(pgc.contribution_date) = YEAR(CURRENT_DATE())
+        WHERE bc.user_id = ? AND bc.is_active = TRUE
+            AND bc.category_type = 'savings'
+        GROUP BY bc.id, bc.name, bc.category_type, bc.icon, bc.color, bc.budget_limit, 
+                 pg.id, pg.current_amount, pg.target_amount, pg.auto_save_enabled, pg.save_amount
+        ORDER BY bc.name
     ");
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param("ii", $userId, $userId);
     $stmt->execute();
-    $savingsResult = $stmt->get_result()->fetch_assoc();
-    $actualSavings = floatval($savingsResult['actual_savings']);
+    $savingsResult = $stmt->get_result();
+    
+    $savingsCategories = [];
+    $totalActualSavings = 0;
+    $totalPlannedSavings = 0;
+    
+    while ($row = $savingsResult->fetch_assoc()) {
+        $actualContributed = floatval($row['actual_contributed']);
+        $autoSaveAmount = floatval($row['save_amount'] ?? 0);
+        $targetAmount = floatval($row['target_amount'] ?? 0);
+        
+        // Use auto-save amount as monthly planned if available, otherwise don't set a monthly target
+        $monthlyPlanned = $autoSaveAmount > 0 ? $autoSaveAmount : 0;
+        
+        $savingsCategories[] = [
+            'id' => intval($row['id']),
+            'name' => $row['name'],
+            'category_type' => $row['category_type'],
+            'icon' => $row['icon'],
+            'color' => $row['color'],
+            'budget_limit' => $monthlyPlanned,
+            'actual_spent' => $actualContributed, // Using 'spent' for consistency, but it's actually saved
+            'transaction_count' => intval($row['contribution_count']),
+            'variance' => $monthlyPlanned - $actualContributed,
+            'progress_percentage' => $monthlyPlanned > 0 ? 
+                min(100, ($actualContributed / $monthlyPlanned) * 100) : 0,
+            'goal_id' => $row['goal_id'],
+            'current_amount' => floatval($row['current_amount'] ?? 0),
+            'target_amount' => $targetAmount,
+            'auto_save_enabled' => boolval($row['auto_save_enabled'] ?? false),
+            'auto_save_amount' => $autoSaveAmount
+        ];
+        
+        $totalActualSavings += $actualContributed;
+        $totalPlannedSavings += $monthlyPlanned;
+    }
 
-    // Get planned savings from budget allocation
-    $plannedSavings = $budgetAllocation ? floatval($budgetAllocation['savings_amount']) : 0;
+    // Get total actual savings from goal contributions (not expenses)
+    $actualSavings = $totalActualSavings;
 
-    // Group categories by type (excluding savings from expense categories)
+    // Get planned savings from budget allocation (fallback if no specific goals)
+    $plannedSavings = $budgetAllocation ? floatval($budgetAllocation['savings_amount']) : $totalPlannedSavings;
+
+    // Group categories by type (including savings goals as budget categories)
     $categoriesByType = [
-        'needs' => array_filter($categories, fn($cat) => $cat['category_type'] === 'needs'),
-        'wants' => array_filter($categories, fn($cat) => $cat['category_type'] === 'wants'),
-        'savings' => [] // Empty array - savings handled separately via goals
+        'needs' => array_values(array_filter($categories, fn($cat) => $cat['category_type'] === 'needs')),
+        'wants' => array_values(array_filter($categories, fn($cat) => $cat['category_type'] === 'wants')),
+        'savings' => array_values($savingsCategories) // Ensure it's an indexed array
     ];
 
     // Calculate category type totals
     $categoryTypeTotals = [];
     foreach ($categoriesByType as $type => $cats) {
         if ($type === 'savings') {
-            // Handle savings separately using goal contributions
+            // Handle savings using actual goal data
             $categoryTypeTotals[$type] = [
-                'planned' => $plannedSavings,
+                'planned' => $totalPlannedSavings > 0 ? $totalPlannedSavings : $plannedSavings,
                 'actual' => $actualSavings,
-                'count' => 0 // No expense categories for savings
+                'count' => count($savingsCategories)
             ];
         } else {
             $categoryTypeTotals[$type] = [

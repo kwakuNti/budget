@@ -370,6 +370,10 @@ function getAutoSaveSettings($conn, $userId) {
 }
 
 function createGoal($conn, $userId) {
+    // Add comprehensive debugging
+    error_log("=== CREATE GOAL DEBUG START ===");
+    error_log("Raw POST data: " . json_encode($_POST));
+    
     $goalName = trim($_POST['goal_name'] ?? '');
     $targetAmountRaw = $_POST['target_amount'] ?? 0;
     $targetAmount = sprintf('%.2f', $targetAmountRaw);
@@ -386,9 +390,48 @@ function createGoal($conn, $userId) {
     $saveAmount = sprintf('%.2f', $saveAmountRaw);
     $deductFromIncome = isset($_POST['deduct_from_income']) ? (bool)$_POST['deduct_from_income'] : false;
     
+    // Enhanced debugging for goal_type
+    error_log("Goal type received: '" . $goalType . "' (length: " . strlen($goalType) . ")");
+    error_log("Goal type bytes: " . bin2hex($goalType));
+    
+    // Get valid goal types from database schema
+    $validGoalTypes = getValidGoalTypesFromSchema($conn);
+    error_log("Valid goal types from database: " . json_encode($validGoalTypes));
+    
+    // Validate and sanitize goal_type
+    if (!in_array($goalType, $validGoalTypes)) {
+        error_log("INVALID goal_type received: '" . $goalType . "'");
+        error_log("Valid goal_types: " . implode(', ', $validGoalTypes));
+        
+        // Check for exact matches with debugging
+        foreach ($validGoalTypes as $valid) {
+            if (trim(strtolower($goalType)) === trim(strtolower($valid))) {
+                error_log("Found case-insensitive match: '$goalType' -> '$valid'");
+                $goalType = $valid;
+                break;
+            }
+        }
+        
+        // If still not valid, default to 'other'
+        if (!in_array($goalType, $validGoalTypes)) {
+            error_log("Defaulting to 'other' for invalid goal_type: '$goalType'");
+            $goalType = 'other';
+        }
+    }
+    
+    error_log("Final goal_type to be inserted: '" . $goalType . "'");
+    error_log("=== CREATE GOAL DEBUG END ===");
+    
     if (empty($goalName) || floatval($targetAmount) <= 0) {
         throw new Exception('Goal name and target amount are required');
     }
+    
+    // Debug logging
+    error_log("Creating goal with parameters:");
+    error_log("- goal_name: " . $goalName);
+    error_log("- target_amount: " . $targetAmount);
+    error_log("- goal_type: " . $goalType);
+    error_log("- priority: " . $priority);
     
     // Get budget allocation data
     $budgetAllocation = getBudgetAllocation($conn, $userId);
@@ -467,6 +510,10 @@ function createGoal($conn, $userId) {
             ");
             $autoSaveInt = $autoSaveEnabled ? 1 : 0;
             $deductInt = $deductFromIncome ? 1 : 0;
+            
+            // Debug the exact values being bound
+            error_log("Binding parameters - userId: $userId, goalName: '$goalName', targetAmount: $targetAmount, initialDeposit: $initialDeposit, targetDate: '$targetDate', categoryId: $categoryId, goalType: '$goalType', priority: '$priority', autoSaveInt: $autoSaveInt, saveMethod: '$saveMethod', savePercentage: $savePercentage, saveAmount: $saveAmount, deductInt: $deductInt");
+            
             $stmt->bind_param("isdsisissdsdi", $userId, $goalName, $targetAmount, $initialDeposit, $targetDate, $categoryId, $goalType, $priority, $autoSaveInt, $saveMethod, $savePercentage, $saveAmount, $deductInt);
         } else {
             // Create the goal without status but with new columns
@@ -477,10 +524,65 @@ function createGoal($conn, $userId) {
             ");
             $autoSaveInt = $autoSaveEnabled ? 1 : 0;
             $deductInt = $deductFromIncome ? 1 : 0;
+            
+            // Debug the exact values being bound
+            error_log("Binding parameters (no status) - userId: $userId, goalName: '$goalName', targetAmount: $targetAmount, initialDeposit: $initialDeposit, targetDate: '$targetDate', categoryId: $categoryId, goalType: '$goalType', priority: '$priority', autoSaveInt: $autoSaveInt, saveMethod: '$saveMethod', savePercentage: $savePercentage, saveAmount: $saveAmount, deductInt: $deductInt");
+            
             $stmt->bind_param("isdsisissdsdi", $userId, $goalName, $targetAmount, $initialDeposit, $targetDate, $categoryId, $goalType, $priority, $autoSaveInt, $saveMethod, $savePercentage, $saveAmount, $deductInt);
         }
         
-        $stmt->execute();
+        // Add error handling for the execute with comprehensive debugging
+        error_log("About to execute SQL insert...");
+        
+        // Get current database schema for goal_type column
+        $schemaQuery = "SHOW COLUMNS FROM personal_goals LIKE 'goal_type'";
+        $schemaStmt = $conn->prepare($schemaQuery);
+        $schemaStmt->execute();
+        $schemaResult = $schemaStmt->get_result()->fetch_assoc();
+        error_log("Current database schema for goal_type: " . json_encode($schemaResult));
+        
+        if (!$stmt->execute()) {
+            $error = $stmt->error;
+            $errno = $stmt->errno;
+            $sqlstate = $stmt->sqlstate;
+            
+            error_log("=== SQL EXECUTION FAILED ===");
+            error_log("MySQL Error Number: " . $errno);
+            error_log("MySQL Error: " . $error);
+            error_log("SQL State: " . $sqlstate);
+            error_log("Goal Type Value: '" . $goalType . "'");
+            error_log("Goal Type Length: " . strlen($goalType));
+            error_log("Goal Type Hex: " . bin2hex($goalType));
+            error_log("Goal Type UTF-8 Check: " . (mb_check_encoding($goalType, 'UTF-8') ? 'Valid' : 'Invalid'));
+            
+            // Try to get more specific information about the truncation
+            if (strpos($error, 'Data truncated') !== false) {
+                error_log("DATA TRUNCATION DETECTED");
+                error_log("Checking each field for potential issues:");
+                error_log("- goal_name length: " . strlen($goalName));
+                error_log("- goal_type length: " . strlen($goalType));
+                error_log("- priority length: " . strlen($priority));
+                error_log("- save_method length: " . strlen($saveMethod));
+                
+                // Check if goal_type is actually in the enum
+                if ($schemaResult && isset($schemaResult['Type'])) {
+                    preg_match_all("/'([^']+)'/", $schemaResult['Type'], $matches);
+                    $enumValues = $matches[1];
+                    error_log("ENUM values from schema: " . json_encode($enumValues));
+                    error_log("Goal type '" . $goalType . "' in ENUM? " . (in_array($goalType, $enumValues) ? 'YES' : 'NO'));
+                    
+                    // Check for similar values
+                    foreach ($enumValues as $enumValue) {
+                        if (levenshtein(strtolower($goalType), strtolower($enumValue)) <= 2) {
+                            error_log("Similar enum value found: '$enumValue' (distance: " . levenshtein(strtolower($goalType), strtolower($enumValue)) . ")");
+                        }
+                    }
+                }
+            }
+            
+            error_log("=== END SQL ERROR DEBUG ===");
+            throw new Exception("Database error: " . $error . " (Error #" . $errno . ")");
+        }
         $goalId = $conn->insert_id;
         
         // Add initial deposit if provided
@@ -872,21 +974,14 @@ function resumeGoal($conn, $userId) {
         throw new Exception('Goal ID is required');
     }
     
-    // Check if status column exists
-    $stmt = $conn->prepare("SHOW COLUMNS FROM personal_goals LIKE 'status'");
+    // Update goal status to active
+    $stmt = $conn->prepare("
+        UPDATE personal_goals 
+        SET status = 'active', updated_at = CURRENT_TIMESTAMP 
+        WHERE id = ? AND user_id = ?
+    ");
+    $stmt->bind_param("ii", $goalId, $userId);
     $stmt->execute();
-    $statusExists = $stmt->get_result()->num_rows > 0;
-    
-    if ($statusExists) {
-        // Update goal status to active and optionally enable auto-save
-        $stmt = $conn->prepare("
-            UPDATE personal_goals 
-            SET status = 'active', updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ? AND user_id = ?
-        ");
-        $stmt->bind_param("ii", $goalId, $userId);
-        $stmt->execute();
-    }
 
     if ($stmt->affected_rows > 0) {
         echo json_encode([
@@ -908,30 +1003,14 @@ function setGoalInactive($conn, $userId) {
         throw new Exception('Goal ID is required');
     }
     
-    // Check if status column exists
-    $stmt = $conn->prepare("SHOW COLUMNS FROM personal_goals LIKE 'status'");
+    // Update goal status to inactive
+    $stmt = $conn->prepare("
+        UPDATE personal_goals 
+        SET status = 'inactive', updated_at = CURRENT_TIMESTAMP 
+        WHERE id = ? AND user_id = ?
+    ");
+    $stmt->bind_param("ii", $goalId, $userId);
     $stmt->execute();
-    $statusExists = $stmt->get_result()->num_rows > 0;
-    
-    if ($statusExists) {
-        // Update goal status to inactive and disable auto-save
-        $stmt = $conn->prepare("
-            UPDATE personal_goals 
-            SET status = 'inactive', auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ? AND user_id = ?
-        ");
-        $stmt->bind_param("ii", $goalId, $userId);
-        $stmt->execute();
-    } else {
-        // Just disable auto-save if status column doesn't exist
-        $stmt = $conn->prepare("
-            UPDATE personal_goals 
-            SET auto_save_enabled = 0, updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ? AND user_id = ?
-        ");
-        $stmt->bind_param("ii", $goalId, $userId);
-        $stmt->execute();
-    }
 
     if ($stmt->affected_rows > 0) {
         echo json_encode([
@@ -1403,13 +1482,23 @@ function getSavingsOverview($conn, $userId) {
 function getGoalTypeIcon($goalType) {
     $icons = [
         'emergency_fund' => '🚨',
-        'vacation' => '✈️',
+        'vacation' => '🏖️',
         'car' => '🚗',
         'house' => '🏠',
         'education' => '🎓',
-        'other' => '💰'
+        'retirement' => '🏖️',
+        'investment' => '📈',
+        'debt_payoff' => '💳',
+        'business' => '💼',
+        'technology' => '💻',
+        'health' => '🏥',
+        'entertainment' => '🎬',
+        'shopping' => '🛍️',
+        'travel' => '✈️',
+        'wedding' => '�',
+        'other' => '🎯'
     ];
-    return $icons[$goalType] ?? '💰';
+    return $icons[$goalType] ?? '🎯';
 }
 
 /**
@@ -1422,9 +1511,55 @@ function getGoalTypeColor($goalType) {
         'car' => '#2ecc71',            // Green
         'house' => '#f39c12',          // Orange
         'education' => '#9b59b6',      // Purple
+        'retirement' => '#1abc9c',     // Turquoise
+        'investment' => '#27ae60',     // Dark green
+        'debt_payoff' => '#e67e22',    // Dark orange
+        'business' => '#8e44ad',       // Dark purple
+        'technology' => '#2980b9',     // Dark blue
+        'health' => '#c0392b',         // Dark red
+        'entertainment' => '#f1c40f',  // Yellow
+        'shopping' => '#e91e63',       // Pink
+        'travel' => '#00bcd4',         // Cyan
+        'wedding' => '#ff69b4',        // Hot pink
         'other' => '#34495e'           // Dark gray
     ];
     return $colors[$goalType] ?? '#34495e';
+}
+
+/**
+ * Get valid goal types directly from database schema
+ */
+function getValidGoalTypesFromSchema($conn) {
+    try {
+        $query = "SHOW COLUMNS FROM personal_goals LIKE 'goal_type'";
+        $stmt = $conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        
+        if ($result && $result['Type']) {
+            preg_match_all("/'([^']+)'/", $result['Type'], $matches);
+            return $matches[1];
+        }
+    } catch (Exception $e) {
+        error_log("Error getting valid goal types: " . $e->getMessage());
+    }
+    
+    // Fallback
+    return ['emergency_fund', 'vacation', 'car', 'house', 'education', 'other'];
+}
+
+/**
+ * Check if a column exists in a table
+ */
+function checkColumnExists($conn, $table, $column) {
+    try {
+        $query = "SHOW COLUMNS FROM `$table` LIKE '$column'";
+        $result = $conn->query($query);
+        return $result->num_rows > 0;
+    } catch (Exception $e) {
+        error_log("Error checking column existence: " . $e->getMessage());
+        return false;
+    }
 }
 
 ?>

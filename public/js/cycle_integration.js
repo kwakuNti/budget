@@ -634,7 +634,6 @@ window.onclick = function(event) {
 document.addEventListener('DOMContentLoaded', function() {
     // Initial load
     loadCycleData().then(() => {
-        console.log('Cycle management initialized successfully');
         setupAutoRefresh();
         showNotification('Cycle data loaded successfully!', 'success');
     }).catch(error => {
