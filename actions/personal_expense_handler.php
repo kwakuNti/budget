@@ -161,12 +161,14 @@ function getCategories($conn, $user_id) {
         
         $stmt = $conn->prepare("
             SELECT 
-                c.id, 
-                c.name, 
-                c.category_type, 
-                c.icon, 
-                c.color, 
+                c.id,
+                c.name,
+                c.category_type,
+                c.icon,
+                c.color,
                 c.budget_limit,
+                c.budget_period,
+                c.original_budget_limit,
                 COALESCE(SUM(CASE 
                     WHEN e.expense_date >= DATE_FORMAT(NOW(), '%Y-%m-01') 
                     THEN e.amount 
@@ -176,11 +178,9 @@ function getCategories($conn, $user_id) {
             LEFT JOIN personal_expenses e ON c.id = e.category_id AND e.user_id = c.user_id
             WHERE c.user_id = ? AND c.is_active = 1
                 AND c.category_type != 'savings'
-            GROUP BY c.id, c.name, c.category_type, c.icon, c.color, c.budget_limit
+            GROUP BY c.id, c.name, c.category_type, c.icon, c.color, c.budget_limit, c.budget_period, c.original_budget_limit
             ORDER BY c.category_type, c.name
-        ");
-        
-        $stmt->bind_param("i", $user_id);
+        ");        $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         
@@ -204,6 +204,8 @@ function getCategories($conn, $user_id) {
             $row['remaining_budget'] = $remaining;
             $row['budget_percentage'] = round($percentage, 1);
             $row['status'] = $percentage >= 100 ? 'over' : ($percentage >= 80 ? 'warning' : 'good');
+            $row['budget_period'] = $row['budget_period'] ?? 'monthly';
+            $row['original_budget_limit'] = floatval($row['original_budget_limit'] ?? $row['budget_limit']);
             
             // Add to section spending total
             $section_spending[$row['category_type']] += floatval($row['spent_this_month']);
@@ -402,6 +404,8 @@ function getExpenseSummary($conn, $user_id) {
                 c.color,
                 c.category_type,
                 c.budget_limit,
+                c.budget_period,
+                c.original_budget_limit,
                 COALESCE(SUM(e.amount), 0) as spent_amount,
                 COUNT(e.id) as transaction_count
             FROM budget_categories c
@@ -409,7 +413,7 @@ function getExpenseSummary($conn, $user_id) {
                 AND e.user_id = c.user_id 
                 AND DATE_FORMAT(e.expense_date, '%Y-%m') = ?
             WHERE c.user_id = ? AND c.is_active = 1 AND c.category_type IN ('needs', 'wants')
-            GROUP BY c.id, c.name, c.icon, c.color, c.category_type, c.budget_limit
+            GROUP BY c.id, c.name, c.icon, c.color, c.category_type, c.budget_limit, c.budget_period, c.original_budget_limit
             ORDER BY c.category_type, c.name
         ");
         $category_stmt->bind_param("si", $current_month, $user_id);
@@ -420,6 +424,8 @@ function getExpenseSummary($conn, $user_id) {
         while ($row = $category_result->fetch_assoc()) {
             $spent = floatval($row['spent_amount']);
             $budget = floatval($row['budget_limit']);
+            $budgetPeriod = $row['budget_period'] ?? 'monthly';
+            $originalBudgetLimit = floatval($row['original_budget_limit'] ?? $budget);
             $remaining = $budget - $spent;
             $percentage = $budget > 0 ? ($spent / $budget) * 100 : 0;
             
@@ -431,6 +437,8 @@ function getExpenseSummary($conn, $user_id) {
                 'category_type' => $row['category_type'],
                 'spent' => $spent,
                 'budget' => $budget,
+                'budget_period' => $budgetPeriod,
+                'original_budget_limit' => $originalBudgetLimit,
                 'remaining' => $remaining,
                 'percentage' => round($percentage, 1),
                 'transactions' => intval($row['transaction_count']),

@@ -20,10 +20,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salary Setup - Personal Budget Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../public/css/personal.css">
     <style>
         /* Additional styles for salary setup page */
@@ -93,6 +95,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -170,7 +173,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         .btn-icon:hover {
-            background: rgba(0,0,0,0.05);
+            background: rgba(0, 0, 0, 0.05);
         }
 
         .btn-icon span {
@@ -673,7 +676,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             border-top: 1px solid #dee2e6;
         }
 
-        .btn-primary, .btn-secondary {
+        .btn-primary,
+        .btn-secondary {
             padding: 12px 24px;
             border-radius: 8px;
             font-weight: 600;
@@ -737,23 +741,51 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         @-webkit-keyframes fadein {
-            from {right: 0; opacity: 0;} 
-            to {right: 30px; opacity: 1;}
+            from {
+                right: 0;
+                opacity: 0;
+            }
+
+            to {
+                right: 30px;
+                opacity: 1;
+            }
         }
 
         @keyframes fadein {
-            from {right: 0; opacity: 0;}
-            to {right: 30px; opacity: 1;}
+            from {
+                right: 0;
+                opacity: 0;
+            }
+
+            to {
+                right: 30px;
+                opacity: 1;
+            }
         }
 
         @-webkit-keyframes fadeout {
-            from {right: 30px; opacity: 1;} 
-            to {right: 0; opacity: 0;}
+            from {
+                right: 30px;
+                opacity: 1;
+            }
+
+            to {
+                right: 0;
+                opacity: 0;
+            }
         }
 
         @keyframes fadeout {
-            from {right: 30px; opacity: 1;}
-            to {right: 0; opacity: 0;}
+            from {
+                right: 30px;
+                opacity: 1;
+            }
+
+            to {
+                right: 0;
+                opacity: 0;
+            }
         }
 
         /* CSS Variables */
@@ -763,7 +795,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             .form-row {
                 grid-template-columns: 1fr;
             }
-            
+
             .allocation-summary {
                 flex-direction: column;
                 gap: 16px;
@@ -989,7 +1021,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
-        .score-number, .score-label {
+        .score-number,
+        .score-label {
             position: relative;
             z-index: 1;
         }
@@ -1073,6 +1106,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 justify-content: center;
             }
         }
+
         /* Primary Salary Hero Section */
         .primary-salary-hero {
             background: var(--card-background);
@@ -1147,34 +1181,35 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             font-size: 16px;
             font-weight: 500;
         }
-
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">💰</div>
+                <div class="logo-icon"><i class="fas fa-piggy-bank"></i></div>
                 <div class="logo-text">
                     <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Finance Dashboard</p>
                 </div>
             </div>
-            
+
             <nav class="header-nav">
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
                 <a href="salary.php" class="nav-item active">Salary Setup</a>
                 <a href="budget.php" class="nav-item">Budget</a>
                 <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
-                <a href="insights.php" class="nav-item">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
+                <a href="report.php" class="nav-item">Reports</a>
+
             </nav>
 
             <div class="theme-selector">
                 <button class="theme-toggle-btn" onclick="toggleThemeSelector()" title="Change Theme">
-                    <span class="theme-icon">🎨</span>
+                    <span class="theme-icon"><i class="fas fa-palette"></i></span>
                 </button>
                 <div class="theme-dropdown" id="themeDropdown">
                     <div class="theme-dropdown-header">
@@ -1234,9 +1269,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
 
             <div class="user-menu">
-                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php 
-                    echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
-                ?></div>
+                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php
+                                                                                    echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1));
+                                                                                    ?></div>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="profile.php">Profile Settings</a>
                     <a href="income-sources.php">Income Sources</a>
@@ -1255,16 +1290,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Page Header -->
             <section class="welcome-section">
                 <div class="welcome-content">
-                    <h2>💼 Salary & Income Setup</h2>
+                    <h2><i class="fas fa-briefcase"></i> Salary & Income Setup</h2>
                     <p>Configure your primary salary and additional income sources to optimize your budget planning</p>
                 </div>
                 <div class="quick-actions">
                     <button class="quick-btn" onclick="showAddIncomeSourceModal()">
-                        <span class="btn-icon">➕</span>
+                        <span class="btn-icon"><i class="fas fa-plus"></i></span>
                         Add Income Source
                     </button>
                     <button class="quick-btn" onclick="showPreviewBudgetModal()">
-                        <span class="btn-icon">👁️</span>
+                        <span class="btn-icon"><i class="fas fa-eye"></i></span>
                         Preview Budget
                     </button>
                 </div>
@@ -1275,7 +1310,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card balance-card">
                     <div class="card-header">
                         <h3>Current Monthly Salary</h3>
-                        <span class="card-icon">💰</span>
+                        <span class="card-icon"><i class="fas fa-dollar-sign"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="currentSalary">₵0.00</div>
@@ -1286,7 +1321,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card income-card">
                     <div class="card-header">
                         <h3>Additional Income</h3>
-                        <span class="card-icon">📊</span>
+                        <span class="card-icon"><i class="fas fa-chart-bar"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="additionalIncome">₵0.00</div>
@@ -1297,7 +1332,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card expense-card">
                     <div class="card-header">
                         <h3>Total Monthly Income</h3>
-                        <span class="card-icon">📈</span>
+                        <span class="card-icon"><i class="fas fa-chart-line"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="totalIncome">₵0.00</div>
@@ -1308,7 +1343,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card savings-card">
                     <div class="card-header">
                         <h3>Budget Efficiency</h3>
-                        <span class="card-icon">🎯</span>
+                        <span class="card-icon"><i class="fas fa-bullseye"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="budgetEfficiency">--</div>
@@ -1331,15 +1366,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         </div>
                     </div>
                 </div>
-                </div>
-            </section>
+        </div>
+        </section>
 
+        <div class="container">
             <!-- Primary Salary Configuration -->
             <section class="salary-breakdown">
                 <div class="primary-salary-hero">
                     <div class="salary-hero-content">
                         <div class="salary-hero-header">
-                            <div class="salary-icon">💰</div>
+                            <div class="salary-icon"><i class="fas fa-dollar-sign"></i></div>
                             <div class="salary-info">
                                 <h2>Monthly Salary</h2>
                                 <p>Your primary income source</p>
@@ -1354,11 +1390,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <button class="btn-primary" id="salaryActionBtn" onclick="showPrimarySalaryModal()">Set Up Salary</button>
                     </div>
                 </div>
-                
-    
-            </section>
-            </section>
 
+
+            </section>
+        </div>
+        </section>
+        <div class="container">
             <!-- Budget Allocation Preview -->
             <section class="salary-breakdown">
                 <div class="section-header">
@@ -1371,69 +1408,71 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <!-- Budget Allocation Preview (Same as Personal Dashboard) -->
                 <div class="budget-allocation-preview" id="budgetAllocationPreview">
                     <div class="allocation-grid" id="previewAllocationGrid">
-                    <div class="allocation-item needs">
-                        <div class="allocation-header">
-                            <span class="allocation-icon">🏠</span>
-                            <div class="allocation-info">
-                                <h4>Needs</h4>
-                                <div class="allocation-display">
-                                    <span class="allocation-percent" id="previewNeedsPercent">%</span>
+                        <div class="allocation-item needs">
+                            <div class="allocation-header">
+                                <span class="allocation-icon"><i class="fas fa-home"></i></span>
+                                <div class="allocation-info">
+                                    <h4>Needs</h4>
+                                    <div class="allocation-display">
+                                        <span class="allocation-percent" id="previewNeedsPercent">%</span>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="allocation-amount" id="previewNeedsAmount">₵0.00</div>
+                            <div class="allocation-categories">
+                                <span class="category-tag">Food</span>
+                                <span class="category-tag">Rent</span>
+                                <span class="category-tag">Utilities</span>
+                                <span class="category-tag">Transport</span>
+                            </div>
                         </div>
-                        <div class="allocation-amount" id="previewNeedsAmount">₵0.00</div>
-                        <div class="allocation-categories">
-                            <span class="category-tag">Food</span>
-                            <span class="category-tag">Rent</span>
-                            <span class="category-tag">Utilities</span>
-                            <span class="category-tag">Transport</span>
-                        </div>
-                    </div>
 
-                    <div class="allocation-item wants">
-                        <div class="allocation-header">
-                            <span class="allocation-icon">🎮</span>
-                            <div class="allocation-info">
-                                <h4>Wants</h4>
-                                <div class="allocation-display">
-                                    <span class="allocation-percent" id="previewWantsPercent">%</span>
+                        <div class="allocation-item wants">
+                            <div class="allocation-header">
+                                <span class="allocation-icon"><i class="fas fa-gamepad"></i></span>
+                                <div class="allocation-info">
+                                    <h4>Wants</h4>
+                                    <div class="allocation-display">
+                                        <span class="allocation-percent" id="previewWantsPercent">%</span>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="allocation-amount" id="previewWantsAmount">₵0.00</div>
+                            <div class="allocation-categories">
+                                <span class="category-tag">Entertainment</span>
+                                <span class="category-tag">Dining</span>
+                                <span class="category-tag">Shopping</span>
+                            </div>
                         </div>
-                        <div class="allocation-amount" id="previewWantsAmount">₵0.00</div>
-                        <div class="allocation-categories">
-                            <span class="category-tag">Entertainment</span>
-                            <span class="category-tag">Dining</span>
-                            <span class="category-tag">Shopping</span>
-                        </div>
-                    </div>
 
-                    <div class="allocation-item savings">
-                        <div class="allocation-header">
-                            <span class="allocation-icon">💰</span>
-                            <div class="allocation-info">
-                                <h4>Savings</h4>
-                                <div class="allocation-display">
-                                    <span class="allocation-percent" id="previewSavingsPercent">%</span>
+                        <div class="allocation-item savings">
+                            <div class="allocation-header">
+                                <span class="allocation-icon"><i class="fas fa-piggy-bank"></i></span>
+                                <div class="allocation-info">
+                                    <h4>Savings</h4>
+                                    <div class="allocation-display">
+                                        <span class="allocation-percent" id="previewSavingsPercent">%</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="allocation-amount" id="previewSavingsAmount">₵0.00</div>
-                        <div class="allocation-categories">
-                            <span class="category-tag">Emergency Fund</span>
-                            <span class="category-tag">Goals</span>
+                            <div class="allocation-amount" id="previewSavingsAmount">₵0.00</div>
+                            <div class="allocation-categories">
+                                <span class="category-tag">Emergency Fund</span>
+                                <span class="category-tag">Goals</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="allocation-summary">
-                    <div class="summary-item">
-                        <span>Total Allocated:</span>
-                        <strong id="totalAllocated">100%</strong>
+                    <div class="allocation-summary">
+                        <div class="summary-item">
+                            <span>Total Allocated:</span>
+                            <strong id="totalAllocated">100%</strong>
+                        </div>
+                        <!-- <button class="btn-primary" onclick="saveBudgetAllocation()">Save Allocation</button> -->
                     </div>
-                    <!-- <button class="btn-primary" onclick="saveBudgetAllocation()">Save Allocation</button> -->
-                </div>
             </section>
+        </div>
 
+        <div class="container">
             <!-- Additional Income Sources -->
             <section class="dashboard-grid">
                 <div class="dashboard-section">
@@ -1494,32 +1533,34 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </div>
                 </div>
             </section>
-
+        </div>
+        <div class="container">
             <!-- Tax & Deductions (if applicable) -->
             <section class="insights-section">
                 <div class="section-header">
-                    <h3>🧾 Deductions & Tax Information</h3>
+                    <h3><i class="fas fa-receipt"></i> Deductions & Tax Information</h3>
                     <button class="edit-allocation-btn small" onclick="manageTaxInfo()">Configure</button>
                 </div>
                 <div class="insights-grid">
                     <div class="insight-card tip">
-                        <div class="insight-icon">💡</div>
+                        <div class="insight-icon"><i class="fas fa-lightbulb"></i></div>
                         <div class="insight-content">
                             <h4>Tax Planning Tip</h4>
                             <p>Your estimated annual income is ₵42,000. Consider setting aside 10% for taxes and deductions.</p>
-                            <button class="insight-action">Setup Tax Savings</button>
+                            <button class="insight-action" onclick="showSnackbar('Tax savings setup coming soon!', 'info')">Setup Tax Savings</button>
                         </div>
                     </div>
                     <div class="insight-card warning">
-                        <div class="insight-icon">⚠️</div>
+                        <div class="insight-icon"><i class="fas fa-exclamation-triangle"></i></div>
                         <div class="insight-content">
                             <h4>SSNIT Contributions</h4>
                             <p>Remember to account for social security contributions if you're employed formally.</p>
-                            <button class="insight-action">Add Deduction</button>
+                            <button class="insight-action" onclick="showSnackbar('Deduction management coming soon!', 'info')">Add Deduction</button>
                         </div>
                     </div>
                 </div>
             </section>
+        </div>
         </div>
     </main>
 
@@ -1565,11 +1606,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <label>Payment Method</label>
                         <div class="payment-method-group">
                             <div class="payment-method selected" onclick="selectModalPaymentMethod('bank', 'primary')">
-                                <div class="payment-method-icon">🏦</div>
+                                <div class="payment-method-icon"><i class="fas fa-university"></i></div>
                                 <div class="payment-method-name">Bank Account</div>
                             </div>
                             <div class="payment-method" onclick="selectModalPaymentMethod('mobile', 'primary')">
-                                <div class="payment-method-icon">📱</div>
+                                <div class="payment-method-icon"><i class="fas fa-mobile-alt"></i></div>
                                 <div class="payment-method-name">Mobile Money</div>
                             </div>
                         </div>
@@ -1637,7 +1678,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <div class="allocation-item" style="border: 1px solid #dee2e6; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span style="font-size: 24px;">🏠</span>
+                                    <span style="font-size: 24px;"><i class="fas fa-home"></i></span>
                                     <div>
                                         <h4 style="margin: 0; color: #495057;">Needs (Essential)</h4>
                                         <p style="margin: 0; color: #6c757d; font-size: 14px;">Food, Rent, Utilities, Transport</p>
@@ -1653,7 +1694,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <div class="allocation-item" style="border: 1px solid #dee2e6; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span style="font-size: 24px;">🎮</span>
+                                    <span style="font-size: 24px;"><i class="fas fa-gamepad"></i></span>
                                     <div>
                                         <h4 style="margin: 0; color: #495057;">Wants (Lifestyle)</h4>
                                         <p style="margin: 0; color: #6c757d; font-size: 14px;">Entertainment, Dining, Shopping</p>
@@ -1669,7 +1710,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <div class="allocation-item" style="border: 1px solid #dee2e6; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span style="font-size: 24px;">💰</span>
+                                    <span style="font-size: 24px;"><i class="fas fa-piggy-bank"></i></span>
                                     <div>
                                         <h4 style="margin: 0; color: #495057;">Savings & Investments</h4>
                                         <p style="margin: 0; color: #6c757d; font-size: 14px;">Emergency Fund, Goals, Investments</p>
@@ -1728,7 +1769,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label>Average Monthly Amount (₵)</label>
@@ -1750,11 +1791,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <label>Payment Method</label>
                         <div class="payment-method-group">
                             <div class="payment-method selected" onclick="selectModalPaymentMethod('bank')">
-                                <div class="payment-method-icon">🏦</div>
+                                <div class="payment-method-icon"><i class="fas fa-university"></i></div>
                                 <div class="payment-method-name">Bank Account</div>
                             </div>
                             <div class="payment-method" onclick="selectModalPaymentMethod('mobile')">
-                                <div class="payment-method-icon">📱</div>
+                                <div class="payment-method-icon"><i class="fas fa-mobile-alt"></i></div>
                                 <div class="payment-method-name">Mobile Money</div>
                             </div>
                         </div>
@@ -1889,18 +1930,18 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Animation function for counting numbers
         function animateNumber(element, start, end, duration = 2000, prefix = '', suffix = '') {
             if (!element) return;
-            
+
             const startTime = performance.now();
             const difference = end - start;
-            
+
             function step(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
+
                 // Easing function for smooth animation
                 const easeOutQuart = 1 - Math.pow(1 - progress, 4);
                 const current = start + (difference * easeOutQuart);
-                
+
                 if (suffix === '%') {
                     element.textContent = prefix + Math.round(current) + suffix;
                 } else {
@@ -1909,12 +1950,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         maximumFractionDigits: 2
                     }) + suffix;
                 }
-                
+
                 if (progress < 1) {
                     requestAnimationFrame(step);
                 }
             }
-            
+
             requestAnimationFrame(step);
         }
 
@@ -1932,11 +1973,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         body: 'action=get_salary_data'
                     })
                 ]);
-                
+
                 const dashboardData = await dashboardResponse.json();
                 const salaryData = await salaryResponse.json();
-                
-                
+
+
                 if (dashboardData.success) {
                     // Use animated update with delay for smooth loading
                     setTimeout(() => {
@@ -1945,7 +1986,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 } else {
                     console.error('Dashboard API Error:', dashboardData.message);
                 }
-                
+
                 if (salaryData.success) {
                     updateSalarySpecificData(salaryData.data);
                     updateIncomeSources(salaryData.data.income_sources || []);
@@ -1962,10 +2003,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Function to update salary UI with animations
         function updateSalaryUIWithAnimation(data) {
-            
+
             const salaryData = data.salary || {};
             const financialOverview = data.financial_overview || {};
-            
+
             // Animate Primary Salary Amount
             const primarySalaryEl = document.getElementById('primarySalaryAmount');
             if (primarySalaryEl) {
@@ -1974,7 +2015,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     animateNumber(primarySalaryEl, 0, salaryAmount, 2500, '₵');
                 }
             }
-            
+
             // Animate Current Salary Card
             const currentSalaryEl = document.getElementById('currentSalary');
             if (currentSalaryEl) {
@@ -1983,7 +2024,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     animateNumber(currentSalaryEl, 0, currentSalary, 2000, '₵');
                 }
             }
-            
+
             // Animate Additional Income
             const additionalIncomeEl = document.getElementById('additionalIncome');
             if (additionalIncomeEl) {
@@ -1994,7 +2035,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     animateNumber(additionalIncomeEl, 0, additional, 1800, '₵');
                 }
             }
-            
+
             // Animate Total Income
             const totalIncomeEl = document.getElementById('totalIncome');
             if (totalIncomeEl) {
@@ -2003,7 +2044,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     animateNumber(totalIncomeEl, 0, total, 2200, '₵');
                 }
             }
-            
+
             // Continue with existing updateSalaryUI logic for non-animated elements
             updateSalaryUI(data);
         }
@@ -2011,14 +2052,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Theme Management
         function changeTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('personalTheme', theme);  // Use same key as personal dashboard
-            
+            localStorage.setItem('personalTheme', theme); // Use same key as personal dashboard
+
             // Update theme selector
             const themeSelector = document.getElementById('themeSelector');
             if (themeSelector) {
                 themeSelector.value = theme;
             }
-            
+
             // Update active theme option visual state
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.classList.remove('active');
@@ -2027,12 +2068,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (activeOption) {
                 activeOption.classList.add('active');
             }
-            
+
         }
 
         // Load saved theme on page load  
         function loadSavedTheme() {
-            const savedTheme = localStorage.getItem('personalTheme') || 'default';  // Use same key as personal dashboard
+            const savedTheme = localStorage.getItem('personalTheme') || 'default'; // Use same key as personal dashboard
             changeTheme(savedTheme);
         }
 
@@ -2041,10 +2082,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const urlParams = new URLSearchParams(window.location.search);
             const fromPage = urlParams.get('from');
             const amount = urlParams.get('amount');
-            
+
             if (fromPage === 'dashboard') {
                 showSnackbar('Welcome from Personal Dashboard! 👋', 'info');
-                
+
                 // Pre-fill salary amount if provided
                 if (amount && amount !== '0') {
                     const salaryInput = document.getElementById('salaryAmount');
@@ -2054,14 +2095,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     }
                     showSnackbar(`Current salary: ₵${amount} (from dashboard)`, 'success');
                 }
-                
+
                 // Highlight the connection
                 const salarySection = document.querySelector('.salary-breakdown');
                 if (salarySection) {
                     salarySection.style.border = '2px solid var(--primary-color)';
                     salarySection.style.borderRadius = '12px';
                     salarySection.style.transition = 'all 0.3s ease';
-                    
+
                     setTimeout(() => {
                         salarySection.style.border = '';
                     }, 3000);
@@ -2070,19 +2111,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function updateSalaryUI(data) {
-            
+
             // Update user information
             if (data.user) {
                 const userAvatar = document.getElementById('userAvatar');
                 const logoUserName = document.getElementById('logoUserName');
-                
+
                 if (userAvatar && data.user.initials) {
                     userAvatar.textContent = data.user.initials;
                     userAvatar.onerror = function() {
                         this.textContent = data.user.initials;
                     };
                 }
-                
+
                 if (logoUserName && data.user.first_name) {
                     logoUserName.textContent = data.user.first_name;
                 }
@@ -2092,7 +2133,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Update salary overview cards
             const salaryData = data.salary || {};
-            
+
             // Current salary
             const currentSalary = document.getElementById('currentSalary');
             const nextPayment = document.getElementById('nextPayment');
@@ -2100,8 +2141,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 if (salaryData.monthly_salary && parseFloat(salaryData.monthly_salary) > 0) {
                     currentSalary.textContent = `₵${parseFloat(salaryData.monthly_salary).toFixed(2)}`;
                     if (nextPayment) {
-                        nextPayment.textContent = salaryData.next_pay_date ? 
-                            `Next payment: ${new Date(salaryData.next_pay_date).toLocaleDateString()}` : 
+                        nextPayment.textContent = salaryData.next_pay_date ?
+                            `Next payment: ${new Date(salaryData.next_pay_date).toLocaleDateString()}` :
                             'Payment date not set';
                     }
                 } else {
@@ -2116,19 +2157,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const primarySalaryAmount = document.getElementById('primarySalaryAmount');
             const primarySalaryStatus = document.getElementById('primarySalaryStatus');
             const salaryActionBtn = document.getElementById('salaryActionBtn');
-            
+
             if (primarySalaryAmount && primarySalaryStatus && salaryActionBtn) {
                 const salary = parseFloat(salaryData.monthly_salary || 0);
-                
+
                 if (salary > 0) {
                     // Salary is set up
                     primarySalaryAmount.textContent = `₵${salary.toLocaleString()}`;
-                    
+
                     if (salaryData.next_pay_date) {
                         const date = new Date(salaryData.next_pay_date);
                         const today = new Date();
                         const daysUntil = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
-                        
+
                         if (daysUntil <= 0) {
                             primarySalaryStatus.textContent = 'Payment due now';
                             primarySalaryStatus.style.color = '#dc3545';
@@ -2146,7 +2187,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         primarySalaryStatus.textContent = 'Payment date not set';
                         primarySalaryStatus.style.color = '#6c757d';
                     }
-                    
+
                     salaryActionBtn.textContent = 'Edit Salary';
                 } else {
                     // Salary not set up
@@ -2165,7 +2206,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const monthlyIncome = parseFloat(data.financial_overview?.monthly_income || 0);
                 const monthlySalary = parseFloat(salaryData.monthly_salary || 0);
                 const additional = Math.max(0, monthlyIncome - monthlySalary);
-                
+
                 additionalIncome.textContent = `₵${additional.toFixed(2)}`;
                 if (incomeSourcesCount) {
                     if (additional > 0) {
@@ -2190,29 +2231,29 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const savingsRateDisplay = document.getElementById('savingsRateDisplay');
             const budgetUtilizationDisplay = document.getElementById('budgetUtilizationDisplay');
             const incomeCoverageDisplay = document.getElementById('incomeCoverageDisplay');
-            
+
             if (budgetEfficiency) {
                 const totalIncome = parseFloat(data.financial_overview?.monthly_income || 0);
                 const savingsRate = parseFloat(data.financial_overview?.savings_rate || 0);
-                
+
                 if (totalIncome > 0 && data.budget_allocation && data.budget_allocation.length > 0) {
                     // Calculate comprehensive efficiency metrics
-                    const totalAllocated = data.budget_allocation.reduce((sum, allocation) => 
+                    const totalAllocated = data.budget_allocation.reduce((sum, allocation) =>
                         sum + parseFloat(allocation.allocated_amount || 0), 0
                     );
-                    
+
                     const budgetUtilization = totalIncome > 0 ? (totalAllocated / totalIncome) * 100 : 0;
                     const incomeCoverage = Math.min(100, budgetUtilization);
-                    
+
                     // Calculate overall efficiency score (weighted average)
                     const efficiencyScore = Math.round(
                         (savingsRate * 0.4) + // 40% weight on savings
                         (Math.min(100, budgetUtilization) * 0.3) + // 30% weight on budget coverage
                         ((100 - Math.abs(100 - budgetUtilization)) * 0.3) // 30% weight on balance
                     );
-                    
+
                     budgetEfficiency.textContent = `${efficiencyScore}%`;
-                    
+
                     // Update status based on score
                     if (efficiencyScore >= 80) {
                         efficiencyStatus.textContent = 'Excellent financial planning!';
@@ -2227,7 +2268,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         efficiencyStatus.textContent = 'Consider optimizing your budget';
                         efficiencyStatus.style.color = '#dc3545';
                     }
-                    
+
                     // Show breakdown
                     if (efficiencyBreakdown) {
                         efficiencyBreakdown.style.display = 'block';
@@ -2249,10 +2290,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Update form fields
             updateSalaryForm(salaryData);
-            
+
             // Update payment schedule
             updatePaymentSchedule(salaryData);
-            
+
             // Update budget preview
             if (salaryData.monthly_salary && salaryData.monthly_salary > 0) {
                 const salaryAmountElement = document.getElementById('salaryAmount');
@@ -2261,7 +2302,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 }
                 updateBudgetPreview();
             }
-            
+
             // Update budget allocation preview with backend data
             if (data.budget_allocation && Array.isArray(data.budget_allocation) && data.budget_allocation.length > 0) {
                 // Store allocation data globally for preview modal
@@ -2276,49 +2317,49 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 }];
             }
         }
-        
+
         function updateBudgetAllocationPreview(allocations, totalIncome) {
-            
+
             if (!allocations || allocations.length === 0) {
                 return;
             }
-            
+
             // Update the "Based on" total income display
             const previewBasedOnSalary = document.getElementById('previewBasedOnSalary');
             if (previewBasedOnSalary && totalIncome > 0) {
                 previewBasedOnSalary.textContent = `₵${totalIncome.toLocaleString()}`;
             }
-            
+
             // Calculate total percentage
             let totalPercentage = 0;
-            
+
             // Update each category
             allocations.forEach(allocation => {
                 const categoryType = allocation.category_type;
                 const percentage = allocation.percentage || 0;
                 const amount = allocation.allocated_amount || 0;
-                
+
                 totalPercentage += percentage;
-                
+
                 // Update percentage display
                 const percentElement = document.getElementById(`preview${categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}Percent`);
                 if (percentElement) {
                     percentElement.textContent = `${percentage}%`;
                 }
-                
+
                 // Update amount display
                 const amountElement = document.getElementById(`preview${categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}Amount`);
                 if (amountElement) {
                     amountElement.textContent = `₵${amount.toLocaleString()}`;
                 }
             });
-            
+
             // Update total percentage display
             const previewTotalAllocated = document.getElementById('previewTotalAllocated');
             if (previewTotalAllocated) {
                 previewTotalAllocated.textContent = `${totalPercentage}%`;
             }
-            
+
         }
 
         function updateSalarySpecificData(data) {
@@ -2326,20 +2367,20 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (data.salary) {
                 updateSalaryForm(data.salary);
             }
-            
+
             // Update budget allocation sliders if data exists
             if (data.budget_allocation) {
                 const allocation = data.budget_allocation;
-                
+
                 // Update sliders - try data-category approach first, then fallback to ID approach
                 let needsSlider = document.querySelector('[data-category="needs"]');
                 let wantsSlider = document.querySelector('[data-category="wants"]');
                 let savingsSlider = document.querySelector('[data-category="savings"]');
-                
+
                 if (!needsSlider) needsSlider = document.getElementById('needsSlider');
                 if (!wantsSlider) wantsSlider = document.getElementById('wantsSlider');
                 if (!savingsSlider) savingsSlider = document.getElementById('savingsSlider');
-                
+
                 if (needsSlider && allocation.needs_percentage) {
                     needsSlider.value = allocation.needs_percentage;
                     updateAllocation('needs', allocation.needs_percentage);
@@ -2358,24 +2399,24 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function updateIncomeSources(incomeSources) {
             const incomeSourcesList = document.getElementById('incomeSourcesList');
             const noIncomeSources = document.getElementById('noIncomeSources');
-            
+
             if (!incomeSourcesList) return;
-            
+
             // Clear existing content
             incomeSourcesList.innerHTML = '';
-            
+
             if (incomeSources && incomeSources.length > 0) {
                 // Hide no data message
                 if (noIncomeSources) {
                     noIncomeSources.style.display = 'none';
                 }
-                
+
                 // Show income sources
                 incomeSources.forEach(source => {
                     const sourceElement = createIncomeSourceElement(source);
                     incomeSourcesList.appendChild(sourceElement);
                 });
-                
+
                 // Update summary
                 const incomeSourcesCount = document.getElementById('incomeSourcesCount');
                 if (incomeSourcesCount) {
@@ -2388,7 +2429,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 if (noIncomeSources) {
                     noIncomeSources.style.display = 'block';
                 }
-                
+
                 // Update summary
                 const incomeSourcesCount = document.getElementById('incomeSourcesCount');
                 if (incomeSourcesCount) {
@@ -2400,7 +2441,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function createIncomeSourceElement(source) {
             const div = document.createElement('div');
             div.className = 'income-source-item';
-            
+
             // Format frequency display
             const frequencyMap = {
                 'weekly': 'Weekly',
@@ -2410,7 +2451,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 'one-time': 'One-time'
             };
             const frequencyText = frequencyMap[source.payment_frequency] || 'Monthly';
-            
+
             // Format income type display
             const typeMap = {
                 'freelance': 'Freelance',
@@ -2420,7 +2461,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 'bonus': 'Bonus'
             };
             const typeText = typeMap[source.income_type] || 'Other';
-            
+
             div.innerHTML = `
                 <div class="income-source-info">
                     <div class="income-source-name">${source.source_name}</div>
@@ -2444,7 +2485,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </button>
                 </div>
             `;
-            
+
             return div;
         }
 
@@ -2457,31 +2498,31 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (!confirm('Are you sure you want to delete this income source?')) {
                 return;
             }
-            
+
             // Make API call to delete
             fetch('../actions/salary_actions.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=delete_income_source&source_id=${sourceId}`
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showSnackbar(result.message, 'success');
-                    // Reload data
-                    setTimeout(() => {
-                        loadSalaryData();
-                    }, 500);
-                } else {
-                    showSnackbar(result.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showSnackbar('Failed to delete income source', 'error');
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=delete_income_source&source_id=${sourceId}`
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showSnackbar(result.message, 'success');
+                        // Reload data
+                        setTimeout(() => {
+                            loadSalaryData();
+                        }, 500);
+                    } else {
+                        showSnackbar(result.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showSnackbar('Failed to delete income source', 'error');
+                });
         }
 
         async function checkSalaryDue() {
@@ -2493,9 +2534,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     },
                     body: 'action=check_salary_due'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success && result.salary_due) {
                     showSalaryConfirmationBanner(result);
                 }
@@ -2509,18 +2550,18 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (document.getElementById('salaryConfirmationBanner')) {
                 return;
             }
-            
+
             const banner = document.createElement('div');
             banner.id = 'salaryConfirmationBanner';
             banner.className = 'salary-confirmation-banner';
-            
-            const message = salaryInfo.is_past_due ? 
+
+            const message = salaryInfo.is_past_due ?
                 `Your salary of ₵${parseFloat(salaryInfo.amount).toFixed(2)} was due on ${new Date(salaryInfo.pay_date).toLocaleDateString()}. Have you received it?` :
                 `Your salary of ₵${parseFloat(salaryInfo.amount).toFixed(2)} is due today! Have you received it?`;
-            
+
             banner.innerHTML = `
                 <div class="banner-content">
-                    <div class="banner-icon">💰</div>
+                    <div class="banner-icon"><i class="fas fa-piggy-bank"></i></div>
                     <div class="banner-message">
                         <h4>Salary Payment Confirmation</h4>
                         <p>${message}</p>
@@ -2531,7 +2572,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </div>
                 </div>
             `;
-            
+
             // Insert at the top of main content
             const container = document.querySelector('.container');
             if (container) {
@@ -2543,39 +2584,39 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const banner = document.getElementById('salaryConfirmationBanner');
             const confirmBtn = banner.querySelector('.btn-primary');
             const originalText = confirmBtn.textContent;
-            
+
             confirmBtn.textContent = 'Processing...';
             confirmBtn.disabled = true;
-            
+
             fetch('../actions/salary_actions.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'action=confirm_salary_received'
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showSnackbar(result.message, 'success');
-                    dismissSalaryBanner();
-                    
-                    // Reload data to reflect the new income
-                    setTimeout(() => {
-                        loadSalaryData();
-                    }, 1000);
-                } else {
-                    showSnackbar(result.message, 'error');
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=confirm_salary_received'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showSnackbar(result.message, 'success');
+                        dismissSalaryBanner();
+
+                        // Reload data to reflect the new income
+                        setTimeout(() => {
+                            loadSalaryData();
+                        }, 1000);
+                    } else {
+                        showSnackbar(result.message, 'error');
+                        confirmBtn.textContent = originalText;
+                        confirmBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showSnackbar('Failed to confirm salary', 'error');
                     confirmBtn.textContent = originalText;
                     confirmBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showSnackbar('Failed to confirm salary', 'error');
-                confirmBtn.textContent = originalText;
-                confirmBtn.disabled = false;
-            });
+                });
         }
 
         function dismissSalaryBanner() {
@@ -2588,20 +2629,22 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function updatePaymentSchedule(salaryData) {
             const primarySchedule = document.getElementById('primarySalarySchedule');
             const noScheduleData = document.getElementById('noScheduleData');
-            
+
             if (salaryData.monthly_salary && salaryData.monthly_salary > 0 && salaryData.next_pay_date) {
                 // Show salary schedule
                 primarySchedule.style.display = 'flex';
                 noScheduleData.style.display = 'none';
-                
+
                 // Update date
                 const payDate = new Date(salaryData.next_pay_date);
                 const dayNum = document.getElementById('salaryDay');
                 const dayMonth = document.getElementById('salaryMonth');
-                
+
                 if (dayNum) dayNum.textContent = payDate.getDate();
-                if (dayMonth) dayMonth.textContent = payDate.toLocaleDateString('en-US', { month: 'short' });
-                
+                if (dayMonth) dayMonth.textContent = payDate.toLocaleDateString('en-US', {
+                    month: 'short'
+                });
+
                 // Update details
                 const scheduleDetails = document.getElementById('salaryScheduleDetails');
                 if (scheduleDetails) {
@@ -2609,13 +2652,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     const paymentMethod = salaryData.payment_method || 'Bank';
                     scheduleDetails.textContent = `₵${amount} • ${paymentMethod}`;
                 }
-                
+
                 // Update status
                 const statusElement = document.getElementById('salaryStatus');
                 if (statusElement) {
                     const today = new Date();
                     const daysUntil = Math.ceil((payDate - today) / (1000 * 60 * 60 * 24));
-                    
+
                     if (daysUntil <= 0) {
                         statusElement.textContent = 'Due now';
                         statusElement.className = 'status-badge due-now';
@@ -2627,7 +2670,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         statusElement.className = 'status-badge scheduled';
                     }
                 }
-                
+
                 // Show additional income if exists
                 const additionalSchedule = document.getElementById('additionalIncomeSchedule');
                 if (salaryData.additional_income && parseFloat(salaryData.additional_income) > 0) {
@@ -2691,12 +2734,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (totalIncome) totalIncome.textContent = '₵0.00';
             if (budgetEfficiency) budgetEfficiency.textContent = '--';
             if (efficiencyStatus) efficiencyStatus.textContent = 'Set up salary first';
-            
+
             // Show payment schedule empty state
             const primarySchedule = document.getElementById('primarySalarySchedule');
             const noScheduleData = document.getElementById('noScheduleData');
             const additionalSchedule = document.getElementById('additionalIncomeSchedule');
-            
+
             if (primarySchedule) primarySchedule.style.display = 'none';
             if (additionalSchedule) additionalSchedule.style.display = 'none';
             if (noScheduleData) noScheduleData.style.display = 'flex';
@@ -2713,24 +2756,24 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             // Create new snackbar
             const snackbar = document.createElement('div');
             snackbar.className = `snackbar ${type}`;
-            
+
             const icons = {
-                success: '✓',
-                error: '✗',
-                warning: '⚠',
-                info: 'ℹ'
+                success: '<i class="fas fa-check-circle"></i>',
+                error: '<i class="fas fa-times-circle"></i>',
+                warning: '<i class="fas fa-exclamation-triangle"></i>',
+                info: '<i class="fas fa-info-circle"></i>'
             };
-            
+
             snackbar.innerHTML = `
                 <span class="snackbar-icon">${icons[type] || icons.info}</span>
                 <span class="snackbar-message">${message}</span>
             `;
-            
+
             document.body.appendChild(snackbar);
-            
+
             // Show snackbar
             setTimeout(() => snackbar.classList.add('show'), 100);
-            
+
             // Hide snackbar after 4 seconds
             setTimeout(() => {
                 snackbar.classList.remove('show');
@@ -2742,17 +2785,17 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function toggleUserMenu() {
             const dropdown = document.getElementById('userDropdown');
             const themeDropdown = document.getElementById('themeDropdown');
-            
+
             if (!dropdown) {
                 console.error('User dropdown not found');
                 return;
             }
-            
+
             // Close theme dropdown if open
             if (themeDropdown && themeDropdown.classList.contains('show')) {
                 themeDropdown.classList.remove('show');
             }
-            
+
             // Toggle user dropdown
             dropdown.classList.toggle('show');
             console.log('User dropdown toggled, has show class:', dropdown.classList.contains('show'));
@@ -2762,18 +2805,18 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             console.log('Toggling theme selector');
             const dropdown = document.getElementById('themeDropdown');
             const userDropdown = document.getElementById('userDropdown');
-            
+
             if (!dropdown) {
                 console.error('Theme dropdown not found');
                 return;
             }
-            
+
             // Close user dropdown if open
             if (userDropdown && userDropdown.classList.contains('show')) {
                 userDropdown.classList.remove('show');
                 console.log('Closed user dropdown');
             }
-            
+
             // Toggle theme dropdown
             dropdown.classList.toggle('show');
             console.log('Theme dropdown toggled, has show class:', dropdown.classList.contains('show'));
@@ -2790,7 +2833,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 setTimeout(() => {
                     modal.classList.add('show');
                 }, 10);
-                
+
                 const firstInput = modal.querySelector('input');
                 if (firstInput) {
                     firstInput.focus();
@@ -2806,7 +2849,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('show');
-                
+
                 setTimeout(() => {
                     modal.style.display = 'none';
                     const form = modal.querySelector('form');
@@ -2845,10 +2888,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const methods = document.querySelectorAll('#paymentDetails').previousElementSibling.querySelectorAll('.payment-method');
             methods.forEach(m => m.classList.remove('selected'));
             event.target.closest('.payment-method').classList.add('selected');
-            
+
             const detailsLabel = document.getElementById('paymentDetailsLabel');
             const detailsSelect = document.getElementById('paymentAccount');
-            
+
             if (method === 'bank') {
                 detailsLabel.textContent = 'Bank Account';
                 detailsSelect.innerHTML = `
@@ -2871,7 +2914,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const methods = modal.querySelectorAll('.payment-method');
             methods.forEach(m => m.classList.remove('selected'));
             event.target.closest('.payment-method').classList.add('selected');
-            
+
             const hiddenInput = modal.querySelector('input[name="paymentMethod"]');
             hiddenInput.value = method;
         }
@@ -2883,7 +2926,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const salaryAmountElement = document.getElementById('salaryAmount');
             const modalSalaryAmountElement = document.getElementById('modalSalaryAmount');
             const primarySalaryAmountElement = document.getElementById('primarySalaryAmount');
-            
+
             if (salaryAmountElement && salaryAmountElement.value) {
                 salary = parseFloat(salaryAmountElement.value) || 0;
             } else if (modalSalaryAmountElement && modalSalaryAmountElement.value) {
@@ -2893,7 +2936,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const displayText = primarySalaryAmountElement.textContent.replace('₵', '').replace(/,/g, '');
                 salary = parseFloat(displayText) || 0;
             }
-            
+
             // Get additional income from the displayed value
             const additionalIncomeElement = document.getElementById('additionalIncome');
             let additionalIncome = 0;
@@ -2901,13 +2944,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const additionalText = additionalIncomeElement.textContent.replace('₵', '').replace(',', '');
                 additionalIncome = parseFloat(additionalText) || 0;
             }
-            
+
             // Calculate total income (salary + additional income)
             const totalIncome = salary + additionalIncome;
-            
+
             updateAllocationAmounts(totalIncome);
             updateTotalAllocation();
-            
+
             // Update the allocation total display
             const allocationTotal = document.getElementById('allocationTotal');
             if (allocationTotal) {
@@ -2917,7 +2960,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     allocationTotal.textContent = `Based on ₵${salary.toFixed(2)} salary`;
                 }
             }
-            
+
             // Update the preview section displays
             const previewBasedOnSalary = document.getElementById('previewBasedOnSalary');
             if (previewBasedOnSalary) {
@@ -2929,23 +2972,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const budgetAllocationPreview = document.getElementById('budgetAllocationPreview');
             const previewBasedOnSalary = document.getElementById('previewBasedOnSalary');
             const previewTotalAllocated = document.getElementById('previewTotalAllocated');
-            
+
             if (!budgetAllocationPreview) return;
-            
+
             // Calculate total budget from salary data
             let totalSalary = 0;
             if (allocations && allocations.length > 0) {
                 totalSalary = allocations.reduce((sum, allocation) => sum + (parseFloat(allocation.allocated_amount) || 0), 0);
             }
-            
+
             if (!allocations || allocations.length === 0) {
                 // Hide the preview section when no data
                 budgetAllocationPreview.style.display = 'none';
                 return;
             }
-            
+
             budgetAllocationPreview.style.display = 'block';
-            
+
             // Update total display
             if (previewBasedOnSalary) {
                 previewBasedOnSalary.textContent = `₵${totalSalary.toLocaleString()}`;
@@ -2954,19 +2997,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const totalPercentage = allocations.reduce((sum, allocation) => sum + (allocation.percentage || 0), 0);
                 previewTotalAllocated.textContent = `${totalPercentage}%`;
             }
-            
+
             // Update each category
             allocations.forEach(allocation => {
                 const categoryType = allocation.category_type;
                 const allocated = parseFloat(allocation.allocated_amount) || 0;
                 const percentage = allocation.percentage || 0;
-                
+
                 // Update percentage display
                 const percentElement = document.getElementById(`preview${categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}Percent`);
                 if (percentElement) {
                     percentElement.textContent = `${percentage}%`;
                 }
-                
+
                 // Update amount display
                 const amountElement = document.getElementById(`preview${categoryType.charAt(0).toUpperCase() + categoryType.slice(1)}Amount`);
                 if (amountElement) {
@@ -2980,20 +3023,20 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             let needsSlider = document.querySelector('[data-category="needs"]');
             let wantsSlider = document.querySelector('[data-category="wants"]');
             let savingsSlider = document.querySelector('[data-category="savings"]');
-            
+
             if (!needsSlider) needsSlider = document.getElementById('needsSlider');
             if (!wantsSlider) wantsSlider = document.getElementById('wantsSlider');
             if (!savingsSlider) savingsSlider = document.getElementById('savingsSlider');
-            
+
             const needs = needsSlider ? parseInt(needsSlider.value) : 50;
             const wants = wantsSlider ? parseInt(wantsSlider.value) : 30;
             const savings = savingsSlider ? parseInt(savingsSlider.value) : 20;
             const total = needs + wants + savings;
-            
+
             const totalElement = document.getElementById('totalAllocated');
             if (totalElement) {
                 totalElement.textContent = total + '%';
-                
+
                 // Visual feedback for total
                 if (total === 100) {
                     totalElement.style.color = 'var(--success-color)';
@@ -3010,21 +3053,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 if (!slider) {
                     slider = document.getElementById(category + 'Slider');
                 }
-                
+
                 if (slider) {
                     const percentage = parseInt(slider.value);
                     const amount = (salary * percentage) / 100;
-                    
+
                     // Update amount element if exists
                     const amountElement = document.getElementById(category + 'Amount');
                     if (amountElement) {
                         amountElement.textContent = '₵' + amount.toFixed(2);
                     }
-                    
+
                     // Update preview elements if exists
                     const previewPercentElement = document.getElementById(`preview${category.charAt(0).toUpperCase() + category.slice(1)}Percent`);
                     const previewAmountElement = document.getElementById(`preview${category.charAt(0).toUpperCase() + category.slice(1)}Amount`);
-                    
+
                     if (previewPercentElement) {
                         previewPercentElement.textContent = `${percentage}%`;
                     }
@@ -3039,9 +3082,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const frequency = document.getElementById('payFrequency').value;
             const nextPayDate = document.getElementById('nextPayDate');
             const today = new Date();
-            
+
             // Update next pay date based on frequency
-            switch(frequency) {
+            switch (frequency) {
                 case 'weekly':
                     nextPayDate.value = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
                     break;
@@ -3061,60 +3104,60 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             let needsSlider = document.querySelector('[data-category="needs"]');
             let wantsSlider = document.querySelector('[data-category="wants"]');
             let savingsSlider = document.querySelector('[data-category="savings"]');
-            
+
             if (!needsSlider) needsSlider = document.getElementById('needsSlider');
             if (!wantsSlider) wantsSlider = document.getElementById('wantsSlider');
             if (!savingsSlider) savingsSlider = document.getElementById('savingsSlider');
-            
+
             if (!needsSlider || !wantsSlider || !savingsSlider) {
                 showSnackbar('Budget allocation sliders not found. Please refresh the page.', 'error');
                 return;
             }
-            
+
             const needs = parseInt(needsSlider.value);
             const wants = parseInt(wantsSlider.value);
             const savings = parseInt(savingsSlider.value);
-            
+
             if (needs + wants + savings !== 100) {
                 showSnackbar('Please ensure your budget allocation totals 100%', 'warning');
                 return;
             }
-            
+
             // Prepare form data
             const formData = new FormData();
             formData.append('action', 'update_budget_allocation');
             formData.append('needsPercent', needs);
             formData.append('wantsPercent', wants);
             formData.append('savingsPercent', savings);
-            
+
             const saveButton = event.target;
             const originalText = saveButton.textContent;
             saveButton.textContent = 'Saving...';
             saveButton.disabled = true;
-            
+
             // Make API call
             fetch('../actions/salary_actions.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showSnackbar(result.message, 'success');
-                    // Update the allocation display
-                    updateBudgetPreview();
-                } else {
-                    showSnackbar(result.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showSnackbar('Failed to save budget allocation', 'error');
-            })
-            .finally(() => {
-                saveButton.textContent = originalText;
-                saveButton.disabled = false;
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showSnackbar(result.message, 'success');
+                        // Update the allocation display
+                        updateBudgetPreview();
+                    } else {
+                        showSnackbar(result.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showSnackbar('Failed to save budget allocation', 'error');
+                })
+                .finally(() => {
+                    saveButton.textContent = originalText;
+                    saveButton.disabled = false;
+                });
         }
 
         function editPrimarySalary() {
@@ -3131,7 +3174,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const salaryAmountElement = document.getElementById('salaryAmount');
             const modalSalaryAmountElement = document.getElementById('modalSalaryAmount');
             const primarySalaryAmountElement = document.getElementById('primarySalaryAmount');
-            
+
             if (salaryAmountElement && salaryAmountElement.value) {
                 salary = parseFloat(salaryAmountElement.value) || 0;
             } else if (modalSalaryAmountElement && modalSalaryAmountElement.value) {
@@ -3141,26 +3184,26 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const displayText = primarySalaryAmountElement.textContent.replace('₵', '').replace(/,/g, '');
                 salary = parseFloat(displayText) || 0;
             }
-            
+
             // Try data-category approach first, then fallback to ID approach
             let needsSlider = document.querySelector('[data-category="needs"]');
             let wantsSlider = document.querySelector('[data-category="wants"]');
             let savingsSlider = document.querySelector('[data-category="savings"]');
-            
+
             if (!needsSlider) needsSlider = document.getElementById('needsSlider');
             if (!wantsSlider) wantsSlider = document.getElementById('wantsSlider');
             if (!savingsSlider) savingsSlider = document.getElementById('savingsSlider');
-            
+
             const needs = needsSlider ? parseInt(needsSlider.value) : 50;
             const wants = wantsSlider ? parseInt(wantsSlider.value) : 30;
             const savings = savingsSlider ? parseInt(savingsSlider.value) : 20;
-            
+
             const message = `Budget Preview:\n\n` +
-                           `Total Salary: ₵${salary.toFixed(2)}\n` +
-                           `Needs (${needs}%): ₵${(salary * needs / 100).toFixed(2)}\n` +
-                           `Wants (${wants}%): ₵${(salary * wants / 100).toFixed(2)}\n` +
-                           `Savings (${savings}%): ₵${(salary * savings / 100).toFixed(2)}`;
-            
+                `Total Salary: ₵${salary.toFixed(2)}\n` +
+                `Needs (${needs}%): ₵${(salary * needs / 100).toFixed(2)}\n` +
+                `Wants (${wants}%): ₵${(salary * wants / 100).toFixed(2)}\n` +
+                `Savings (${savings}%): ₵${(salary * savings / 100).toFixed(2)}`;
+
             showSnackbar('Check console for budget preview details', 'info');
         }
 
@@ -3177,14 +3220,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function populatePayDayOptions() {
             const payFrequency = document.getElementById('payFrequency');
             const payDay = document.getElementById('payDay');
-            
+
             if (!payFrequency || !payDay) return;
-            
+
             payFrequency.addEventListener('change', function() {
                 const frequency = this.value;
                 payDay.innerHTML = '<option value="">Select day</option>';
-                
-                switch(frequency) {
+
+                switch (frequency) {
                     case 'weekly':
                         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                         days.forEach((day, index) => {
@@ -3198,7 +3241,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         break;
                     case 'monthly':
                     case 'semi-monthly':
-                        for(let i = 1; i <= 31; i++) {
+                        for (let i = 1; i <= 31; i++) {
                             const suffix = i === 1 ? 'st' : i === 2 ? 'nd' : i === 3 ? 'rd' : 'th';
                             payDay.innerHTML += `<option value="${i}">${i}${suffix} of month</option>`;
                         }
@@ -3217,23 +3260,25 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const salaryMonth = document.getElementById('salaryMonth');
             const salaryScheduleDetails = document.getElementById('salaryScheduleDetails');
             const salaryStatus = document.getElementById('salaryStatus');
-            
+
             if (data.nextPayDate && salaryDay && salaryMonth) {
                 const payDate = new Date(data.nextPayDate);
                 salaryDay.textContent = payDate.getDate();
-                salaryMonth.textContent = payDate.toLocaleDateString('en-US', { month: 'short' });
+                salaryMonth.textContent = payDate.toLocaleDateString('en-US', {
+                    month: 'short'
+                });
             }
-            
+
             if (data.expectedAmount && salaryScheduleDetails) {
                 const frequency = data.payFrequency || 'monthly';
                 salaryScheduleDetails.textContent = `₵${parseFloat(data.expectedAmount).toFixed(2)} • ${frequency}`;
             }
-            
+
             if (salaryStatus) {
                 salaryStatus.textContent = data.enableReminders ? 'Scheduled' : 'Not scheduled';
                 salaryStatus.className = 'status-badge ' + (data.enableReminders ? 'scheduled' : 'pending');
             }
-            
+
             // Show/hide additional income section
             const additionalIncomeSchedule = document.getElementById('additionalIncomeSchedule');
             if (additionalIncomeSchedule && data.trackAdditionalIncome) {
@@ -3252,25 +3297,25 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             // Pre-populate form with current values
             const salaryAmountElement = document.getElementById('salaryAmount');
             const payFrequencyElement = document.getElementById('payFrequency');
-            
+
             const salaryAmount = salaryAmountElement ? salaryAmountElement.value : '';
             const payFrequency = payFrequencyElement ? payFrequencyElement.value : 'monthly';
             const nextPayDate = document.getElementById('nextPayDate').value;
-            
+
             document.getElementById('modalSalaryAmount').value = salaryAmount;
             document.getElementById('modalPayFrequency').value = payFrequency;
             document.getElementById('modalNextPayDate').value = nextPayDate;
-            
+
             showModal('primarySalaryModal');
         }
 
         function selectModalPaymentMethod(method, modalType) {
             const modalPrefix = modalType === 'primary' ? 'modal' : '';
             const paymentMethods = document.querySelectorAll(`#${modalType === 'primary' ? 'primarySalaryModal' : ''} .payment-method`);
-            
+
             paymentMethods.forEach(pm => pm.classList.remove('selected'));
             event.target.closest('.payment-method').classList.add('selected');
-            
+
             if (modalType === 'primary') {
                 document.getElementById('modalPaymentMethod').value = method;
                 const label = document.getElementById('modalPaymentDetailsLabel');
@@ -3284,17 +3329,17 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Preview Budget Modal Functions
         async function showPreviewBudgetModal() {
-            
+
             // Show loading state
             const modal = document.getElementById('previewBudgetModal');
             if (modal) {
                 // Add loading indicator
                 modal.style.opacity = '0.7';
             }
-            
+
             try {
                 // Force fresh data load from both APIs
-                
+
                 const [dashboardResponse, salaryResponse] = await Promise.all([
                     fetch('/budget/api/personal_dashboard_data.php', {
                         method: 'GET',
@@ -3313,19 +3358,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         body: 'action=get_salary_data'
                     })
                 ]);
-                
+
                 const dashboardData = await dashboardResponse.json();
                 const salaryData = await salaryResponse.json();
-                
+
                 console.log('Fresh dashboard data:', dashboardData);
                 console.log('Fresh salary data:', salaryData);
-                
+
                 // Update the global budget allocation data
                 if (dashboardData.success && dashboardData.budget_allocation) {
                     window.currentBudgetAllocation = dashboardData.budget_allocation;
                     console.log('Updated global budget allocation:', window.currentBudgetAllocation);
                 }
-                
+
                 // Set preview data directly from API responses
                 if (dashboardData.success) {
                     window.previewModalData = {
@@ -3338,20 +3383,20 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     };
                     console.log('Set preview modal data:', window.previewModalData);
                 }
-                
+
             } catch (error) {
                 console.error('Error loading fresh data:', error);
             }
-            
+
             // Remove loading state
             if (modal) {
                 modal.style.opacity = '1';
             }
-            
+
             // Update preview with fresh data and show modal
             await updatePreviewBudgetData();
             showModal('previewBudgetModal');
-            
+
             // Force update after modal is shown (safety net)
             setTimeout(async () => {
                 console.log('Safety update of preview data after modal shown...');
@@ -3361,7 +3406,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         async function updatePreviewBudgetData() {
             console.log('Updating budget preview data...');
-            
+
             // Try to use fresh API data first
             let salaryAmount = 0;
             let additionalIncome = 0;
@@ -3369,7 +3414,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             let needsPercent = 50;
             let wantsPercent = 30;
             let savingsPercent = 20;
-            
+
             // First priority: Use fresh API data if available
             if (window.previewModalData) {
                 totalIncome = window.previewModalData.totalIncome;
@@ -3382,30 +3427,30 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             } else {
                 // Fallback: Try to get from page elements
                 console.log('Falling back to page elements...');
-                
+
                 const totalIncomeElement = document.getElementById('totalIncome');
                 if (totalIncomeElement) {
                     const totalText = totalIncomeElement.textContent.replace('₵', '').replace(/,/g, '');
                     totalIncome = parseFloat(totalText) || 0;
                 }
-                
+
                 const primarySalaryAmountElement = document.getElementById('primarySalaryAmount');
                 if (primarySalaryAmountElement) {
                     const displayText = primarySalaryAmountElement.textContent.replace('₵', '').replace(/,/g, '');
                     salaryAmount = parseFloat(displayText) || 0;
                 }
-                
+
                 const additionalIncomeElement = document.getElementById('additionalIncome');
                 if (additionalIncomeElement) {
                     const additionalText = additionalIncomeElement.textContent.replace('₵', '').replace(/,/g, '');
                     additionalIncome = parseFloat(additionalText) || 0;
                 }
-                
+
                 // Calculate total if not available
                 if (totalIncome === 0) {
                     totalIncome = salaryAmount + additionalIncome;
                 }
-                
+
                 // FORCE CORRECT ALLOCATION if we have the expected total income
                 if (totalIncome === 6500) {
                     // Database has 60/20/20 allocation
@@ -3422,15 +3467,22 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         savingsPercent = parseFloat(allocation.savings_percentage) || 20;
                     }
                 }
-                
-                console.log('Using page element data:', { totalIncome, salaryAmount, additionalIncome, needsPercent, wantsPercent, savingsPercent });
+
+                console.log('Using page element data:', {
+                    totalIncome,
+                    salaryAmount,
+                    additionalIncome,
+                    needsPercent,
+                    wantsPercent,
+                    savingsPercent
+                });
             }
-            
+
             // Calculate allocation amounts based on TOTAL INCOME
             const needsAmount = (totalIncome * needsPercent) / 100;
             const wantsAmount = (totalIncome * wantsPercent) / 100;
             const savingsAmount = (totalIncome * savingsPercent) / 100;
-            
+
             console.log('Final calculated amounts:', {
                 totalIncome: `₵${totalIncome.toFixed(2)}`,
                 salary: `₵${salaryAmount.toFixed(2)}`,
@@ -3442,16 +3494,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 savingsPercent: `${savingsPercent}%`,
                 savingsAmount: `₵${savingsAmount.toFixed(2)}`
             });
-            
+
             // Update preview modal with calculated values
             const previewTotalIncomeEl = document.getElementById('previewTotalIncome');
             const previewSalaryIncomeEl = document.getElementById('previewSalaryIncome');
             const previewAdditionalIncomeEl = document.getElementById('previewAdditionalIncome');
-            
+
             if (previewTotalIncomeEl) previewTotalIncomeEl.textContent = `₵${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewSalaryIncomeEl) previewSalaryIncomeEl.textContent = `₵${salaryAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewAdditionalIncomeEl) previewAdditionalIncomeEl.textContent = `₵${additionalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            
+
             // Update allocation amounts with safety checks
             const previewNeedsAmountEl = document.getElementById('modalPreviewNeedsAmount');
             const previewNeedsPercentEl = document.getElementById('modalPreviewNeedsPercent');
@@ -3459,25 +3511,25 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const previewWantsPercentEl = document.getElementById('modalPreviewWantsPercent');
             const previewSavingsAmountEl = document.getElementById('modalPreviewSavingsAmount');
             const previewSavingsPercentEl = document.getElementById('modalPreviewSavingsPercent');
-            
+
             if (previewNeedsAmountEl) previewNeedsAmountEl.textContent = `₵${needsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewNeedsPercentEl) {
                 previewNeedsPercentEl.textContent = `${needsPercent}%`;
                 console.log('Updated Needs percent element:', previewNeedsPercentEl.textContent, 'Element found:', !!previewNeedsPercentEl);
             }
-            
+
             if (previewWantsAmountEl) previewWantsAmountEl.textContent = `₵${wantsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewWantsPercentEl) {
                 previewWantsPercentEl.textContent = `${wantsPercent}%`;
                 console.log('Updated Wants percent element:', previewWantsPercentEl.textContent, 'Element found:', !!previewWantsPercentEl);
             }
-            
+
             if (previewSavingsAmountEl) previewSavingsAmountEl.textContent = `₵${savingsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewSavingsPercentEl) {
                 previewSavingsPercentEl.textContent = `${savingsPercent}%`;
                 console.log('Updated Savings percent element:', previewSavingsPercentEl.textContent, 'Element found:', !!previewSavingsPercentEl);
             }
-            
+
             console.log('Budget Preview - Updated DOM elements:', {
                 needsPercent: `${needsPercent}%`,
                 needsAmount: previewNeedsAmountEl ? previewNeedsAmountEl.textContent : 'element not found',
@@ -3487,15 +3539,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 savingsAmount: previewSavingsAmountEl ? previewSavingsAmountEl.textContent : 'element not found',
                 totalCheck: `${needsAmount + wantsAmount + savingsAmount} should equal ${totalIncome}`
             });
-            
+
             // Calculate realistic health score based on allocation percentages and total income
             let healthScore = 0;
-            
+
             // Base score for having income
             if (totalIncome > 0) {
                 healthScore += 20;
             }
-            
+
             // Savings rate scoring (up to 30 points)
             if (savingsPercent >= 20) {
                 healthScore += 30; // Excellent savings rate
@@ -3506,7 +3558,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             } else if (savingsPercent >= 5) {
                 healthScore += 10; // Basic savings
             }
-            
+
             // Needs allocation scoring (up to 25 points)
             if (needsPercent <= 50) {
                 healthScore += 25; // Excellent needs control
@@ -3517,7 +3569,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             } else if (needsPercent <= 80) {
                 healthScore += 10; // High needs spending
             }
-            
+
             // Wants allocation scoring (up to 25 points)
             if (wantsPercent <= 20) {
                 healthScore += 25; // Very disciplined spending
@@ -3528,12 +3580,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             } else if (wantsPercent <= 50) {
                 healthScore += 10; // High discretionary spending
             }
-            
+
             // Cap at 100
             healthScore = Math.min(100, healthScore);
-            
+
             document.getElementById('previewHealthScore').textContent = healthScore;
-            
+
             let healthStatus = 'Consider adjusting your allocation';
             if (healthScore >= 90) {
                 healthStatus = 'Excellent financial planning!';
@@ -3546,7 +3598,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             } else if (healthScore >= 50) {
                 healthStatus = 'Budget needs significant improvement';
             }
-            
+
             document.getElementById('previewHealthStatus').textContent = healthStatus;
         }
 
@@ -3559,13 +3611,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         document.addEventListener('DOMContentLoaded', function() {
             updateBudgetPreview();
             updateTotalAllocation();
-            setupModalListeners();  // Add modal event listeners
-            
+            setupModalListeners(); // Add modal event listeners
+
             // Initialize with delayed data load to ensure DOM is ready
             setTimeout(() => {
                 loadSalaryData();
             }, 200);
-            
+
             // Add visibility change listener for auto-refresh
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
@@ -3575,181 +3627,181 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     }, 300);
                 }
             });
-            
+
             // Handle Primary Salary form submission
             const primarySalaryForm = document.getElementById('primarySalaryForm');
             if (primarySalaryForm) {
                 primarySalaryForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(this);
                     const data = Object.fromEntries(formData.entries());
-                    
+
                     const submitButton = this.querySelector('button[type="submit"]');
                     const originalText = submitButton.textContent;
-                    
+
                     // Add action to form data
                     formData.append('action', 'save_primary_salary');
-                    
+
                     // Show loading state
                     submitButton.textContent = 'Saving...';
                     submitButton.disabled = true;
-                    
+
                     // Make API call
                     fetch('../actions/salary_actions.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            // Update the main form with new values (with null checks)
-                            const salaryAmountElement = document.getElementById('salaryAmount');
-                            const payFrequencyElement = document.getElementById('payFrequency');
-                            const nextPayDateElement = document.getElementById('nextPayDate');
-                            const autoBudgetElement = document.getElementById('autoBudget');
-                            
-                            if (salaryAmountElement) salaryAmountElement.value = data.salaryAmount;
-                            if (payFrequencyElement) payFrequencyElement.value = data.payFrequency;
-                            if (nextPayDateElement) nextPayDateElement.value = data.nextPayDate;
-                            if (autoBudgetElement) autoBudgetElement.checked = data.autoBudget === 'on';
-                            
-                            showSnackbar(result.message, 'success');
-                            closeModal('primarySalaryModal');
-                            
-                            // Update budget preview
-                            updateBudgetPreview();
-                            
-                            // Reload salary data
-                            setTimeout(() => {
-                                loadSalaryData();
-                            }, 500);
-                        } else {
-                            showSnackbar(result.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showSnackbar('Failed to save salary information', 'error');
-                    })
-                    .finally(() => {
-                        // Reset button
-                        submitButton.textContent = originalText;
-                        submitButton.disabled = false;
-                    });
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                // Update the main form with new values (with null checks)
+                                const salaryAmountElement = document.getElementById('salaryAmount');
+                                const payFrequencyElement = document.getElementById('payFrequency');
+                                const nextPayDateElement = document.getElementById('nextPayDate');
+                                const autoBudgetElement = document.getElementById('autoBudget');
+
+                                if (salaryAmountElement) salaryAmountElement.value = data.salaryAmount;
+                                if (payFrequencyElement) payFrequencyElement.value = data.payFrequency;
+                                if (nextPayDateElement) nextPayDateElement.value = data.nextPayDate;
+                                if (autoBudgetElement) autoBudgetElement.checked = data.autoBudget === 'on';
+
+                                showSnackbar(result.message, 'success');
+                                closeModal('primarySalaryModal');
+
+                                // Update budget preview
+                                updateBudgetPreview();
+
+                                // Reload salary data
+                                setTimeout(() => {
+                                    loadSalaryData();
+                                }, 500);
+                            } else {
+                                showSnackbar(result.message, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showSnackbar('Failed to save salary information', 'error');
+                        })
+                        .finally(() => {
+                            // Reset button
+                            submitButton.textContent = originalText;
+                            submitButton.disabled = false;
+                        });
                 });
             }
-            
+
             // Handle Add Income Source form submission
             const addIncomeForm = document.getElementById('addIncomeForm');
             if (addIncomeForm) {
                 addIncomeForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(this);
                     const data = Object.fromEntries(formData.entries());
-                    
+
                     const submitButton = this.querySelector('button[type="submit"]');
                     const originalText = submitButton.textContent;
-                    
+
                     // Add action to form data
                     formData.append('action', 'add_income_source');
-                    
+
                     // Show loading state
                     submitButton.textContent = 'Processing...';
                     submitButton.disabled = true;
-                    
+
                     // Make API call
                     fetch('../actions/salary_actions.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            showSnackbar(result.message, 'success');
-                            closeModal('addIncomeSourceModal');
-                            
-                            // Reset form
-                            this.reset();
-                            
-                            // Reset payment method selection
-                            const methods = this.querySelectorAll('.payment-method');
-                            methods.forEach(m => m.classList.remove('selected'));
-                            methods[0].classList.add('selected');
-                            this.querySelector('input[name="paymentMethod"]').value = 'bank';
-                            
-                            // Reload salary data
-                            setTimeout(() => {
-                                loadSalaryData();
-                            }, 500);
-                        } else {
-                            showSnackbar(result.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showSnackbar('Failed to add income source', 'error');
-                    })
-                    .finally(() => {
-                        // Reset button
-                        submitButton.textContent = originalText;
-                        submitButton.disabled = false;
-                    });
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                showSnackbar(result.message, 'success');
+                                closeModal('addIncomeSourceModal');
+
+                                // Reset form
+                                this.reset();
+
+                                // Reset payment method selection
+                                const methods = this.querySelectorAll('.payment-method');
+                                methods.forEach(m => m.classList.remove('selected'));
+                                methods[0].classList.add('selected');
+                                this.querySelector('input[name="paymentMethod"]').value = 'bank';
+
+                                // Reload salary data
+                                setTimeout(() => {
+                                    loadSalaryData();
+                                }, 500);
+                            } else {
+                                showSnackbar(result.message, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showSnackbar('Failed to add income source', 'error');
+                        })
+                        .finally(() => {
+                            // Reset button
+                            submitButton.textContent = originalText;
+                            submitButton.disabled = false;
+                        });
                 });
             }
-            
+
             // Handle Pay Schedule form submission
             const payScheduleForm = document.getElementById('payScheduleForm');
             if (payScheduleForm) {
                 payScheduleForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(this);
                     const data = Object.fromEntries(formData.entries());
-                    
+
                     const submitButton = this.querySelector('button[type="submit"]');
                     const originalText = submitButton.textContent;
-                    
+
                     // Add action to form data
                     formData.append('action', 'save_pay_schedule');
-                    
+
                     // Show loading state
                     submitButton.textContent = 'Saving...';
                     submitButton.disabled = true;
-                    
+
                     // Make API call
                     fetch('../actions/salary_actions.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            showSnackbar(result.message, 'success');
-                            closeModal('payScheduleModal');
-                            updatePayScheduleDisplay(result.data);
-                            
-                            // Reload salary data
-                            setTimeout(() => {
-                                loadSalaryData();
-                            }, 500);
-                        } else {
-                            showSnackbar(result.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showSnackbar('Failed to save pay schedule', 'error');
-                    })
-                    .finally(() => {
-                        // Reset button
-                        submitButton.textContent = originalText;
-                        submitButton.disabled = false;
-                    });
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                showSnackbar(result.message, 'success');
+                                closeModal('payScheduleModal');
+                                updatePayScheduleDisplay(result.data);
+
+                                // Reload salary data
+                                setTimeout(() => {
+                                    loadSalaryData();
+                                }, 500);
+                            } else {
+                                showSnackbar(result.message, 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showSnackbar('Failed to save pay schedule', 'error');
+                        })
+                        .finally(() => {
+                            // Reset button
+                            submitButton.textContent = originalText;
+                            submitButton.disabled = false;
+                        });
                 });
             }
-        
+
             // Handle additional income checkbox toggle
             const trackAdditionalCheckbox = document.getElementById('trackAdditionalIncome');
             const additionalIncomeSection = document.getElementById('additionalIncomeSection');
@@ -3758,13 +3810,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     additionalIncomeSection.style.display = this.checked ? 'block' : 'none';
                 });
             }
-            
+
             // Initialize page
             loadSavedTheme();
             loadSalaryData();
             handleURLParams(); // Handle parameters from other pages
             checkSalaryDue(); // Check if salary is due
-            
+
             // Theme selector change handler
             const themeSelector = document.getElementById('themeSelector');
             if (themeSelector) {
@@ -3772,25 +3824,25 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     changeTheme(this.value);
                 });
             }
-            
+
             // Close dropdowns when clicking outside
             document.addEventListener('click', function(event) {
                 const themeSelector = document.querySelector('.theme-selector');
                 const userMenu = document.querySelector('.user-menu');
                 const themeDropdown = document.getElementById('themeDropdown');
                 const userDropdown = document.getElementById('userDropdown');
-                
+
                 // Close theme dropdown if clicking outside
                 if (themeDropdown && !themeSelector.contains(event.target)) {
                     themeDropdown.classList.remove('show');
                 }
-                
+
                 // Close user dropdown if clicking outside  
                 if (userDropdown && !userMenu.contains(event.target)) {
                     userDropdown.classList.remove('show');
                 }
             });
-            
+
             // Handle slider inputs
             const sliders = document.querySelectorAll('.allocation-slider');
             sliders.forEach(slider => {
@@ -3799,7 +3851,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     updateAllocation(category, this.value);
                 });
             });
-            
+
             // Handle salary amount changes
             const salaryInput = document.getElementById('salaryAmount');
             if (salaryInput) {
@@ -3808,4 +3860,5 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         });
     </script>
 </body>
+
 </html>

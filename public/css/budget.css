@@ -20,6 +20,35 @@
     --button-hover-bg: rgba(0, 0, 0, 0.05);
 }
 
+/* Period Indicator Styles */
+.period-indicator {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.period-indicator.weekly {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.period-indicator.monthly {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.monthly-note {
+    display: block;
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
 /* Budget Input Group Styles */
 .budget-input-group {
     display: flex;
@@ -1259,7 +1288,7 @@ body {
 .budget-modal-content {
     background: var(--card-background);
     border-radius: 12px;
-    max-width: 500px;
+    max-width: 700px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;

@@ -775,6 +775,19 @@ function addContribution($conn, $userId) {
         throw new Exception('Goal not found');
     }
     
+    // Check if contribution would exceed the goal target
+    $newAmount = $goal['current_amount'] + floatval($amount);
+    $targetAmount = floatval($goal['target_amount']);
+    
+    if ($newAmount > $targetAmount) {
+        $remaining = $targetAmount - $goal['current_amount'];
+        if ($remaining <= 0) {
+            throw new Exception('Goal has already been completed. No additional contributions needed.');
+        } else {
+            throw new Exception(sprintf('Contribution amount would exceed goal target. Maximum you can save is ₵%.2f to complete this goal.', $remaining));
+        }
+    }
+    
     $conn->begin_transaction();
     
     try {
@@ -788,7 +801,6 @@ function addContribution($conn, $userId) {
         $stmt->execute();
         
         // Update goal current amount
-        $newAmount = $goal['current_amount'] + $amount;
         $isCompleted = $newAmount >= $goal['target_amount'] ? 1 : 0;
         
         $stmt = $conn->prepare("

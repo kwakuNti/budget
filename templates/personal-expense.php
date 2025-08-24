@@ -18,6 +18,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expenses</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/personal-expense.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -82,7 +83,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">💰</div>
+                <div class="logo-icon"><i class="fas fa-piggy-bank"></i></div>
                 <div class="logo-text">
                     <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Expense Dashboard</p>
@@ -95,13 +96,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="budget.php" class="nav-item">Budget</a>
                 <a href="personal-expense.php" class="nav-item active">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
-                <a href="insights.php" class="nav-item">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
+                <a href="report.php" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">
                 <button class="theme-toggle-btn" onclick="toggleThemeSelector()" title="Change Theme">
-                    <span class="theme-icon">🎨</span>
+                    <span class="theme-icon"><i class="fas fa-palette"></i></span>
                 </button>
                 <div class="theme-dropdown" id="themeDropdown">
                     <div class="theme-dropdown-header">
@@ -182,7 +183,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Page Header -->
             <section class="page-header">
                 <div class="page-title">
-                    <h2>💸 Expense Tracker</h2>
+                    <h2><i class="fas fa-money-bill-wave"></i> Expense Tracker</h2>
                     <p>Monitor and manage your spending across all categories</p>
                 </div>
                 <button class="quick-btn" onclick="showAddExpenseModal()">
@@ -196,7 +197,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="summary-card total">
                     <div class="summary-header">
                         <h3>Total Spent This Month</h3>
-                        <span class="summary-icon">💳</span>
+                        <span class="summary-icon"><i class="fas fa-credit-card"></i></span>
                     </div>
                     <div class="summary-amount" id="totalSpent">₵0.00</div>
                     <div class="summary-change" id="monthChange">Loading...</div>
@@ -219,7 +220,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="summary-card wants">
                     <div class="summary-header">
                         <h3>Wants Expenses</h3>
-                        <span class="summary-icon">🎮</span>
+                        <span class="summary-icon"><i class="fas fa-gamepad"></i></span>
                     </div>
                     <div class="summary-amount" id="wantsSpent">₵0.00</div>
                     <div class="summary-budget" id="wantsBudget">Loading...</div>
@@ -233,7 +234,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="summary-card daily">
                     <div class="summary-header">
                         <h3>Daily Average</h3>
-                        <span class="summary-icon">📊</span>
+                        <span class="summary-icon"><i class="fas fa-chart-bar"></i></span>
                     </div>
                     <div class="summary-amount" id="dailyAverage">₵0.00</div>
                     <div class="summary-change" id="dailyTarget">Loading...</div>
@@ -283,11 +284,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="controls-right">
                     <div class="view-toggle">
                         <button class="view-btn active" onclick="setView('list')" data-view="list">
-                            <span class="view-icon">📋</span>
+                            <span class="view-icon"><i class="fas fa-clipboard-list"></i></span>
                             List
                         </button>
                         <button class="view-btn" onclick="setView('chart')" data-view="chart">
-                            <span class="view-icon">📊</span>
+                            <span class="view-icon"><i class="fas fa-chart-bar"></i></span>
                             Chart
                         </button>
                     </div>
@@ -984,20 +985,29 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                 // Store budget data for this category using category ID
                                 window.categoryBudgets[category.id] = {
                                     spent: parseFloat(category.spent_this_month) || 0,
-                                    budget: parseFloat(category.budget_limit) || 0
+                                    budget: parseFloat(category.budget_limit) || 0,
+                                    budget_period: category.budget_period || 'monthly',
+                                    original_budget_limit: parseFloat(category.original_budget_limit) || parseFloat(category.budget_limit) || 0
                                 };
                                 
-                                // Add visual indicator for budget status
+                                // Add visual indicator for budget status and period
                                 const spentAmount = parseFloat(category.spent_this_month) || 0;
                                 const budgetLimit = parseFloat(category.budget_limit) || 0;
+                                const budgetPeriod = category.budget_period || 'monthly';
+                                const originalBudgetLimit = parseFloat(category.original_budget_limit) || budgetLimit;
                                 const budgetPercentage = budgetLimit > 0 ? (spentAmount / budgetLimit) * 100 : 0;
                                 
+                                // Show period indicator and original budget if weekly
+                                const periodText = budgetPeriod === 'weekly' ? ` [Weekly: ₵${originalBudgetLimit.toFixed(2)}]` : '';
+                                
                                 if (budgetPercentage >= 100) {
-                                    option.textContent += ' ⚠️ (Over Budget)';
+                                    option.textContent += ` ⚠️ (Over Budget)${periodText}`;
                                     option.style.color = '#dc2626';
                                 } else if (budgetPercentage >= 80) {
-                                    option.textContent += ' ⚡ (Near Limit)';
+                                    option.textContent += ` ⚡ (Near Limit)${periodText}`;
                                     option.style.color = '#f59e0b';
+                                } else if (periodText) {
+                                    option.textContent += periodText;
                                 }
                                 
                                 optgroup.appendChild(option);
@@ -1063,18 +1073,26 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     `₵${remainingAmount.toFixed(2)} left` : 
                     `₵${remainingAmount.toFixed(2)} exceeded`;
                 
+                // Get budget period info
+                const budgetPeriod = category.budget_period || 'monthly';
+                const originalBudgetLimit = category.original_budget_limit || category.budget;
+                const periodIndicator = budgetPeriod === 'weekly' ? 
+                    `<small class="period-indicator weekly">Weekly: ₵${originalBudgetLimit.toFixed(2)}</small>` :
+                    `<small class="period-indicator monthly">Monthly Budget</small>`;
+                
                 categoryElement.innerHTML = `
                     <div class="category-header">
                         <span class="category-icon">${category.icon || '📝'}</span>
                         <div class="category-info">
                             <h4>${category.name}</h4>
                             <p>${category.transactions} transaction${category.transactions !== 1 ? 's' : ''}</p>
+                            ${periodIndicator}
                         </div>
                         <div class="category-amount">₵${category.spent.toFixed(2)}</div>
                     </div>
                     <div class="category-details">
                         <div class="detail-row">
-                            <span>Budget: ₵${category.budget.toFixed(2)}</span>
+                            <span>Budget: ₵${category.budget.toFixed(2)} (Monthly)</span>
                             <span class="status ${statusClass}">${remainingText}</span>
                         </div>
                         <div class="progress-bar">

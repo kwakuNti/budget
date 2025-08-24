@@ -21,6 +21,15 @@ switch ($action) {
             $icon = $_POST['icon'] ?? 'fa-circle';
             $color = $_POST['color'] ?? '#007bff';
             $budgetLimit = floatval($_POST['budget_limit'] ?? 0);
+            $budgetPeriod = $_POST['budget_period'] ?? 'monthly';
+
+            // Store original budget limit as entered by user
+            $originalBudgetLimit = $budgetLimit;
+            
+            // Convert weekly budget to monthly for storage
+            if ($budgetPeriod === 'weekly') {
+                $budgetLimit = $budgetLimit * 4.33; // Convert weekly to monthly (52 weeks / 12 months = 4.33)
+            }
 
             // Validate input
             if (empty($name) || empty($categoryType)) {
@@ -33,6 +42,11 @@ switch ($action) {
                 exit;
             }
 
+            if (!in_array($budgetPeriod, ['weekly', 'monthly'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid budget period']);
+                exit;
+            }
+
             // Check if category name already exists for this user
             $stmt = $conn->prepare("SELECT id FROM budget_categories WHERE user_id = ? AND name = ? AND is_active = TRUE");
             $stmt->bind_param("is", $userId, $name);
@@ -42,12 +56,12 @@ switch ($action) {
                 exit;
             }
 
-            // Insert new category
+            // Insert new category with budget period
             $stmt = $conn->prepare("
-                INSERT INTO budget_categories (user_id, name, category_type, icon, color, budget_limit, is_active) 
-                VALUES (?, ?, ?, ?, ?, ?, TRUE)
+                INSERT INTO budget_categories (user_id, name, category_type, icon, color, budget_limit, budget_period, original_budget_limit, is_active) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)
             ");
-            $stmt->bind_param("issssd", $userId, $name, $categoryType, $icon, $color, $budgetLimit);
+            $stmt->bind_param("issssdsd", $userId, $name, $categoryType, $icon, $color, $budgetLimit, $budgetPeriod, $originalBudgetLimit);
             
             if ($stmt->execute()) {
                 $categoryId = $conn->insert_id;
@@ -60,7 +74,10 @@ switch ($action) {
                 echo json_encode([
                     'success' => true, 
                     'message' => 'Category added successfully',
-                    'category_id' => $categoryId
+                    'category_id' => $categoryId,
+                    'budget_period' => $budgetPeriod,
+                    'original_limit' => $originalBudgetLimit,
+                    'monthly_limit' => $budgetLimit
                 ]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Failed to add category']);
@@ -79,10 +96,24 @@ switch ($action) {
             $icon = $_POST['icon'] ?? '';
             $color = $_POST['color'] ?? '';
             $budgetLimit = floatval($_POST['budget_limit'] ?? 0);
+            $budgetPeriod = $_POST['budget_period'] ?? 'monthly';
+
+            // Store original budget limit as entered by user
+            $originalBudgetLimit = $budgetLimit;
+            
+            // Convert weekly budget to monthly for storage
+            if ($budgetPeriod === 'weekly') {
+                $budgetLimit = $budgetLimit * 4.33; // Convert weekly to monthly
+            }
 
             // Validate input
             if ($categoryId <= 0 || empty($name) || empty($categoryType)) {
                 echo json_encode(['success' => false, 'message' => 'Invalid category data']);
+                exit;
+            }
+
+            if (!in_array($budgetPeriod, ['weekly', 'monthly'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid budget period']);
                 exit;
             }
 
@@ -106,13 +137,13 @@ switch ($action) {
                 exit;
             }
 
-            // Update category
+            // Update category with budget period
             $stmt = $conn->prepare("
                 UPDATE budget_categories 
-                SET name = ?, category_type = ?, icon = ?, color = ?, budget_limit = ?, updated_at = CURRENT_TIMESTAMP
+                SET name = ?, category_type = ?, icon = ?, color = ?, budget_limit = ?, budget_period = ?, original_budget_limit = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ? AND user_id = ?
             ");
-            $stmt->bind_param("ssssdii", $name, $categoryType, $icon, $color, $budgetLimit, $categoryId, $userId);
+            $stmt->bind_param("ssssdsdii", $name, $categoryType, $icon, $color, $budgetLimit, $budgetPeriod, $originalBudgetLimit, $categoryId, $userId);
             
             if ($stmt->execute() && $stmt->affected_rows > 0) {
                 // If this was or is now a savings category, update corresponding savings goal
@@ -120,7 +151,13 @@ switch ($action) {
                     updateLinkedSavingsGoal($conn, $userId, $originalCategory['name'], $name, $budgetLimit, $categoryType);
                 }
                 
-                echo json_encode(['success' => true, 'message' => 'Category updated successfully']);
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Category updated successfully',
+                    'budget_period' => $budgetPeriod,
+                    'original_limit' => $originalBudgetLimit,
+                    'monthly_limit' => $budgetLimit
+                ]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Failed to update category']);
             }

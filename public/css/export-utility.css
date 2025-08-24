@@ -1,0 +1,335 @@
+/* Export Utility Styles */
+
+/* Modal Overlay */
+.export-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Modal */
+.export-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+/* Modal Header */
+.export-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.export-modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.export-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.export-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Modal Body */
+.export-modal-body {
+    padding: 25px;
+}
+
+.export-modal-body p {
+    margin: 0 0 20px 0;
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* Format Buttons */
+.export-format-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.export-btn {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 120px;
+    position: relative;
+    overflow: hidden;
+}
+
+.export-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.export-btn:hover:before {
+    left: 100%;
+}
+
+.export-btn:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.export-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.export-label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #1f2937;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.export-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+    display: block;
+}
+
+/* Specific button colors */
+.export-pdf-btn:hover {
+    border-color: #dc2626;
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.15);
+}
+
+.export-excel-btn:hover {
+    border-color: #059669;
+    box-shadow: 0 10px 25px rgba(5, 150, 105, 0.15);
+}
+
+.export-csv-btn:hover {
+    border-color: #7c3aed;
+    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.15);
+}
+
+/* Loading Overlay */
+.export-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    animation: fadeIn 0.3s ease;
+}
+
+.export-loading {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+}
+
+.export-loading p {
+    margin: 20px 0 0 0;
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+/* Spinner */
+.export-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+/* Notifications */
+.export-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    padding: 15px 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10002;
+    animation: slideInRight 0.3s ease;
+    max-width: 350px;
+}
+
+.export-notification-success {
+    border-left: 4px solid #10b981;
+}
+
+.export-notification-error {
+    border-left: 4px solid #ef4444;
+}
+
+.export-notification-info {
+    border-left: 4px solid #3b82f6;
+}
+
+.export-notification-icon {
+    font-size: 1.2rem;
+}
+
+.export-notification-message {
+    color: #1f2937;
+    font-weight: 500;
+}
+
+/* Elements to hide during export */
+.no-export {
+    display: none !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from { 
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .export-modal {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .export-format-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .export-notification {
+        right: 10px;
+        left: 10px;
+        top: 10px;
+    }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    .export-modal {
+        background: #1f2937;
+        color: white;
+    }
+    
+    .export-modal-header {
+        border-bottom-color: #374151;
+    }
+    
+    .export-btn {
+        background: #374151;
+        border-color: #4b5563;
+        color: white;
+    }
+    
+    .export-label {
+        color: white;
+    }
+    
+    .export-desc {
+        color: #d1d5db;
+    }
+    
+    .export-loading {
+        background: #1f2937;
+        color: white;
+    }
+    
+    .export-notification {
+        background: #1f2937;
+        color: white;
+    }
+    
+    .export-notification-message {
+        color: white;
+    }
+}

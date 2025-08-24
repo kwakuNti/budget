@@ -31,6 +31,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Insights - Smart Analytics</title>
+    <link rel="stylesheet" href="../public/css/insights.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -1641,8 +1642,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="budget.php" class="nav-item">Budget</a>
                 <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
-                <a href="insights.php" class="nav-item active">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item active">Insights</a> -->
+                <a href="report.php" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">
@@ -1860,6 +1861,64 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         </div>
                     </div>
                 </div>
+
+                <!-- Actionable Recommendations -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <h3><span class="insight-icon">💡</span> Smart Recommendations</h3>
+                        <button class="refresh-btn" onclick="loadAIPredictions()">🔄</button>
+                    </div>
+                    <div id="actionableRecommendations">
+                        <div class="recommendation">Loading personalized recommendations...</div>
+                    </div>
+                </div>
+
+                <!-- Financial Benchmarks -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <h3><span class="insight-icon">📊</span> Financial Benchmarks</h3>
+                        <button class="refresh-btn" onclick="initializeInsights()">🔄</button>
+                    </div>
+                    <div id="benchmarksContainer">
+                        <div class="recommendation">Loading benchmarks...</div>
+                    </div>
+                </div>
+
+                <!-- Savings Performance Analytics -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <h3><span class="insight-icon">💰</span> Savings Analytics</h3>
+                        <button class="refresh-btn" onclick="initializeInsights()">🔄</button>
+                    </div>
+                    <div id="savingsMetrics" class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Loading...</div>
+                            <div class="metric-value">...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Goal Insights -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <h3><span class="insight-icon">🎯</span> Goal Optimization</h3>
+                        <button class="refresh-btn" onclick="initializeInsights()">🔄</button>
+                    </div>
+                    <div id="goalInsightsContainer">
+                        <div class="recommendation">Loading goal insights...</div>
+                    </div>
+                </div>
+
+                <!-- Trend Analysis -->
+                <div class="insight-card">
+                    <div class="insight-card-header">
+                        <h3><span class="insight-icon">📈</span> Trend Analysis</h3>
+                        <button class="refresh-btn" onclick="initializeInsights()">🔄</button>
+                    </div>
+                    <div id="trendInsights">
+                        <div class="recommendation">Loading trend analysis...</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Chat Assistant -->
@@ -1930,7 +1989,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Utility function to safely fetch from API
         async function fetchInsightsData(action) {
             try {
-                const response = await fetch(`../api/insights_data.php?action=${action}`);
+                const response = await fetch(`../api/enhanced_insights_data.php?action=${action}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -1951,53 +2010,270 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             showLoadingState();
             
             try {
-                // Load all data in parallel
-                const [
-                    financialHealthData,
-                    spendingData,
-                    goalData,
-                    budgetData,
-                    incomeData
-                ] = await Promise.all([
-                    fetchInsightsData('financial_health'),
-                    fetchInsightsData('spending_patterns'),
-                    fetchInsightsData('goal_analytics'),
-                    fetchInsightsData('budget_performance'),
-                    fetchInsightsData('income_trends')
-                ]);
-
-                // Update the dashboard with real data
-                if (financialHealthData) {
-                    updateFinancialHealthDisplay(financialHealthData);
-                    refreshFinancialHealth(financialHealthData);
+                // Load essential data first
+                const financialHealth = await fetchInsightsData('financial_health');
+                if (financialHealth) {
+                    updateFinancialHealthDisplay(financialHealth);
+                    updateHeroStats(financialHealth);
                 }
                 
-                if (spendingData) {
-                    refreshSpendingPatterns(spendingData);
-                }
+                // Load additional insights progressively
+                loadProgressiveInsights();
                 
-                if (goalData) {
-                    updateGoalAnalytics(goalData);
-                    refreshGoalAnalytics(goalData);
-                }
-                
-                if (budgetData) {
-                    refreshBudgetPerformance(budgetData);
-                }
-                
-                if (incomeData) {
-                    refreshIncomeTrends(incomeData);
-                }
-
-                // Generate AI-powered predictive insights
-                await generatePredictiveInsights(financialHealthData, spendingData, goalData);
-
-                hideLoadingState();
-                showSnackbar('Insights loaded successfully!', 'success');
             } catch (error) {
                 console.error('Error initializing insights:', error);
+                showSnackbar('Failed to load insights', 'error');
+            } finally {
                 hideLoadingState();
-                showSnackbar('Failed to load insights data', 'error');
+            }
+        }
+
+        // Load insights progressively to avoid overwhelming the server
+        async function loadProgressiveInsights() {
+            // Load spending analytics
+            try {
+                const spendingData = await fetchInsightsData('spending_patterns');
+                if (spendingData && spendingData.current_month_categories) {
+                    updateSpendingAnalytics(spendingData);
+                }
+            } catch (error) {
+                console.log('Spending patterns will load later');
+            }
+            
+            // Load recommendations
+            try {
+                const recommendations = await fetchInsightsData('personalized_recommendations');
+                if (recommendations) {
+                    updateRecommendations(recommendations);
+                }
+            } catch (error) {
+                console.log('Recommendations will load later');
+            }
+            
+            // Skip AI predictions for now due to server issues
+            // TODO: Fix AI predictions endpoint
+            
+            // Load remaining insights with delays to prevent server overload
+            setTimeout(async () => {
+                try {
+                    const goalData = await fetchInsightsData('goal_optimization');
+                    if (goalData) {
+                        updateGoalInsights(goalData);
+                    }
+                } catch (error) {
+                    console.log('Goal insights will load later');
+                }
+            }, 1000);
+            
+            setTimeout(async () => {
+                try {
+                    const behavioralData = await fetchInsightsData('behavioral_insights');
+                    if (behavioralData) {
+                        updateBehavioralInsights(behavioralData);
+                    }
+                } catch (error) {
+                    console.log('Behavioral insights will load later');
+                }
+            }, 2000);
+        }
+
+        // Enhanced update functions for comprehensive insights
+        function updateHeroStats(financialHealthData) {
+            // Calculate dynamic insights metrics from financial health data
+            const totalInsights = financialHealthData?.recommendations?.length || 5;
+            const healthScore = financialHealthData?.health_score || 0;
+            const trendsAnalyzed = 4; // Health score, expenses, savings, goals
+            
+            animateCounter(document.querySelector('[data-metric="total-insights"]'), 0, totalInsights, 1200);
+            animateCounter(document.querySelector('[data-metric="health-score"]'), 0, healthScore, 1500);
+            animateCounter(document.querySelector('[data-metric="trends-analyzed"]'), 0, trendsAnalyzed, 1800);
+        }
+
+        function countTotalInsights(data) {
+            let count = 0;
+            if (data.financial_health?.recommendations) count += data.financial_health.recommendations.length;
+            if (data.predictions?.predictions) count += data.predictions.predictions.length;
+            if (data.recommendations) count += data.recommendations.length;
+            if (data.goal_insights?.goal_insights) count += data.goal_insights.goal_insights.length;
+            return Math.max(5, count);
+        }
+
+        function updateSpendingAnalytics(spendingData) {
+            if (!spendingData) return;
+            
+            // Update spending patterns chart with real data
+            const ctx = document.getElementById('spendingPatternsChart');
+            if (!ctx) return;
+            
+            const context = ctx.getContext('2d');
+            
+            if (chartInstances.spendingPatterns) {
+                chartInstances.spendingPatterns.destroy();
+            }
+
+            const categories = spendingData.current_month_categories || [];
+            
+            chartInstances.spendingPatterns = new Chart(context, {
+                type: 'doughnut',
+                data: {
+                    labels: categories.map(cat => cat.category),
+                    datasets: [{
+                        data: categories.map(cat => parseFloat(cat.category_total || 0)),
+                        backgroundColor: [
+                            getThemeVariable('--primary-color'),
+                            getThemeVariable('--secondary-color'),
+                            getThemeVariable('--accent-color'),
+                            getThemeVariable('--warning-color'),
+                            getThemeVariable('--success-color'),
+                            getThemeVariable('--danger-color')
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                color: getThemeVariable('--text-primary')
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSavingsPerformance(savingsData) {
+            if (!savingsData) return;
+            
+            // Update metrics display
+            const metricsContainer = document.querySelector('#savingsMetrics');
+            if (metricsContainer) {
+                metricsContainer.innerHTML = `
+                    <div class="metric-item">
+                        <div class="metric-label">Total Saved</div>
+                        <div class="metric-value">₵${savingsData.total_saved?.toLocaleString() || '0'}</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Overall Progress</div>
+                        <div class="metric-value">${savingsData.overall_progress || 0}%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Monthly Needed</div>
+                        <div class="metric-value">₵${savingsData.monthly_savings_needed?.toLocaleString() || '0'}</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Savings Momentum</div>
+                        <div class="metric-value">${savingsData.savings_momentum || 0}%</div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateGoalInsights(goalData) {
+            if (!goalData) return;
+            
+            const goalsContainer = document.querySelector('#goalInsightsContainer');
+            if (goalsContainer && goalData.goal_insights) {
+                goalsContainer.innerHTML = goalData.goal_insights.map(insight => 
+                    '<div class="recommendation">' + insight + '</div>'
+                ).join('');
+            }
+        }
+
+        function updateTrendAnalysis(trendData) {
+            if (!trendData) return;
+            
+            // Update trend insights
+            const trendsContainer = document.querySelector('#trendInsights');
+            if (trendsContainer && trendData.insights) {
+                trendsContainer.innerHTML = 
+                    '<div class="recommendation">📈 ' + trendData.insights.overall_trend + '</div>' +
+                    '<div class="recommendation">💰 Average monthly expenses: ₵' + (trendData.insights.avg_monthly_expenses?.toFixed(2) || '0') + '</div>';
+            }
+        }
+
+        function updatePredictions(predictionsData) {
+            if (!predictionsData) return;
+            
+            const predictionsContainer = document.querySelector('#predictionsContainer .insights-predictions');
+            if (predictionsContainer && predictionsData.predictions) {
+                let html = '<h4>🤖 AI-Powered Predictions</h4>';
+                predictionsData.predictions.forEach(prediction => {
+                    html += '<div class="prediction-item">💡 ' + prediction + '</div>';
+                });
+                html += '<div class="prediction-meta">';
+                html += '<small>Confidence: ' + (predictionsData.confidence_score || 75) + '% • Generated by: ' + (predictionsData.generated_by || 'AI') + ' • ' + new Date(predictionsData.timestamp || Date.now()).toLocaleTimeString() + '</small>';
+                html += '</div>';
+                
+                predictionsContainer.innerHTML = html;
+            }
+        }
+
+        function updateRecommendations(recommendationsData) {
+            if (!recommendationsData || !Array.isArray(recommendationsData)) return;
+            
+            const recommendationsContainer = document.querySelector('#actionableRecommendations');
+            if (recommendationsContainer) {
+                let html = '';
+                recommendationsData.forEach(rec => {
+                    html += '<div class="recommendation-card ' + rec.priority + '">';
+                    html += '<div class="recommendation-header">';
+                    html += '<h4>' + rec.title + '</h4>';
+                    html += '<span class="priority-badge ' + rec.priority + '">' + rec.priority + '</span>';
+                    html += '</div>';
+                    html += '<p>' + rec.description + '</p>';
+                    html += '<div class="action-items">';
+                    if (rec.action_items) {
+                        rec.action_items.forEach(item => {
+                            html += '<div class="action-item">• ' + item + '</div>';
+                        });
+                    }
+                    html += '</div>';
+                    html += '<div class="potential-impact">' + rec.potential_impact + '</div>';
+                    html += '</div>';
+                });
+                recommendationsContainer.innerHTML = html;
+            }
+        }
+
+        function updateBenchmarks(benchmarksData) {
+            if (!benchmarksData) return;
+            
+            const benchmarksContainer = document.querySelector('#benchmarksContainer');
+            if (benchmarksContainer) {
+                let html = '';
+                Object.entries(benchmarksData).forEach(([key, benchmark]) => {
+                    const suffix = key.includes('rate') || key.includes('spending') ? '%' : 
+                                  key.includes('fund') ? ' months' : '';
+                    
+                    html += '<div class="benchmark-item ' + benchmark.status + '">';
+                    html += '<div class="benchmark-label">' + benchmark.description + '</div>';
+                    html += '<div class="benchmark-values">';
+                    html += '<span class="user-value">You: ' + (benchmark.user_value?.toFixed(1) || '0') + suffix + '</span>';
+                    html += '<span class="benchmark-value">Target: ' + benchmark.benchmark + suffix + '</span>';
+                    html += '</div>';
+                    html += '<div class="benchmark-status ' + benchmark.status + '">';
+                    html += benchmark.status === 'good' ? '✅ On Track' : '⚠️ Needs Improvement';
+                    html += '</div>';
+                    html += '</div>';
+                });
+                benchmarksContainer.innerHTML = html;
+            }
+        }
+
+        async function loadAIPredictions() {
+            try {
+                const aiData = await fetchInsightsData('ai_predictions');
+                if (aiData) {
+                    updatePredictions(aiData);
+                }
+            } catch (error) {
+                console.error('Error loading AI predictions:', error);
             }
         }
 
@@ -2111,21 +2387,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const incomeElement = document.querySelector('[data-metric="income"]');
             if (incomeElement) {
                 incomeElement.dataset.format = 'currency';
-                animateCounter(incomeElement, 0, data.income, 2000);
+                animateCounter(incomeElement, 0, data.monthly_income || 0, 2000);
             }
 
             // Update expenses with animation
             const expensesElement = document.querySelector('[data-metric="expenses"]');
             if (expensesElement) {
                 expensesElement.dataset.format = 'currency';
-                animateCounter(expensesElement, 0, data.expenses, 2000);
+                animateCounter(expensesElement, 0, data.total_expenses || 0, 2000);
             }
 
             // Update savings with animation
             const savingsElement = document.querySelector('[data-metric="savings"]');
             if (savingsElement) {
                 savingsElement.dataset.format = 'currency';
-                animateCounter(savingsElement, 0, data.savings, 2000);
+                animateCounter(savingsElement, 0, data.total_saved || 0, 2000);
             }
 
             // Update expense ratio with animation
@@ -2209,10 +2485,59 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Initialize the insights page
         document.addEventListener('DOMContentLoaded', function() {
+            initializePlaceholderCharts();
             initializeInsights();
             setupThemeSystem();
             setupAutoRefresh();
         });
+
+        // Initialize placeholder charts to show loading state
+        function initializePlaceholderCharts() {
+            // Initialize spending patterns chart with placeholder data
+            const spendingCtx = document.getElementById('spendingPatternsChart');
+            if (spendingCtx) {
+                chartInstances.spendingPatterns = new Chart(spendingCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Loading...'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#e5e7eb'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Initialize other charts with similar placeholder data
+            const goalCtx = document.getElementById('goalProgressChart');
+            if (goalCtx) {
+                chartInstances.goalProgress = new Chart(goalCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Loading...'],
+                        datasets: [{
+                            data: [0],
+                            backgroundColor: ['#e5e7eb']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
 
         // Setup smart automatic refresh system
         function setupAutoRefresh() {
@@ -3059,6 +3384,22 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 snackbar.classList.remove('show');
                 setTimeout(() => snackbar.remove(), 300);
             }, 4000);
+        }
+
+        // Add missing function for behavioral insights
+        function updateBehavioralInsights(behavioralData) {
+            if (!behavioralData) return;
+            
+            // Update behavioral insights section if it exists
+            const behavioralSection = document.querySelector('#behavioral-insights');
+            if (behavioralSection) {
+                behavioralSection.innerHTML = `
+                    <div class="insight-card">
+                        <h3>Behavioral Insights</h3>
+                        <p>Spending patterns and behavior analysis loaded successfully.</p>
+                    </div>
+                `;
+            }
         }
     </script>
 </body>

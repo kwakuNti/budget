@@ -812,6 +812,7 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--border-color);
     border: 1px solid var(--border-color);
     margin-bottom: 2rem;
+    
 }
 
 .section-header {
@@ -1334,7 +1335,7 @@ body {
 .modal-content {
     background: var(--card-background);
     border-radius: 20px;
-    width: 90%;
+    width: 100%;
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;

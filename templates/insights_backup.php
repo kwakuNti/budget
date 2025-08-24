@@ -839,8 +839,8 @@
                 <a href="budget.php" class="nav-item">Budget</a>
                 <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
-                <a href="insights.php" class="nav-item active">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item active">Insights</a> -->
+                <a href="report.php" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">

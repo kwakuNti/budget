@@ -1,56 +1,41 @@
 <?php
-// Direct test of the API
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Direct test of the API to see exact output
+session_start();
+$_SESSION['user_id'] = 2; // Set user session
 
-echo "<h2>Testing Goal Types API Directly</h2>\n";
+// Test different actions
+$actions = ['financial_health', 'comprehensive_insights', 'dashboard_insights'];
 
-// Test database connection first
-try {
-    require_once 'config/connection.php';
-    echo "<p>✅ Database connection successful</p>\n";
+foreach ($actions as $action) {
+    echo "=== Testing action: $action ===\n";
     
-    // Test the query
-    $query = "SHOW COLUMNS FROM personal_goals LIKE 'goal_type'";
-    $stmt = $conn->prepare($query);
-    $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Capture the API output
+    ob_start();
     
-    if ($result) {
-        echo "<p>✅ Query successful</p>\n";
-        echo "<p><strong>Result:</strong></p>\n";
-        echo "<pre>" . print_r($result, true) . "</pre>\n";
+    $_GET['action'] = $action;
+    
+    try {
+        include 'api/enhanced_insights_data.php';
+        $output = ob_get_clean();
         
-        // Test the regex parsing
-        if ($result['Type']) {
-            preg_match_all("/'([^']+)'/", $result['Type'], $matches);
-            echo "<p><strong>Parsed goal types:</strong></p>\n";
-            echo "<pre>" . print_r($matches[1], true) . "</pre>\n";
+        echo "Raw output:\n";
+        echo $output . "\n";
+        
+        // Test if it's valid JSON
+        $decoded = json_decode($output, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            echo "✅ Valid JSON\n";
+        } else {
+            echo "❌ Invalid JSON - Error: " . json_last_error_msg() . "\n";
+            echo "First 200 chars: " . substr($output, 0, 200) . "\n";
         }
-    } else {
-        echo "<p>❌ No result from query</p>\n";
+        
+    } catch (Exception $e) {
+        $output = ob_get_clean();
+        echo "Exception: " . $e->getMessage() . "\n";
+        echo "Output: " . $output . "\n";
     }
     
-} catch (Exception $e) {
-    echo "<p>❌ Error: " . $e->getMessage() . "</p>\n";
-}
-
-// Test the API endpoint
-echo "<hr>\n";
-echo "<h3>API Endpoint Test</h3>\n";
-$apiUrl = "http://localhost/budget/api/goal_types.php";
-$context = stream_context_create([
-    'http' => [
-        'timeout' => 10
-    ]
-]);
-
-$response = file_get_contents($apiUrl, false, $context);
-if ($response !== false) {
-    echo "<p>✅ API endpoint accessible</p>\n";
-    echo "<p><strong>Response:</strong></p>\n";
-    echo "<pre>" . htmlspecialchars($response) . "</pre>\n";
-} else {
-    echo "<p>❌ Could not access API endpoint</p>\n";
+    echo "\n";
 }
 ?>

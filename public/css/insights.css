@@ -1,0 +1,398 @@
+/* Enhanced Insights CSS Styles */
+
+/* Recommendation Cards */
+.recommendation-card {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.recommendation-card.high {
+    border-left: 4px solid var(--danger-color);
+}
+
+.recommendation-card.medium {
+    border-left: 4px solid var(--warning-color);
+}
+
+.recommendation-card.low {
+    border-left: 4px solid var(--primary-color);
+}
+
+.recommendation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.recommendation-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.priority-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-badge.high {
+    background: var(--danger-gradient);
+    color: white;
+}
+
+.priority-badge.medium {
+    background: var(--warning-gradient);
+    color: white;
+}
+
+.priority-badge.low {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.action-items {
+    margin: 1rem 0;
+}
+
+.action-item {
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.potential-impact {
+    padding: 0.75rem 1rem;
+    background: var(--primary-light);
+    border-radius: 8px;
+    border: 1px solid var(--accent-border);
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+/* Benchmark Items */
+.benchmark-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--card-background);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.benchmark-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+.benchmark-item.good {
+    border-left: 4px solid var(--success-color);
+    background: var(--success-light);
+}
+
+.benchmark-item.needs_improvement {
+    border-left: 4px solid var(--warning-color);
+    background: var(--warning-light);
+}
+
+.benchmark-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.benchmark-values {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.user-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.benchmark-value {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.benchmark-status {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.benchmark-status.good {
+    color: var(--success-color);
+}
+
+.benchmark-status.needs_improvement {
+    color: var(--warning-color);
+}
+
+/* Enhanced Insight Cards */
+.insight-card.alert {
+    border-left: 4px solid var(--danger-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, rgba(239, 68, 68, 0.05) 100%);
+}
+
+.insight-card.tip {
+    border-left: 4px solid var(--primary-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--primary-light) 100%);
+}
+
+.insight-card.opportunity {
+    border-left: 4px solid var(--success-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--success-light) 100%);
+}
+
+.insight-card.urgent {
+    border-left: 4px solid var(--warning-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--warning-light) 100%);
+    animation: pulse 2s infinite;
+}
+
+.insight-card.good {
+    border-left: 4px solid var(--success-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--success-light) 100%);
+}
+
+.insight-card.warning {
+    border-left: 4px solid var(--warning-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--warning-light) 100%);
+}
+
+.insight-card.more {
+    border-left: 4px solid var(--accent-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--accent-light) 100%);
+}
+
+.insight-card.info {
+    border-left: 4px solid var(--primary-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--primary-light) 100%);
+}
+
+.insight-card.loading {
+    border-left: 4px solid var(--border-color);
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--secondary-background) 100%);
+    opacity: 0.7;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Savings Performance Metrics */
+#savingsMetrics .metric-item {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+#savingsMetrics .metric-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+#savingsMetrics .metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 0.5rem;
+}
+
+/* Prediction Items Enhanced */
+.prediction-item {
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--primary-light) 100%);
+    border: 1px solid var(--accent-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.prediction-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.prediction-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-gradient);
+}
+
+.prediction-meta {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--secondary-background);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.prediction-meta small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Trend Insights */
+#trendInsights .recommendation {
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--accent-light) 100%);
+    border: 1px solid var(--accent-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+#trendInsights .recommendation:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+/* Goal Insights Container */
+#goalInsightsContainer .recommendation {
+    background: linear-gradient(135deg, var(--card-background) 0%, var(--success-light) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+#goalInsightsContainer .recommendation:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* Responsive Design for Insights */
+@media (max-width: 768px) {
+    .recommendation-card {
+        padding: 1rem;
+    }
+    
+    .recommendation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .benchmark-values {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .benchmark-item {
+        padding: 1rem;
+    }
+    
+    .prediction-item {
+        padding: 1rem;
+    }
+}
+
+/* Loading states */
+.loading-insights {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading-insights::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Enhanced chart containers */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow-sm);
+    border: 1px solid var(--border-color);
+    margin: 1rem 0;
+}
+
+/* Success animations */
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.insight-card.success {
+    animation: successPulse 0.6s ease-in-out;
+}
+
+/* Hover effects for interactive elements */
+.insight-action {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.insight-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--primary-shadow);
+}
+
+/* Enhanced insight icons */
+.insight-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}

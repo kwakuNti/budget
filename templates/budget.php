@@ -19,13 +19,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Budget Planning - Nkansah Budget Manager</title>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/budget.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">💰</div>
+                <div class="logo-icon"><i class="fas fa-piggy-bank"></i></div>
                 <div class="logo-text">
                     <h1><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Personal Finance</p>
@@ -38,8 +40,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="budget.php" class="nav-item active">Budget</a>
                 <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
-                <a href="insights.php" class="nav-item">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
+                <a href="report.php" class="nav-item">Reports</a>
             </nav>
 
             <div class="user-menu">
@@ -64,7 +66,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Page Header -->
             <section class="welcome-section">
                 <div class="welcome-content">
-                    <h2>💼 Budget Planning</h2>
+                    <h2><i class="fas fa-calculator"></i> Budget Planning</h2>
                     <p>Plan, track, and optimize your monthly budget across all categories</p>
                 </div>
                 <div class="quick-actions">
@@ -73,7 +75,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         Add Category
                     </button>
                     <button class="quick-btn" onclick="showBudgetTemplateModal()">
-                        <span class="btn-icon">📋</span>
+                        <span class="btn-icon"><i class="fas fa-clipboard-list"></i></span>
                         Use Template
                     </button>
                     <button class="quick-btn" onclick="exportBudget()">
@@ -88,7 +90,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card balance-card">
                     <div class="card-header">
                         <h3>Total Monthly Income</h3>
-                        <span class="card-icon">💰</span>
+                        <span class="card-icon"><i class="fas fa-dollar-sign"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="totalIncome">₵0.00</div>
@@ -99,7 +101,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card income-card">
                     <div class="card-header">
                         <h3>Planned Budget</h3>
-                        <span class="card-icon">📊</span>
+                        <span class="card-icon"><i class="fas fa-chart-bar"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="plannedBudget">₵0.00</div>
@@ -110,7 +112,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card expense-card">
                     <div class="card-header">
                         <h3>Actual Spending</h3>
-                        <span class="card-icon">💸</span>
+                        <span class="card-icon"><i class="fas fa-money-bill-wave"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="actualSpending">₵0.00</div>
@@ -121,7 +123,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card savings-card">
                     <div class="card-header">
                         <h3>Budget Performance</h3>
-                        <span class="card-icon">🎯</span>
+                        <span class="card-icon"><i class="fas fa-bullseye"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="budgetPerformance">0%</div>
@@ -223,7 +225,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <option value="wants">Wants (Lifestyle)</option>
                             <option value="savings">Savings & Investments</option>
                         </select>
-                        <small class="form-note">💡 <strong>Tip:</strong> For savings goals, use the <a href="savings.php">Savings</a> page to create and track specific goals. Savings categories here are for budget allocation only.</small>
+                        <small class="form-note"><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> For savings goals, use the <a href="savings.php">Savings</a> page to create and track specific goals. Savings categories here are for budget allocation only.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Budget Period</label>
+                        <select name="budget_period" required>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                        <small class="form-note"><i class="fas fa-lightbulb"></i> <strong>Note:</strong> You can set your budget limit as weekly or monthly. All calculations and storage are monthly, but your original choice will be shown for clarity.</small>
                     </div>
                     <div class="form-group">
                         <label>Budget Limit</label>
@@ -255,16 +265,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="form-group">
                         <label>Icon</label>
                         <div class="icon-selector">
-                            <div class="icon-option selected" data-icon="🏥">🏥</div>
-                            <div class="icon-option" data-icon="💊">💊</div>
-                            <div class="icon-option" data-icon="🚗">🚗</div>
-                            <div class="icon-option" data-icon="📚">📚</div>
-                            <div class="icon-option" data-icon="🎯">🎯</div>
-                            <div class="icon-option" data-icon="💳">💳</div>
-                            <div class="icon-option" data-icon="🏠">🏠</div>
-                            <div class="icon-option" data-icon="🍽️">🍽️</div>
+                            <div class="icon-option selected" data-icon="fas fa-hospital"><i class="fas fa-hospital"></i></div>
+                            <div class="icon-option" data-icon="fas fa-pills"><i class="fas fa-pills"></i></div>
+                            <div class="icon-option" data-icon="fas fa-car"><i class="fas fa-car"></i></div>
+                            <div class="icon-option" data-icon="fas fa-book"><i class="fas fa-book"></i></div>
+                            <div class="icon-option" data-icon="fas fa-bullseye"><i class="fas fa-bullseye"></i></div>
+                            <div class="icon-option" data-icon="fas fa-credit-card"><i class="fas fa-credit-card"></i></div>
+                            <div class="icon-option" data-icon="fas fa-home"><i class="fas fa-home"></i></div>
+                            <div class="icon-option" data-icon="fas fa-utensils"><i class="fas fa-utensils"></i></div>
                         </div>
-                        <input type="hidden" name="icon" value="🏥">
+                        <input type="hidden" name="icon" value="fas fa-hospital">
                     </div>
                     <div class="form-group">
                         <label>Color</label>
@@ -307,14 +317,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="form-group">
                         <label>Icon</label>
                         <div class="icon-selector">
-                            <div class="icon-option selected" data-icon="💪">💪</div>
-                            <div class="icon-option" data-icon="📱">📱</div>
-                            <div class="icon-option" data-icon="🎵">🎵</div>
-                            <div class="icon-option" data-icon="📖">📖</div>
-                            <div class="icon-option" data-icon="🎨">🎨</div>
-                            <div class="icon-option" data-icon="⚽">⚽</div>
+                            <div class="icon-option selected" data-icon="fas fa-dumbbell"><i class="fas fa-dumbbell"></i></div>
+                            <div class="icon-option" data-icon="fas fa-mobile-alt"><i class="fas fa-mobile-alt"></i></div>
+                            <div class="icon-option" data-icon="fas fa-music"><i class="fas fa-music"></i></div>
+                            <div class="icon-option" data-icon="fas fa-book-open"><i class="fas fa-book-open"></i></div>
+                            <div class="icon-option" data-icon="fas fa-palette"><i class="fas fa-palette"></i></div>
+                            <div class="icon-option" data-icon="fas fa-futbol"><i class="fas fa-futbol"></i></div>
                         </div>
-                        <input type="hidden" name="itemIcon" value="💪">
+                        <input type="hidden" name="itemIcon" value="fas fa-dumbbell">
                     </div>
                     <div class="form-group">
                         <label>Description</label>
@@ -423,7 +433,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         </div>
                         
                         <div class="template-card custom-template" onclick="showCustomTemplate()">
-                            <h5>🎯 Custom Template</h5>
+                            <h5><i class="fas fa-bullseye"></i> Custom Template</h5>
                             <p class="template-desc">Create your own allocation</p>
                             <div class="custom-icon">
                                 <span>✏️</span>

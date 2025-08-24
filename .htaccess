@@ -1,4 +1,10 @@
+# Disable directory browsing
+Options -Indexes
+
 RewriteEngine On
+
+# Block directory access - redirect using smart redirect handler
+RewriteRule ^(templates|config|db|includes|actions|ajax|api|cron|logs)/?$ redirect_to_login.php [R=302,L]
 
 # Remove .php extension from URLs
 RewriteCond %{REQUEST_FILENAME} !-f

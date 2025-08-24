@@ -94,6 +94,8 @@ try {
                     bc.icon,
                     bc.color,
                     bc.budget_limit,
+                    bc.budget_period,
+                    bc.original_budget_limit,
                     bc.is_active,
                     bc.created_at,
                     COALESCE(SUM(CASE WHEN 
@@ -107,7 +109,7 @@ try {
                 FROM budget_categories bc
                 LEFT JOIN personal_expenses pe ON bc.id = pe.category_id
                 WHERE bc.user_id = ? AND bc.is_active = TRUE
-                GROUP BY bc.id, bc.name, bc.category_type, bc.icon, bc.color, bc.budget_limit, bc.is_active, bc.created_at
+                GROUP BY bc.id, bc.name, bc.category_type, bc.icon, bc.color, bc.budget_limit, bc.budget_period, bc.original_budget_limit, bc.is_active, bc.created_at
                 ORDER BY bc.category_type, bc.name
             ");
             $stmt->bind_param("i", $userId);
@@ -149,6 +151,9 @@ try {
                     'icon' => $row['icon'],
                     'color' => $row['color'],
                     'budget_limit' => $budgetLimit,
+                    'budget_period' => $row['budget_period'] ?? 'monthly',
+                    'original_budget_limit' => floatval($row['original_budget_limit'] ?? $budgetLimit),
+                    'display_budget_limit' => $row['budget_period'] === 'weekly' ? floatval($row['original_budget_limit']) : $budgetLimit,
                     'current_month_spent' => $spent,
                     'remaining' => $remaining,
                     'percentage_used' => round($percentageUsed, 1),
@@ -184,13 +189,31 @@ try {
             $category_type = $input['category_type'];
             $icon = $input['icon'] ?? '📝';
             $color = $input['color'] ?? '#3498db';
-            $budget_limit = floatval($input['budget_limit']);
+            $budgetLimit = floatval($input['budget_limit']);
+            $budgetPeriod = $input['budget_period'] ?? 'monthly';
+            
+            // Store original budget limit as entered by user
+            $originalBudgetLimit = $budgetLimit;
+            
+            // Convert weekly budget to monthly for storage
+            if ($budgetPeriod === 'weekly') {
+                $budgetLimit = $budgetLimit * 4.33; // Convert weekly to monthly
+            }
             
             // Validate category type
             if (!in_array($category_type, ['needs', 'wants', 'savings'])) {
                 echo json_encode([
                     'success' => false,
                     'message' => 'Invalid category type'
+                ]);
+                exit;
+            }
+            
+            // Validate budget period
+            if (!in_array($budgetPeriod, ['weekly', 'monthly'])) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid budget period'
                 ]);
                 exit;
             }
@@ -211,12 +234,12 @@ try {
                 exit;
             }
             
-            // Insert new category
+            // Insert new category with budget period
             $stmt = $conn->prepare("
-                INSERT INTO budget_categories (user_id, name, category_type, icon, color, budget_limit)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO budget_categories (user_id, name, category_type, icon, color, budget_limit, budget_period, original_budget_limit)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param("issssd", $userId, $name, $category_type, $icon, $color, $budget_limit);
+            $stmt->bind_param("issssdsd", $userId, $name, $category_type, $icon, $color, $budgetLimit, $budgetPeriod, $originalBudgetLimit);
             
             if ($stmt->execute()) {
                 $categoryId = $conn->insert_id;
@@ -231,7 +254,7 @@ try {
                              save_method, save_amount, budget_category_id, status, created_at) 
                             VALUES (?, ?, ?, 'other', 'medium', 1, 'fixed', ?, ?, 'active', NOW())
                         ");
-                        $goalStmt->bind_param("isddi", $userId, $name, $budget_limit, $budget_limit, $categoryId);
+                        $goalStmt->bind_param("isddi", $userId, $name, $budgetLimit, $budgetLimit, $categoryId);
                         $goalStmt->execute();
                     } catch (Exception $e) {
                         // Log the error but don't fail the category creation
@@ -241,7 +264,7 @@ try {
                 
                 // Get the newly created category
                 $getStmt = $conn->prepare("
-                    SELECT id, name, category_type, icon, color, budget_limit, created_at
+                    SELECT id, name, category_type, icon, color, budget_limit, budget_period, original_budget_limit, created_at
                     FROM budget_categories 
                     WHERE id = ?
                 ");
@@ -260,6 +283,9 @@ try {
                         'icon' => $newCategory['icon'],
                         'color' => $newCategory['color'],
                         'budget_limit' => floatval($newCategory['budget_limit']),
+                        'budget_period' => $newCategory['budget_period'],
+                        'original_budget_limit' => floatval($newCategory['original_budget_limit']),
+                        'display_budget_limit' => $newCategory['budget_period'] === 'weekly' ? floatval($newCategory['original_budget_limit']) : floatval($newCategory['budget_limit']),
                         'created_at' => $newCategory['created_at']
                     ]
                 ]);
@@ -310,9 +336,34 @@ try {
                 $types .= 's';
             }
             if (isset($input['budget_limit'])) {
+                $budgetLimit = floatval($input['budget_limit']);
+                $budgetPeriod = $input['budget_period'] ?? 'monthly';
+                $originalBudgetLimit = $budgetLimit;
+                
+                // Convert weekly budget to monthly for storage
+                if ($budgetPeriod === 'weekly') {
+                    $budgetLimit = $budgetLimit * 4.33;
+                }
+                
                 $updates[] = 'budget_limit = ?';
-                $params[] = floatval($input['budget_limit']);
+                $params[] = $budgetLimit;
                 $types .= 'd';
+                
+                $updates[] = 'original_budget_limit = ?';
+                $params[] = $originalBudgetLimit;
+                $types .= 'd';
+            }
+            if (isset($input['budget_period'])) {
+                if (!in_array($input['budget_period'], ['weekly', 'monthly'])) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Invalid budget period'
+                    ]);
+                    exit;
+                }
+                $updates[] = 'budget_period = ?';
+                $params[] = $input['budget_period'];
+                $types .= 's';
             }
             
             if (empty($updates)) {

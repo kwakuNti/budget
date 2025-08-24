@@ -20,6 +20,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Savings - Nkansah Budget Manager</title>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/savings.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -28,7 +30,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">💰</div>
+                <div class="logo-icon"><i class="fas fa-piggy-bank"></i></div>
                 <div class="logo-text">
                     <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Finance Dashboard</p>
@@ -41,13 +43,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="budget.php" class="nav-item">Budget</a>
                 <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item active">Savings</a>
-                <a href="insights.php" class="nav-item">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
+                <a href="report.php" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">
                 <button class="theme-toggle-btn" onclick="toggleThemeSelector()" title="Change Theme">
-                    <span class="theme-icon">🎨</span>
+                    <span class="theme-icon"><i class="fas fa-palette"></i></span>
                 </button>
                 <div class="theme-dropdown" id="themeDropdown">
                     <div class="theme-dropdown-header">
@@ -128,20 +130,20 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Page Header -->
             <section class="page-header">
                 <div class="page-title">
-                    <h2>💰 Savings Management</h2>
+                    <h2><i class="fas fa-piggy-bank"></i> Savings Management</h2>
                     <p>Track your goals, manage auto-savings, and build your financial future</p>
                 </div>
                 <div class="page-actions">
                     <button class="quick-btn" onclick="showNewGoalModal()">
-                        <span class="btn-icon">🎯</span>
+                        <span class="btn-icon"><i class="fas fa-bullseye"></i></span>
                         New Goal
                     </button>
                     <button class="quick-btn" onclick="showDepositModal()">
-                        <span class="btn-icon">💵</span>
+                        <span class="btn-icon"><i class="fas fa-dollar-sign"></i></span>
                         Add Deposit
                     </button>
                     <button class="quick-btn secondary" onclick="showAutoSaveModal()">
-                        <span class="btn-icon">⚙️</span>
+                        <span class="btn-icon"><i class="fas fa-cog"></i></span>
                         Auto-Save
                     </button>
                 </div>
@@ -152,7 +154,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="overview-card total-savings">
                     <div class="card-header">
                         <h3>Total Savings</h3>
-                        <span class="card-icon">🏦</span>
+                        <span class="card-icon"><i class="fas fa-piggy-bank"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="totalSavingsAmount">₵0.00</div>
@@ -167,7 +169,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="overview-card monthly-target">
                     <div class="card-header">
                         <h3>Monthly Target</h3>
-                        <span class="card-icon">📊</span>
+                        <span class="card-icon"><i class="fas fa-chart-bar"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="monthlyTargetAmount">₵700.00</div>
@@ -187,7 +189,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="overview-card savings-rate">
                     <div class="card-header">
                         <h3>Savings Rate</h3>
-                        <span class="card-icon">📈</span>
+                        <span class="card-icon"><i class="fas fa-chart-line"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="savingsRateAmount">0%</div>
@@ -205,7 +207,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Savings Goals Grid -->
             <section class="savings-goals-section">
                 <div class="section-header">
-                    <h3>🎯 Savings Goals</h3>
+                    <h3><i class="fas fa-bullseye"></i> Savings Goals</h3>
                     <div class="goal-filters">
                         <button class="filter-btn active" data-filter="all">All Goals</button>
                         <button class="filter-btn" data-filter="active">Active</button>
@@ -226,9 +228,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Auto-Save Settings -->
             <section class="auto-save-section">
                 <div class="section-header">
-                    <h3>⚙️ Smart Auto-Save System</h3>
+                    <h3><i class="fas fa-cog"></i> Smart Auto-Save System</h3>
                     <div class="section-actions">
-                        <button class="btn btn-secondary btn-sm" onclick="processAutoSave()" title="Process auto-save now">⚡ Process Now</button>
+                        <button class="btn btn-secondary btn-sm" onclick="processAutoSave()" title="Process auto-save now"><i class="fas fa-bolt"></i> Process Now</button>
                         <button class="view-all" onclick="showAutoSaveModal()">Configure Settings</button>
                     </div>
                 </div>
@@ -244,7 +246,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Savings Challenges -->
             <section class="challenges-section">
                 <div class="section-header">
-                    <h3>🏆 Savings Challenges</h3>
+                    <h3><i class="fas fa-trophy"></i> Savings Challenges</h3>
                     <button class="view-all" onclick="showCreateChallengeModal()">Create Challenge</button>
                 </div>
 
@@ -259,7 +261,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Recent Activity -->
             <section class="recent-activity-section">
                 <div class="section-header">
-                    <h3>📊 Recent Activity</h3>
+                    <h3><i class="fas fa-chart-bar"></i> Recent Activity</h3>
                     <a href="#" class="view-all">View All Transactions</a>
                 </div>
 
@@ -428,7 +430,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
             <form class="modal-form" onsubmit="saveAutoSaveConfig(event)">
                 <div class="form-section">
-                    <h4>🎯 Auto-Save Settings</h4>
+                    <h4><i class="fas fa-bullseye"></i> Auto-Save Settings</h4>
                     <div class="auto-save-config">
                         <div class="config-header">
                             <div class="config-info">
@@ -477,7 +479,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
 
                 <div class="form-section">
-                    <h4>💡 Round-Up Savings</h4>
+                    <h4><i class="fas fa-lightbulb"></i> Round-Up Savings</h4>
                     <div class="auto-save-config">
                         <div class="config-header">
                             <div class="config-info">
@@ -503,7 +505,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
 
                 <div class="form-section">
-                    <h4>📊 Goal Allocation Priority</h4>
+                    <h4><i class="fas fa-chart-bar"></i> Goal Allocation Priority</h4>
                     <div class="goal-allocation-list" id="goalAllocationList">
                         <div class="loading-placeholder">
                             <p>Loading goals...</p>
@@ -586,10 +588,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         </div>
     </div>
 
-                <div class="modal-actions">
+                <!-- <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="closeModal('autoSaveModal')">Cancel</button>
                     <button type="submit" class="btn-primary">Save Settings</button>
-                </div>
+                </div> -->
             </form>
         </div>
     </div>
@@ -605,7 +607,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="goal-details-content">
                     <div class="goal-summary">
                         <div class="summary-left">
-                            <div class="goal-icon-large" id="goalIconLarge">🎯</div>
+                            <div class="goal-icon-large" id="goalIconLarge"><i class="fas fa-bullseye"></i></div>
                             <div class="goal-basic-info">
                                 <h4 id="goalTitleLarge">Goal Name</h4>
                                 <p id="goalDescriptionLarge">Goal description will be loaded dynamically</p>
@@ -705,7 +707,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>💰 Default Save Amount</label>
+                                <label><i class="fas fa-dollar-sign"></i> Default Save Amount</label>
                                 <div class="input-group">
                                     <span class="input-prefix">₵</span>
                                     <input type="number" id="defaultSaveAmount" placeholder="100.00" step="0.01">
@@ -713,7 +715,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             </div>
                             
                             <div class="form-group">
-                                <label>📊 Default Save Percentage</label>
+                                <label><i class="fas fa-chart-bar"></i> Default Save Percentage</label>
                                 <div class="input-group">
                                     <input type="number" id="defaultSavePercentage" placeholder="10" min="1" max="100">
                                     <span class="input-suffix">%</span>
@@ -722,13 +724,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         </div>
 
                         <div class="trigger-section">
-                            <h5>🎯 Auto-Save Triggers</h5>
+                            <h5><i class="fas fa-bullseye"></i> Auto-Save Triggers</h5>
                             <div class="trigger-grid">
                                 <label class="trigger-option">
                                     <input type="checkbox" id="triggerSalary">
                                     <span class="checkmark"></span>
                                     <div class="trigger-info">
-                                        <strong>💼 Salary Added</strong>
+                                        <strong><i class="fas fa-briefcase"></i> Salary Added</strong>
                                         <small>Save when salary is added to account</small>
                                     </div>
                                 </label>
@@ -737,7 +739,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                     <input type="checkbox" id="triggerAdditional">
                                     <span class="checkmark"></span>
                                     <div class="trigger-info">
-                                        <strong>💸 Additional Income</strong>
+                                        <strong><i class="fas fa-money-bill-wave"></i> Additional Income</strong>
                                         <small>Save when any additional income is received</small>
                                     </div>
                                 </label>
@@ -763,7 +765,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         </div>
 
                         <div class="allocation-section">
-                            <h5>📈 Goal Allocation Method</h5>
+                            <h5><i class="fas fa-chart-line"></i> Goal Allocation Method</h5>
                             <div class="allocation-options">
                                 <label class="radio-option">
                                     <input type="radio" name="allocationMethod" value="equal" checked>
@@ -778,7 +780,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                     <input type="radio" name="allocationMethod" value="priority">
                                     <span class="radio-checkmark"></span>
                                     <div class="option-info">
-                                        <strong>🎯 Priority-Based</strong>
+                                        <strong><i class="fas fa-bullseye"></i> Priority-Based</strong>
                                         <small>Allocate based on goal priority levels</small>
                                     </div>
                                 </label>
@@ -787,7 +789,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                     <input type="radio" name="allocationMethod" value="percentage">
                                     <span class="radio-checkmark"></span>
                                     <div class="option-info">
-                                        <strong>📊 Percentage-Based</strong>
+                                        <strong><i class="fas fa-chart-bar"></i> Percentage-Based</strong>
                                         <small>Custom percentage allocation per goal</small>
                                     </div>
                                 </label>
@@ -796,7 +798,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                     <input type="radio" name="allocationMethod" value="single">
                                     <span class="radio-checkmark"></span>
                                     <div class="option-info">
-                                        <strong>🎯 Single Goal</strong>
+                                        <strong><i class="fas fa-bullseye"></i> Single Goal</strong>
                                         <small>Save to one specific goal only</small>
                                     </div>
                                 </label>
@@ -806,7 +808,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
                     <!-- Goal-Specific Settings Tab -->
                     <div id="goal-specific" class="tab-content">
-                        <h4>🎯 Goal-Specific Auto-Save Rules</h4>
+                        <h4><i class="fas fa-bullseye"></i> Goal-Specific Auto-Save Rules</h4>
                         <div class="goal-rules-list" id="goalRulesList">
                             <!-- Goal rules will be loaded dynamically -->
                         </div>
@@ -819,7 +821,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         
                         <div class="conditions-grid">
                             <div class="condition-group">
-                                <h5>💰 Amount Limits</h5>
+                                <h5><i class="fas fa-dollar-sign"></i> Amount Limits</h5>
                                 <div class="form-group">
                                     <label>Minimum Save Amount</label>
                                     <div class="input-group">
@@ -880,7 +882,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
                     <!-- Execution History Tab -->
                     <div id="history" class="tab-content">
-                        <h4>📊 Auto-Save Execution History</h4>
+                        <h4><i class="fas fa-chart-bar"></i> Auto-Save Execution History</h4>
                         <div class="history-stats">
                             <div class="stat-card">
                                 <div class="stat-value" id="totalAutoSaved">₵0.00</div>
@@ -966,15 +968,17 @@ window.showDepositModal = function() {
 };
 
 window.showAutoSaveModal = function() {
-    const modal = document.getElementById('comprehensiveAutoSaveModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.classList.add('show');
-        setTimeout(() => modal.style.opacity = '1', 10);
-        loadComprehensiveAutoSaveConfig();
-    } else {
-        console.error('Comprehensive auto-save modal not found');
-    }
+    showSnackbar('Auto-save configuration coming soon!', 'info');
+    // Temporarily disabled until feature is fully implemented
+    // const modal = document.getElementById('comprehensiveAutoSaveModal');
+    // if (modal) {
+    //     modal.style.display = 'flex';
+    //     modal.classList.add('show');
+    //     setTimeout(() => modal.style.opacity = '1', 10);
+    //     loadComprehensiveAutoSaveConfig();
+    // } else {
+    //     console.error('Comprehensive auto-save modal not found');
+    // }
 };
 
 window.closeModal = function(modalId) {
@@ -1268,19 +1272,20 @@ window.viewGoalDetails = function(goalId) {
 // Auto-Save System Functions
 
 window.showCreateChallengeModal = function() {
-    const modal = document.getElementById('createChallengeModal');
-    if (modal) {
-        // Set default dates
-        const today = new Date();
-        const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-        
-        document.getElementById('challengeStartDate').value = today.toISOString().split('T')[0];
-        document.getElementById('challengeEndDate').value = nextWeek.toISOString().split('T')[0];
-        
-        modal.style.display = 'flex';
-        modal.classList.add('show');
-        setTimeout(() => modal.style.opacity = '1', 10);
-    }
+    showSnackbar('Savings challenges coming soon! Stay tuned for this exciting feature.', 'info');
+    // Temporarily disabled until feature is fully implemented
+    // const modal = document.getElementById('createChallengeModal');
+    // if (modal) {
+    //     // Set default dates
+    //     const today = new Date();
+    //     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    //     
+    //     document.getElementById('challengeStartDate').value = today.toISOString().split('T')[0];
+    //     document.getElementById('challengeEndDate').value = nextWeek.toISOString().split('T')[0];
+    //     modal.style.display = 'flex';
+    //     modal.classList.add('show');
+    //     setTimeout(() => modal.style.opacity = '1', 10);
+    // }
 };
 
 function loadAutoSaveConfig() {
@@ -2011,13 +2016,18 @@ class SavingsManager {
             const data = await response.json();
             
             if (data.success) {
+                this.savingsOverviewData = data.data;
                 this.updateSavingsOverviewDisplay(data.data);
+                // Update budget allocation with accurate committed amounts
+                this.updateBudgetAllocationDisplay();
             } else {
                 console.error('Failed to load savings overview:', data.message);
+                this.savingsOverviewData = null;
                 this.updateSavingsOverviewDisplay(null);
             }
         } catch (error) {
             console.error('Error loading savings overview:', error);
+            this.savingsOverviewData = null;
             this.updateSavingsOverviewDisplay(null);
         }
     }
@@ -2085,30 +2095,6 @@ class SavingsManager {
                 <span class="comparison-item">Target: ${targetPercentage}%</span>
                 <span class="comparison-item">Current: ${data.savings_rate}%</span>
             `;
-        }
-    }
-
-    async loadSavingsOverview() {
-        try {
-            const response = await fetch('/budget/actions/savings_handler.php?action=get_savings_overview', {
-                method: 'GET',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                this.updateSavingsOverviewDisplay(data.data);
-            } else {
-                console.error('Failed to load savings overview:', data.message);
-                this.updateSavingsOverviewDisplay(null);
-            }
-        } catch (error) {
-            console.error('Error loading savings overview:', error);
-            this.updateSavingsOverviewDisplay(null);
         }
     }
 
@@ -2586,12 +2572,59 @@ class SavingsManager {
         // Add goals from currentGoals
         this.currentGoals.forEach(goal => {
             if (goal.current_amount < goal.target_amount) { // Only show incomplete goals
+                const remaining = goal.target_amount - goal.current_amount;
                 const option = document.createElement('option');
                 option.value = goal.id;
                 option.textContent = `${this.getGoalIcon(goal.goal_type)} ${goal.goal_name} (${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)})`;
+                option.dataset.remaining = remaining.toFixed(2);
+                option.dataset.currentAmount = goal.current_amount;
+                option.dataset.targetAmount = goal.target_amount;
                 goalSelect.appendChild(option);
             }
         });
+
+        // Add event listener to update amount field constraints when goal is selected
+        goalSelect.addEventListener('change', this.updateDepositConstraints.bind(this));
+    }
+
+    updateDepositConstraints() {
+        const goalSelect = document.getElementById('depositGoal');
+        const amountInput = document.getElementById('depositAmount');
+        const selectedOption = goalSelect.selectedOptions[0];
+        
+        if (selectedOption && selectedOption.value) {
+            const remaining = parseFloat(selectedOption.dataset.remaining);
+            const currentAmount = parseFloat(selectedOption.dataset.currentAmount);
+            const targetAmount = parseFloat(selectedOption.dataset.targetAmount);
+            
+            // Set maximum amount to remaining
+            amountInput.max = remaining.toFixed(2);
+            amountInput.placeholder = `Maximum: ₵${remaining.toFixed(2)}`;
+            
+            // Add helper text
+            let helperText = amountInput.parentNode.querySelector('.deposit-helper');
+            if (!helperText) {
+                helperText = document.createElement('small');
+                helperText.className = 'deposit-helper';
+                amountInput.parentNode.appendChild(helperText);
+            }
+            helperText.textContent = `Remaining to complete goal: ₵${remaining.toFixed(2)}`;
+            helperText.style.color = '#666';
+            helperText.style.fontSize = '12px';
+            helperText.style.marginTop = '4px';
+            helperText.style.display = 'block';
+            
+        } else {
+            // Reset constraints
+            amountInput.removeAttribute('max');
+            amountInput.placeholder = '0.00';
+            
+            // Remove helper text
+            const helperText = amountInput.parentNode.querySelector('.deposit-helper');
+            if (helperText) {
+                helperText.remove();
+            }
+        }
     }
 
     updateMonthlyTargetDisplay() {
@@ -2699,9 +2732,10 @@ class SavingsManager {
         const allocationProgressText = document.getElementById('allocationProgressText');
         
         if (allocationProgressFill && allocationProgressText) {
-            const usedAmount = this.budgetAllocation.total_goal_amounts;
+            // Use actual monthly contributions from savings overview if available
+            const usedAmount = this.savingsOverviewData ? this.savingsOverviewData.monthly_contributions : 0;
             const totalAllocated = this.budgetAllocation.allocated_savings;
-            const remainingAmount = this.budgetAllocation.remaining_allocation;
+            const remainingAmount = Math.max(0, totalAllocated - usedAmount);
             const usagePercentage = totalAllocated > 0 ? (usedAmount / totalAllocated) * 100 : 0;
             
             allocationProgressFill.style.width = `${Math.min(usagePercentage, 100)}%`;
@@ -2720,9 +2754,11 @@ class SavingsManager {
         // Update breakdown
         const allocationBreakdownElement = document.getElementById('allocationBreakdown');
         if (allocationBreakdownElement) {
-            const percentageUsed = this.budgetAllocation.allocation_percentage_used;
+            const actualCommitted = this.savingsOverviewData ? this.savingsOverviewData.monthly_contributions : 0;
+            const totalAllocated = this.budgetAllocation.allocated_savings;
+            const percentageUsed = totalAllocated > 0 ? (actualCommitted / totalAllocated) * 100 : 0;
             allocationBreakdownElement.innerHTML = `
-                <small>Auto-save goals using ${percentageUsed.toFixed(1)}% of allocation</small>
+                <small>Current contributions using ${percentageUsed.toFixed(1)}% of allocation</small>
             `;
         }
 
@@ -2749,13 +2785,23 @@ class SavingsManager {
         const monthlyProgressText = document.getElementById('monthlyProgressText');
         
         if (monthlyProgressFill && monthlyProgressText) {
-            const totalGoalContributions = this.budgetAllocation.total_goal_amounts;
+            // Use actual monthly contributions from savings overview if available
+            const actualCommitted = this.savingsOverviewData ? this.savingsOverviewData.monthly_contributions : 0;
             const allocatedAmount = this.budgetAllocation.allocated_savings;
-            const progressPercentage = allocatedAmount > 0 ? (totalGoalContributions / allocatedAmount) * 100 : 0;
-            const remaining = allocatedAmount - totalGoalContributions;
+            const progressPercentage = allocatedAmount > 0 ? (actualCommitted / allocatedAmount) * 100 : 0;
+            const remaining = Math.max(0, allocatedAmount - actualCommitted);
             
             monthlyProgressFill.style.width = `${Math.min(progressPercentage, 100)}%`;
-            monthlyProgressText.textContent = `${formatCurrency(totalGoalContributions)} committed • ${formatCurrency(remaining)} available`;
+            monthlyProgressText.textContent = `${formatCurrency(actualCommitted)} committed • ${formatCurrency(remaining)} available`;
+            
+            // Update progress bar color based on usage
+            if (progressPercentage > 90) {
+                monthlyProgressFill.style.backgroundColor = '#ef4444'; // Red
+            } else if (progressPercentage > 75) {
+                monthlyProgressFill.style.backgroundColor = '#f59e0b'; // Orange
+            } else {
+                monthlyProgressFill.style.backgroundColor = '#10b981'; // Green
+            }
         }
 
         const targetBreakdownElement = document.getElementById('targetBreakdown');
@@ -2855,6 +2901,30 @@ class SavingsManager {
         e.preventDefault();
         
         const formData = new FormData(e.target);
+        const goalId = formData.get('goal_id');
+        const amount = parseFloat(formData.get('amount'));
+        
+        // Client-side validation
+        if (!goalId) {
+            this.showSnackbar('Please select a goal', 'error');
+            return;
+        }
+        
+        if (!amount || amount <= 0) {
+            this.showSnackbar('Please enter a valid amount', 'error');
+            return;
+        }
+        
+        // Find the selected goal and check if amount exceeds remaining
+        const goal = this.currentGoals.find(g => g.id == goalId);
+        if (goal) {
+            const remaining = goal.target_amount - goal.current_amount;
+            if (amount > remaining) {
+                this.showSnackbar(`Amount exceeds remaining goal target. Maximum you can save is ₵${remaining.toFixed(2)}`, 'error');
+                return;
+            }
+        }
+        
         formData.append('action', 'add_contribution');
 
         try {
@@ -2872,7 +2942,13 @@ class SavingsManager {
                 this.loadSavingsData();
                 this.loadSavingsOverview();
                 this.loadRecentActivity();
-                this.showSnackbar('Contribution added successfully!', 'success');
+                
+                // Show completion message if goal was completed
+                if (data.is_completed) {
+                    this.showSnackbar(`🎉 Congratulations! You've completed your "${data.goal_name}" goal!`, 'success');
+                } else {
+                    this.showSnackbar('Contribution added successfully!', 'success');
+                }
             } else {
                 this.showSnackbar(data.message || 'Error adding contribution', 'error');
             }
@@ -3520,6 +3596,42 @@ function saveComprehensiveAutoSaveConfig() {
         console.error('Error saving configuration:', error);
         showSnackbar('Error saving configuration', 'error');
     });
+}
+
+// Snackbar notification function
+function showSnackbar(message, type = 'info') {
+    // Remove existing snackbar if any
+    const existingSnackbar = document.querySelector('.snackbar');
+    if (existingSnackbar) {
+        existingSnackbar.remove();
+    }
+
+    // Create new snackbar
+    const snackbar = document.createElement('div');
+    snackbar.className = `snackbar ${type}`;
+    
+    const icons = {
+        success: '<i class="fas fa-check-circle"></i>',
+        error: '<i class="fas fa-times-circle"></i>',
+        warning: '<i class="fas fa-exclamation-triangle"></i>',
+        info: '<i class="fas fa-info-circle"></i>'
+    };
+    
+    snackbar.innerHTML = `
+        <span class="snackbar-icon">${icons[type] || icons.info}</span>
+        <span class="snackbar-message">${message}</span>
+    `;
+    
+    document.body.appendChild(snackbar);
+    
+    // Show snackbar
+    setTimeout(() => snackbar.classList.add('show'), 100);
+    
+    // Hide snackbar after 4 seconds
+    setTimeout(() => {
+        snackbar.classList.remove('show');
+        setTimeout(() => snackbar.remove(), 300);
+    }, 4000);
 }
 
     </script>

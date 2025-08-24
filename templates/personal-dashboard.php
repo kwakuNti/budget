@@ -32,6 +32,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Dashboard </title>
     <link rel="stylesheet" href="../public/css/personal.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Enhanced Payday Countdown Styles */
         .payday-countdown-hero {
@@ -1127,7 +1129,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">💰</div>
+                <div class="logo-icon"><i class="fas fa-piggy-bank"></i></div>
                 <div class="logo-text">
                     <h1 id="logoUserName"><?php echo htmlspecialchars($user_first_name); ?></h1>
                     <p>Finance Dashboard</p>
@@ -1140,13 +1142,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="budget.php" class="nav-item">Budget</a>
                 <a href="personal-expense.php" class="nav-item">Expenses</a>
                 <a href="savings.php" class="nav-item">Savings</a>
-                <a href="insights.php" class="nav-item">Insights</a>
-                <a href="reports.php" class="nav-item">Reports</a>
+                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
+
+                <a href="report.php" class="nav-item">Reports</a>
+                <a href="feedback.php" class="nav-item">Feedback</a>
+
             </nav>
 
             <div class="theme-selector">
                 <button class="theme-toggle-btn" onclick="toggleThemeSelector()" title="Change Theme">
-                    <span class="theme-icon">🎨</span>
+                    <span class="theme-icon"><i class="fas fa-palette"></i></span>
                 </button>
                 <div class="theme-dropdown" id="themeDropdown">
                     <div class="theme-dropdown-header">
@@ -1226,7 +1231,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         <div class="container">
             <!-- Hero Payday Countdown Section -->
             <section class="payday-countdown-hero">
-                <h2>🎯 Next Payday Countdown</h2>
+                <h2><i class="fas fa-bullseye"></i> Next Payday Countdown</h2>
                 <p>Stay motivated and track your financial progress</p>
                 
                 <div class="countdown-main-display">
@@ -1253,8 +1258,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="salary-info-hero">
                     <div class="salary-display">
                         <div class="salary-amount-hero" id="monthlySalaryHero">Monthly Income: ₵0.00</div>
-                        <button class="setup-salary-btn-hero" onclick="window.location.href='salary.php'">⚙️ Setup Income</button>
-                        <button class="setup-salary-btn-hero" onclick="showSalaryPaidModal()">✅ I've Been Paid</button>
+                        <button class="setup-salary-btn-hero" onclick="window.location.href='salary.php'"><i class="fas fa-cog"></i> Setup Income</button>
+                        <button class="setup-salary-btn-hero" onclick="showSalaryPaidModal()"><i class="fas fa-check-circle"></i> I've Been Paid</button>
                     </div>
                 </div>
             </section>
@@ -1268,15 +1273,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 
                 <div class="quick-actions">
                     <button class="quick-btn" onclick="showAddIncomeModal()">
-                        <span class="btn-icon">💵</span>
+                        <span class="btn-icon"><i class="fas fa-dollar-sign"></i></span>
                         Add Income
                     </button>
                     <button class="quick-btn" onclick="showAddExpenseModal()">
-                        <span class="btn-icon">💸</span>
+                        <span class="btn-icon"><i class="fas fa-money-bill-wave"></i></span>
                         Add Expense
                     </button>
                     <button class="quick-btn" onclick="showBudgetTemplateViewModal()">
-                        <span class="btn-icon">📊</span>
+                        <span class="btn-icon"><i class="fas fa-chart-bar"></i></span>
                         View Budget
                     </button>
                 </div>
@@ -1287,7 +1292,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card balance-card">
                     <div class="card-header">
                         <h3>Current Balance</h3>
-                        <span class="card-icon">💳</span>
+                        <span class="card-icon"><i class="fas fa-credit-card"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="currentBalance">₵0.00</div>
@@ -1298,7 +1303,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card income-card">
                     <div class="card-header">
                         <h3>This Month Income</h3>
-                        <span class="card-icon">📈</span>
+                        <span class="card-icon"><i class="fas fa-chart-line"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="monthlyIncome">₵0.00</div>
@@ -1309,7 +1314,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card expense-card">
                     <div class="card-header">
                         <h3>This Month Expenses</h3>
-                        <span class="card-icon">📊</span>
+                        <span class="card-icon"><i class="fas fa-chart-bar"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="monthlyExpenses">₵0.00</div>
@@ -1320,7 +1325,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="card savings-card">
                     <div class="card-header">
                         <h3>Total Saved This Month</h3>
-                        <span class="card-icon">🎯</span>
+                        <span class="card-icon"><i class="fas fa-bullseye"></i></span>
                     </div>
                     <div class="card-content">
                         <div class="amount" id="autoSavings">₵0.00</div>
@@ -1332,26 +1337,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <!-- Financial Insights & Advice -->
             <section class="insights-section">
                 <div class="section-header">
-                    <h3>💡 Financial Insights</h3>
-                    <a href="insights.php" class="view-all">View All</a>
+                    <h3><i class="fas fa-lightbulb"></i> Smart Financial Insights</h3>
+                    <a href="report.php" class="view-all">View All Insights</a>
                 </div>
                 <div class="insights-grid" id="insightsGrid">
                     <!-- Dynamic insights will be populated here -->
-                    <div class="insight-card success">
-                        <div class="insight-icon">🎉</div>
+                    <div class="insight-card loading">
+                        <div class="insight-icon">🔄</div>
                         <div class="insight-content">
-                            <h4>Great Saving Habit!</h4>
-                            <p>You're consistently saving 20% of your income. Keep up the excellent work!</p>
-                            <button class="insight-action" onclick="navigateToSavings()">View Savings</button>
-                        </div>
-                    </div>
-                    
-                    <div class="insight-card tip">
-                        <div class="insight-icon">💡</div>
-                        <div class="insight-content">
-                            <h4>Budget Optimization Tip</h4>
-                            <p>Consider reviewing your "Wants" category - you have some room for reallocation.</p>
-                            <button class="insight-action" onclick="navigateToBudget()">Optimize Budget</button>
+                            <h4>Loading Insights...</h4>
+                            <p>Analyzing your financial data to provide personalized insights...</p>
                         </div>
                     </div>
                 </div>
@@ -1368,7 +1363,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="savings-goals" id="savingsGoals">
                         <div class="goal-item">
                             <div class="goal-header">
-                                <span class="goal-name">⏳ Loading goals...</span>
+                                <span class="goal-name"><i class="fas fa-clock"></i> Loading goals...</span>
                                 <span class="goal-interval">Please wait</span>
                             </div>
                             <div class="goal-progress">
@@ -1389,7 +1384,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </div>
                     <div class="transactions-list" id="recentTransactions">
                         <div class="transaction-item">
-                            <div class="transaction-icon">⏳</div>
+                            <div class="transaction-icon"><i class="fas fa-clock"></i></div>
                             <div class="transaction-details">
                                 <div class="transaction-name">Loading transactions...</div>
                                 <div class="transaction-category">Please wait</div>
@@ -1591,7 +1586,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
             <div class="modal-body" id="budgetTemplateViewContent" style="padding: 0 16px 16px 16px;">
                 <div style="text-align:center; padding: 24px 12px; color: var(--text-secondary);">
-                    <div style="font-size: 2rem; margin-bottom: 8px;">⏳</div>
+                    <div style="font-size: 2rem; margin-bottom: 8px;"><i class="fas fa-clock"></i></div>
                     <div>Loading template...</div>
                 </div>
             </div>
@@ -1611,7 +1606,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
             <div class="modal-body">
                 <div class="salary-confirmation-info">
-                    <div class="confirmation-icon">💰</div>
+                    <div class="confirmation-icon"><i class="fas fa-piggy-bank"></i></div>
                     <h4>Did you receive your salary?</h4>
                     <p id="salaryConfirmationDetails">Confirming will add your salary amount to your current balance and update your next pay date.</p>
                 </div>
@@ -1675,6 +1670,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 .then(data => {
                     if (data.success) {
                         updateDashboardUI(data);
+                        // Load enhanced insights after main dashboard data
+                        loadEnhancedInsights();
                     } else {
                         console.error('Failed to load dashboard data:', data.message);
                         showSnackbar('Failed to load dashboard data', 'error');
@@ -1684,6 +1681,93 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     console.error('Error fetching dashboard data:', error);
                     showSnackbar('Error loading dashboard data', 'error');
                 });
+        }
+
+        // Load enhanced insights for the dashboard
+        function loadEnhancedInsights() {
+            fetch('../api/enhanced_insights_data.php?action=dashboard_insights')
+                .then(response => response.json())
+                .then(insights => {
+                    if (insights && Array.isArray(insights)) {
+                        updateDashboardInsights(insights);
+                    } else {
+                        console.error('Invalid insights data:', insights);
+                        showDefaultInsights();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching insights:', error);
+                    showDefaultInsights();
+                });
+        }
+
+        // Update dashboard insights display
+        function updateDashboardInsights(insights) {
+            const insightsGrid = document.getElementById('insightsGrid');
+            if (!insightsGrid) return;
+            
+            let html = '';
+            insights.slice(0, 4).forEach(insight => {
+                html += `
+                    <div class="insight-card ${insight.type}">
+                        <div class="insight-icon">${insight.icon}</div>
+                        <div class="insight-content">
+                            <h4>${insight.title}</h4>
+                            <p>${insight.message}</p>
+                            <button class="insight-action" onclick="window.location.href='${insight.link}'">${insight.action}</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Add "More Insights" card if there are more than 4 insights
+            if (insights.length > 4) {
+                html += `
+                    <div class="insight-card more">
+                        <div class="insight-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div class="insight-content">
+                            <h4>More Insights Available</h4>
+                            <p>Discover ${insights.length - 4} additional insights to optimize your finances.</p>
+                            <button class="insight-action" onclick="window.location.href='insights.php'">View All Insights</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            insightsGrid.innerHTML = html;
+        }
+
+        // Show default insights if enhanced insights fail to load
+        function showDefaultInsights() {
+            const insightsGrid = document.getElementById('insightsGrid');
+            if (!insightsGrid) return;
+            
+            insightsGrid.innerHTML = `
+                <div class="insight-card tip">
+                    <div class="insight-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="insight-content">
+                        <h4>Track Your Progress</h4>
+                        <p>Start tracking your expenses to get personalized financial insights.</p>
+                        <button class="insight-action" onclick="window.location.href='personal-expense.php'">Add Expenses</button>
+                    </div>
+                </div>
+                <div class="insight-card info">
+                    <div class="insight-icon"><i class="fas fa-bullseye"></i></div>
+                    <div class="insight-content">
+                        <h4>Set Financial Goals</h4>
+                        <p>Create savings goals to stay motivated and track your progress.</p>
+                        <button class="insight-action" onclick="window.location.href='savings.php'">Create Goals</button>
+                    </div>
+                </div>
+                <div class="insight-card success">
+                    <div class="insight-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="insight-content">
+                        <h4>Smart Insights Available</h4>
+                        <p>Get AI-powered insights and predictions based on your financial data.</p>
+                        <button class="insight-action" onclick="window.location.href='insights.php'">View Insights</button>
+                    </div>
+                </div>
+            `;
         }
 
         function updateDashboardUI(data) {
@@ -1862,7 +1946,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (!transactions || transactions.length === 0) {
                 transactionsContainer.innerHTML = `
                     <div class="no-transactions">
-                        <div class="no-transactions-icon">📝</div>
+                        <div class="no-transactions-icon"><i class="fas fa-receipt"></i></div>
                         <p>No recent transactions</p>
                         <small>Your recent income and expenses will appear here</small>
                     </div>
@@ -1897,11 +1981,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 // Determine icon and styling based on transaction type
                 let icon, amountClass, amountPrefix;
                 if (isIncome) {
-                    icon = '💰';
+                    icon = '<i class="fas fa-plus-circle"></i>';
                     amountClass = 'income';
                     amountPrefix = '+';
                 } else {
-                    icon = '💸';
+                    icon = '<i class="fas fa-minus-circle"></i>';
                     amountClass = 'expense';
                     amountPrefix = '-';
                 }
@@ -1953,7 +2037,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (!goals || goals.length === 0) {
                 savingsContainer.innerHTML = `
                     <div class="no-goals">
-                        <div class="no-goals-icon">🎯</div>
+                        <div class="no-goals-icon"><i class="fas fa-bullseye"></i></div>
                         <p>No savings goals set</p>
                         <small>Create your first savings goal to track your progress</small>
                         <button class="create-goal-btn" onclick="showCreateGoalModal()">Create Goal</button>
@@ -1970,20 +2054,20 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const targetAmount = goal.target_amount || 0;
                 const remaining = targetAmount - currentAmount;
                 const priorityClass = goal.priority === 'high' ? 'high-priority' : goal.priority === 'medium' ? 'medium-priority' : 'low-priority';
-                const goalEmoji = getGoalEmoji(goal.goal_type);
+                const goalIcon = getGoalIcon(goal.goal_type);
                 let statusIndicator = '';
                 let progressColor = '#10b981';
                 if (progressPercentage >= 100) {
                     statusIndicator = '<span class="goal-status completed">✓ Completed</span>';
                     progressColor = '#059669';
                 } else if (progressPercentage >= 75) {
-                    statusIndicator = '<span class="goal-status on-track">📈 On Track</span>';
+                    statusIndicator = '<span class="goal-status on-track"><i class="fas fa-chart-line"></i> On Track</span>';
                     progressColor = '#10b981';
                 } else if (progressPercentage >= 50) {
-                    statusIndicator = '<span class="goal-status moderate">⚡ In Progress</span>';
+                    statusIndicator = '<span class="goal-status moderate"><i class="fas fa-bolt"></i> In Progress</span>';
                     progressColor = '#f59e0b';
                 } else if (progressPercentage >= 25) {
-                    statusIndicator = '<span class="goal-status slow">⏳ Getting Started</span>';
+                    statusIndicator = '<span class="goal-status slow"><i class="fas fa-clock"></i> Getting Started</span>';
                     progressColor = '#f97316';
                 } else {
                     statusIndicator = '<span class="goal-status behind">🚨 Needs Attention</span>';
@@ -2004,14 +2088,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     </div>
                     <div style="flex:1; min-width:0;">
                         <div class="goal-header" style="margin-bottom:0.2rem;">
-                            <span class="goal-name" style="font-size:1.1rem; font-weight:700;">${goalEmoji} ${escapeHtml(goal.goal_name)}</span>
+                            <span class="goal-name" style="font-size:1.1rem; font-weight:700;">${goalIcon} ${escapeHtml(goal.goal_name)}</span>
                             <span class="goal-interval" style="font-size:0.85rem;">${timeToTarget}</span>
                         </div>
                         <div style="font-size:1.05rem; font-weight:600; color:#222; margin-bottom:0.2rem;">
                             ₵${currentAmount.toLocaleString()} <span style="font-size:0.95rem; font-weight:400; color:#888;">/ ₵${targetAmount.toLocaleString()}</span>
                         </div>
                         <div class="goal-remaining" style="margin-bottom:0.3rem;">
-                            ${remaining > 0 ? `₵${remaining.toLocaleString()} left to reach goal` : 'Goal achieved! 🎉'}
+                            ${remaining > 0 ? `₵${remaining.toLocaleString()} left to reach goal` : 'Goal achieved! <i class="fas fa-trophy"></i>'}
                         </div>
                         <div class="goal-status-section" style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid #e5e7eb;">
                             ${statusIndicator}
@@ -2046,16 +2130,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
         }
 
-        function getGoalEmoji(goalType) {
-            const emojiMap = {
-                'emergency_fund': '🚨',
-                'vacation': '✈️',
-                'car': '🚗',
-                'house': '🏠',
-                'education': '🎓',
-                'other': '💰'
+        function getGoalIcon(goalType) {
+            const iconMap = {
+                'emergency_fund': '<i class="fas fa-shield-alt"></i>',
+                'vacation': '<i class="fas fa-plane"></i>',
+                'car': '<i class="fas fa-car"></i>',
+                'house': '<i class="fas fa-home"></i>',
+                'education': '<i class="fas fa-graduation-cap"></i>',
+                'other': '<i class="fas fa-piggy-bank"></i>'
             };
-            return emojiMap[goalType] || '💰';
+            return iconMap[goalType] || '<i class="fas fa-piggy-bank"></i>';
         }
 
         function addToGoal(goalId) {
@@ -2466,10 +2550,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             snackbar.className = `snackbar ${type}`;
             
             const icons = {
-                success: '✓',
-                error: '✗',
-                warning: '⚠',
-                info: 'ℹ'
+                success: '<i class="fas fa-check-circle"></i>',
+                error: '<i class="fas fa-times-circle"></i>',
+                warning: '<i class="fas fa-exclamation-triangle"></i>',
+                info: '<i class="fas fa-info-circle"></i>'
             };
             
             snackbar.innerHTML = `

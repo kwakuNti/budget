@@ -150,6 +150,7 @@ function updatePercentageCalculation() {
 function enhancedSubmitAddCategory(formData) {
     const budgetInputType = document.querySelector('input[name="budget_input_type"]:checked').value;
     const categoryType = formData.get('category_type');
+    const budgetPeriod = formData.get('budget_period') || 'monthly';
     
     let finalBudgetLimit = 0;
     
@@ -186,8 +187,9 @@ function enhancedSubmitAddCategory(formData) {
     // Use parseFloat and toFixed to ensure proper decimal precision
     const budgetLimitValue = parseFloat(finalBudgetLimit.toFixed(2));
     
-    // Update the form data with calculated amount
+    // Update the form data with calculated amount and budget period
     formData.set('budget_limit', budgetLimitValue.toString());
+    formData.set('budget_period', budgetPeriod);
     
     return budgetLimitValue;
 }
@@ -1498,54 +1500,7 @@ function updateBudgetOverview() {
 }
 
 function updateAppliedTemplateDisplay() {
-    let templateInfoEl = document.getElementById('appliedTemplateInfo');
-    
-    // Create template info element if it doesn't exist
-    if (!templateInfoEl) {
-        templateInfoEl = document.createElement('div');
-        templateInfoEl.id = 'appliedTemplateInfo';
-        templateInfoEl.className = 'applied-template-info';
-        
-        // Insert after budget overview or at the top of the page
-        const overviewSection = document.querySelector('.budget-overview') || document.querySelector('.main-content');
-        if (overviewSection) {
-            overviewSection.appendChild(templateInfoEl);
-        }
-    }
-    
-    // Check if we have allocation data from the API
-    if (budgetAllocation && budgetAllocation.needs_percentage) {
-        const totalIncome = budgetAllocation.total_monthly_income || budgetAllocation.monthly_income || budgetAllocation.monthly_salary || 0;
-        const baseSalary = budgetAllocation.base_salary || 0;
-        const additionalIncome = budgetAllocation.additional_income || 0;
-        
-        let incomeBreakdown = '';
-        if (additionalIncome > 0) {
-            incomeBreakdown = `<small>Salary: ${formatCurrency(baseSalary)} + Additional: ${formatCurrency(additionalIncome)}</small>`;
-        } else {
-            incomeBreakdown = `<small>Based on salary only</small>`;
-        }
-        
-        templateInfoEl.innerHTML = `
-            <div class="template-banner">
-                <div class="template-icon">📊</div>
-                <div class="template-details">
-                    <h4>Active Budget Allocation</h4>
-                    <p>Based on total monthly income of ${formatCurrency(totalIncome)}</p>
-                    ${incomeBreakdown}
-                    <div class="template-allocations">
-                        <span class="allocation needs">Needs: ${budgetAllocation.needs_percentage}% (${formatCurrency(budgetAllocation.needs_amount || 0)})</span>
-                        <span class="allocation wants">Wants: ${budgetAllocation.wants_percentage}% (${formatCurrency(budgetAllocation.wants_amount || 0)})</span>
-                        <span class="allocation savings">Savings: ${budgetAllocation.savings_percentage}% (${formatCurrency(budgetAllocation.savings_amount || 0)})</span>
-                    </div>
-                </div>
-                <button onclick="clearAllocation()" class="clear-template-btn" title="Remove allocation">×</button>
-            </div>
-        `;
-        templateInfoEl.style.display = 'block';
-    } else {
-        templateInfoEl.style.display = 'none';
-    }
+    return true;
 }
 
 function clearAllocation() {
@@ -1938,12 +1893,20 @@ function createCategoryTable(categories) {
         const variance = budgetLimit - spentAmount;
         const percentageUsed = budgetLimit > 0 ? (spentAmount / budgetLimit) * 100 : 0;
         const expenseCount = category.transaction_count || 0;
+        const budgetPeriod = category.budget_period || 'monthly';
+        const displayBudgetLimit = category.display_budget_limit || budgetLimit;
+        const originalBudgetLimit = category.original_budget_limit || budgetLimit;
         
         // Use the new status calculation function
         const statusInfo = getCategoryStatus(spentAmount, budgetLimit);
         const statusClass = getStatusClass(statusInfo.status);
         const statusText = statusInfo.text;
         const varianceClass = variance >= 0 ? 'positive' : 'negative';
+        
+        // Create period indicator
+        const periodIndicator = budgetPeriod === 'weekly' ? 
+            `<small class="period-indicator weekly">Weekly: ${formatCurrency(originalBudgetLimit)}</small>` :
+            `<small class="period-indicator monthly">Monthly</small>`;
         
         tableHTML += `
             <div class="budget-item ${statusInfo.status === 'over_budget' ? 'over-budget' : ''}" data-category-id="${category.id}">
@@ -1952,10 +1915,12 @@ function createCategoryTable(categories) {
                     <div class="item-info">
                         <h5>${category.name}</h5>
                         <p>${expenseCount} transaction${expenseCount !== 1 ? 's' : ''} this month</p>
+                        ${periodIndicator}
                     </div>
                 </div>
                 <div class="col-planned">
                     <span class="editable-amount" onclick="makeEditable(this, ${category.id}, 'budget_limit')">${formatCurrency(budgetLimit)}</span>
+                    <small class="monthly-note">Monthly limit</small>
                 </div>
                 <div class="col-actual">
                     <span class="spent-amount ${statusInfo.status === 'over_budget' ? 'over-budget' : ''}">${formatCurrency(spentAmount)}</span>
@@ -2424,6 +2389,7 @@ function setupFormHandlers() {
                     name: formData.get('name'),
                     category_type: formData.get('category_type'),
                     budget_limit: calculatedBudgetLimit,
+                    budget_period: formData.get('budget_period') || 'monthly',
                     icon: formData.get('icon'),
                     color: formData.get('color')
                 };
