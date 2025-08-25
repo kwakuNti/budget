@@ -15,7 +15,6 @@ class FinancialReportApp {
     }
 
     async init() {
-        console.log('🚀 Initializing Financial Report App');
         
         // Show loading overlay
         this.showLoading();
@@ -38,13 +37,12 @@ class FinancialReportApp {
         // Add periodic chart size monitoring to prevent infinite growth
         this.startChartSizeMonitoring();
         
-        console.log('✅ Financial Report App initialized successfully');
     }
     
+
     startChartSizeMonitoring() {
         // Disabled chart size monitoring as it's causing console warnings
         // Charts are now properly constrained via CSS
-        console.log('Chart size monitoring disabled - using CSS constraints instead');
     }
     
     cleanup() {
@@ -110,7 +108,6 @@ class FinancialReportApp {
 
     async loadAllData() {
         try {
-            console.log('📊 Loading comprehensive financial data...');
             
             // Load comprehensive report data
             const response = await fetch('../api/comprehensive_report_data.php');
@@ -122,7 +119,6 @@ class FinancialReportApp {
             
             if (result.success) {
                 this.data = result.data;
-                console.log('✅ Comprehensive data loaded successfully:', this.data);
                 
                 // Update all UI elements with real data
                 this.updateHeroStats();
@@ -149,9 +145,9 @@ class FinancialReportApp {
     }
 
     updateHeroStats() {
-        const healthScore = this.data.financial_health?.health_score || 87;
-        const totalInsights = this.data.recommendations?.length || 12;
-        const categoriesAnalyzed = Object.keys(this.data.expense_analysis?.category_breakdown || {}).length || 8;
+        const healthScore = this.data.financial_health?.health_score || 0;
+        const totalInsights = this.data.recommendations?.length || 0;
+        const categoriesAnalyzed = Object.keys(this.data.expense_analysis?.category_breakdown || {}).length || 0;
 
         this.updateElement('[data-metric="health-score"]', healthScore);
         this.updateElement('[data-metric="total-insights"]', totalInsights);
@@ -160,8 +156,8 @@ class FinancialReportApp {
 
     updateExecutiveSummary() {
         const healthData = this.data.financial_health || {};
-        const income = healthData.monthly_income || 6500;
-        const expenses = healthData.total_expenses || 4850;
+        const income = healthData.monthly_income || 0;
+        const expenses = healthData.total_expenses || 0;
         const savings = healthData.net_savings || (income - expenses);
         const savingsRate = healthData.savings_rate || 0;
 
@@ -175,16 +171,16 @@ class FinancialReportApp {
         const expenseData = this.data.expense_analysis || {};
         
         this.updateElement('[data-metric="total-income"] + .summary-change', 
-            incomeData.trend_percentage ? `${incomeData.trend_percentage > 0 ? '+' : ''}${incomeData.trend_percentage}%` : '+5.2%');
+            incomeData.trend_percentage ? `${incomeData.trend_percentage > 0 ? '+' : ''}${incomeData.trend_percentage}%` : '0%');
         this.updateElement('[data-metric="total-expenses"] + .summary-change', 
-            expenseData.trend_percentage ? `${expenseData.trend_percentage > 0 ? '+' : ''}${expenseData.trend_percentage}%` : '+2.1%');
-        this.updateElement('[data-metric="net-savings"] + .summary-change', '+12.8%');
-        this.updateElement('[data-metric="savings-rate"] + .summary-change', '+3.4%');
+            expenseData.trend_percentage ? `${expenseData.trend_percentage > 0 ? '+' : ''}${expenseData.trend_percentage}%` : '0%');
+        this.updateElement('[data-metric="net-savings"] + .summary-change', '0%');
+        this.updateElement('[data-metric="savings-rate"] + .summary-change', '0%');
     }
 
     updateFinancialHealth() {
         const healthData = this.data.financial_health || {};
-        const healthScore = healthData.health_score || 87;
+        const healthScore = healthData.health_score || 0;
         
         // Update health score circle
         this.updateHealthScoreCircle(healthScore);
@@ -192,10 +188,10 @@ class FinancialReportApp {
         // Update breakdown scores from real data
         const breakdown = healthData.health_breakdown || {};
         const breakdownScores = {
-            emergency: Math.round(breakdown.emergency_fund_score || 85),
-            expenses: Math.round(breakdown.expense_management_score || 78),
-            savings: Math.round(breakdown.savings_rate_score || 92),
-            goals: Math.round(breakdown.goal_progress_score || 88)
+            emergency: Math.round(breakdown.emergency_fund_score || 0),
+            expenses: Math.round(breakdown.expense_management_score || 0),
+            savings: Math.round(breakdown.savings_rate_score || 0),
+            goals: Math.round(breakdown.goal_progress_score || 0)
         };
 
         Object.entries(breakdownScores).forEach(([key, score]) => {
@@ -293,176 +289,196 @@ class FinancialReportApp {
             this.updateElement('#wantsLabel', `Wants (${wantsPercent}%)`);
             this.updateElement('#savingsLabel', `Savings (${savingsPercent}%)`);
         } else {
-            // Fallback to default 50/30/20
-            this.updateElement('[data-value="needs-percentage"]', '50%');
-            this.updateElement('[data-value="wants-percentage"]', '30%');
-            this.updateElement('[data-value="savings-percentage"]', '20%');
+            // No allocation data available
+            this.updateElement('[data-value="needs-percentage"]', '0%');
+            this.updateElement('[data-value="wants-percentage"]', '0%');
+            this.updateElement('[data-value="savings-percentage"]', '0%');
             
-            this.updateElement('#budgetRuleTitle', '50/30/20 Budget Rule Analysis');
-            this.updateElement('#needsLabel', 'Needs (50%)');
-            this.updateElement('#wantsLabel', 'Wants (30%)');
-            this.updateElement('#savingsLabel', 'Savings (20%)');
+            this.updateElement('#budgetRuleTitle', 'Budget Rule Analysis');
+            this.updateElement('#needsLabel', 'Needs');
+            this.updateElement('#wantsLabel', 'Wants');
+            this.updateElement('#savingsLabel', 'Savings');
         }
     }
 
     updateRecommendations() {
-        const recommendations = this.data.recommendations || [
-            {
-                title: "Build Emergency Fund",
-                description: "Increase your emergency fund to cover 6 months of expenses",
-                icon: "🛡️"
-            },
-            {
-                title: "Optimize Spending",
-                description: "Reduce dining out expenses by 15% to save ₵320/month",
-                icon: "💰"
-            },
-            {
-                title: "Investment Opportunity",
-                description: "Consider investing 10% of income in diversified portfolio",
-                icon: "📈"
-            }
-        ];
+        const recommendations = this.data.recommendations || [];
 
         const container = document.getElementById('healthRecommendations');
         if (container) {
-            container.innerHTML = recommendations.map(rec => `
-                <div class="recommendation-item">
-                    <div class="rec-icon">${rec.icon || '💡'}</div>
-                    <div class="rec-content">
-                        <div class="rec-title">${rec.title}</div>
-                        <div class="rec-description">${rec.description}</div>
+            if (recommendations.length > 0) {
+                container.innerHTML = recommendations.map(rec => `
+                    <div class="recommendation-item">
+                        <div class="rec-icon">${rec.icon || '💡'}</div>
+                        <div class="rec-content">
+                            <div class="rec-title">${rec.title}</div>
+                            <div class="rec-description">${rec.description}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="recommendation-item">
+                        <div class="rec-icon">�</div>
+                        <div class="rec-content">
+                            <div class="rec-title">No recommendations available</div>
+                            <div class="rec-description">Set up your budget and expenses to get personalized recommendations</div>
+                        </div>
+                    </div>
+                `;
+            }
         }
     }
 
     updateInsights() {
         const spendingData = this.data.spending_analytics || {};
-        const peakDay = spendingData.peak_spending_day || 'Friday';
+        const peakDay = spendingData.peak_spending_day || null;
         const expenseData = this.data.expense_analysis || {};
-        const topCategory = expenseData.highest_category?.category || 'Entertainment';
+        const topCategory = expenseData.highest_category?.category || null;
         
-        const insights = [
-            {
+        const insights = [];
+        
+        if (peakDay) {
+            insights.push({
                 title: "Peak Spending Day",
                 description: `You spend the most on ${peakDay}s compared to other weekdays`,
                 icon: "📅"
-            },
-            {
+            });
+        }
+        
+        if (topCategory) {
+            insights.push({
                 title: "Category Alert",
                 description: `${topCategory} expenses are your highest spending category`,
                 icon: "🎭"
-            },
-            {
-                title: "Savings Opportunity",
-                description: "Review subscription services for potential savings",
-                icon: "💡"
-            }
-        ];
+            });
+        }
 
         const container = document.getElementById('spendingInsights');
         if (container) {
-            container.innerHTML = insights.map(insight => `
-                <div class="insight-item">
-                    <div class="insight-icon">${insight.icon}</div>
-                    <div class="insight-content">
-                        <div class="insight-title">${insight.title}</div>
-                        <div class="insight-description">${insight.description}</div>
+            if (insights.length > 0) {
+                container.innerHTML = insights.map(insight => `
+                    <div class="insight-item">
+                        <div class="insight-icon">${insight.icon}</div>
+                        <div class="insight-content">
+                            <div class="insight-title">${insight.title}</div>
+                            <div class="insight-description">${insight.description}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="insight-item">
+                        <div class="insight-icon">📊</div>
+                        <div class="insight-content">
+                            <div class="insight-title">No spending insights available</div>
+                            <div class="insight-description">Add expenses to get personalized insights</div>
+                        </div>
+                    </div>
+                `;
+            }
         }
     }
 
     updateGoals() {
         const goalsData = this.data.goals_progress || {};
-        const goals = goalsData.goals || [
-            {
-                goal_name: "Emergency Fund",
-                current_amount: 8500,
-                target_amount: 15000,
-                progress_percentage: 57
-            },
-            {
-                goal_name: "Vacation Savings",
-                current_amount: 2300,
-                target_amount: 4000,
-                progress_percentage: 58
-            },
-            {
-                goal_name: "New Car",
-                current_amount: 12000,
-                target_amount: 25000,
-                progress_percentage: 48
-            }
-        ];
+        const goals = goalsData.goals || [];
 
         const container = document.getElementById('goalsList');
         if (container) {
-            container.innerHTML = goals.map(goal => `
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-name">${goal.goal_name}</span>
-                        <span class="goal-progress">${Math.round(goal.progress_percentage)}%</span>
+            if (goals.length > 0) {
+                container.innerHTML = goals.map(goal => `
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-name">${goal.goal_name}</span>
+                            <span class="goal-progress">${Math.round(goal.progress_percentage)}%</span>
+                        </div>
+                        <div class="goal-bar">
+                            <div class="goal-fill" style="width: ${goal.progress_percentage}%"></div>
+                        </div>
+                        <div class="goal-details-text">
+                            <span class="goal-current">₵${parseFloat(goal.current_amount).toLocaleString()}</span>
+                            <span class="goal-target">/ ₵${parseFloat(goal.target_amount).toLocaleString()}</span>
+                        </div>
                     </div>
-                    <div class="goal-bar">
-                        <div class="goal-fill" style="width: ${goal.progress_percentage}%"></div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="goal-item">
+                        <div class="goal-header">
+                            <span class="goal-name">No goals set</span>
+                            <span class="goal-progress">0%</span>
+                        </div>
+                        <div class="goal-bar">
+                            <div class="goal-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="goal-details-text">
+                            <span class="goal-current">Create goals to track your progress</span>
+                        </div>
                     </div>
-                    <div class="goal-details-text">
-                        <span class="goal-current">₵${parseFloat(goal.current_amount).toLocaleString()}</span>
-                        <span class="goal-target">/ ₵${parseFloat(goal.target_amount).toLocaleString()}</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }
         }
     }
 
     updatePredictions() {
         const forecastData = this.data.trends_forecasts || {};
-        const incomeData = this.data.income_analysis || {};
-        const expenseData = this.data.expense_analysis || {};
         
-        const predictions = [
-            {
+        const predictions = [];
+        
+        if (forecastData.savings_forecast) {
+            predictions.push({
                 title: "6-Month Savings Projection",
-                confidence: `Based on current trend: ${forecastData.savings_forecast?.confidence || 'High'} Confidence`,
+                confidence: `Based on current trend: ${forecastData.savings_forecast?.confidence || 'Unknown'} Confidence`,
                 icon: "📊"
-            },
-            {
-                title: "Emergency Fund Complete",
-                confidence: `Est. completion timeline available`,
-                icon: "🎯"
-            },
-            {
-                title: "Income Trend Analysis",
-                confidence: `${forecastData.income_forecast?.trend || 'Stable'} pattern detected`,
+            });
+        }
+        
+        if (forecastData.income_forecast) {
+            predictions.push({
+                title: "Income Trend Analysis", 
+                confidence: `${forecastData.income_forecast?.trend || 'Unknown'} pattern detected`,
                 icon: "📈"
-            }
-        ];
+            });
+        }
 
         const container = document.getElementById('aiPredictions');
         if (container) {
-            container.innerHTML = predictions.map(pred => `
-                <div class="prediction-item">
-                    <div class="pred-icon">${pred.icon}</div>
-                    <div class="pred-content">
-                        <div class="pred-title">${pred.title}</div>
-                        <div class="pred-confidence">${pred.confidence}</div>
+            if (predictions.length > 0) {
+                container.innerHTML = predictions.map(pred => `
+                    <div class="prediction-item">
+                        <div class="pred-icon">${pred.icon}</div>
+                        <div class="pred-content">
+                            <div class="pred-title">${pred.title}</div>
+                            <div class="pred-confidence">${pred.confidence}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="prediction-item">
+                        <div class="pred-icon">🔄</div>
+                        <div class="pred-content">
+                            <div class="pred-title">No predictions available</div>
+                            <div class="pred-confidence">Add more financial data to generate predictions</div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // Update scenario values using real data
-        const monthlyIncome = this.data.financial_health?.monthly_income || 6500;
-        const monthlyExpenses = this.data.financial_health?.total_expenses || 4850;
+        const monthlyIncome = this.data.financial_health?.monthly_income || 0;
+        const monthlyExpenses = this.data.financial_health?.total_expenses || 0;
         
-        this.updateElement('[data-scenario="reduce-expenses"]', `+₵${Math.round(monthlyExpenses * 0.1)}/month`);
-        this.updateElement('[data-scenario="increase-income"]', `+₵${Math.round(monthlyIncome * 0.05)}/month`);
+        this.updateElement('[data-scenario="reduce-expenses"]', 
+            monthlyExpenses > 0 ? `+₵${Math.round(monthlyExpenses * 0.1)}/month` : '₵0/month');
+        this.updateElement('[data-scenario="increase-income"]', 
+            monthlyIncome > 0 ? `+₵${Math.round(monthlyIncome * 0.05)}/month` : '₵0/month');
         this.updateElement('[data-scenario="emergency-fund"]', 
-            `${Math.round((monthlyExpenses * 6) / (monthlyIncome - monthlyExpenses))} months`);
+            (monthlyExpenses > 0 && monthlyIncome > monthlyExpenses) ? 
+                `${Math.round((monthlyExpenses * 6) / (monthlyIncome - monthlyExpenses))} months` : 
+                'N/A');
     }
 
     updateBenchmarks() {
@@ -470,15 +486,15 @@ class FinancialReportApp {
         
         const benchmarks = {
             'savings-rate': { 
-                your: benchmarkData.savings_rate?.your_rate || 25, 
+                your: benchmarkData.savings_rate?.your_rate || 0, 
                 avg: benchmarkData.savings_rate?.average || 15 
             },
             'emergency-fund': { 
-                your: benchmarkData.emergency_fund?.your_months || 4.2, 
+                your: benchmarkData.emergency_fund?.your_months || 0, 
                 avg: benchmarkData.emergency_fund?.minimum || 3 
             },
             'expense-ratio': { 
-                your: benchmarkData.expense_ratio?.your_ratio || 75, 
+                your: benchmarkData.expense_ratio?.your_ratio || 0, 
                 avg: benchmarkData.expense_ratio?.average || 70 
             }
         };
@@ -512,67 +528,45 @@ class FinancialReportApp {
             optimization: recommendations.filter(r => r.priority === 'low')
         };
 
-        // Add default items if no recommendations available
-        if (actionItems.high.length === 0) {
-            actionItems.high = [
-                {
-                    title: "Review and optimize high-expense categories",
-                    description: "Focus on reducing dining and entertainment costs",
-                    impact: "Save ₵400+/month"
-                }
-            ];
-        }
-
-        if (actionItems.medium.length === 0) {
-            actionItems.medium = [
-                {
-                    title: "Negotiate subscription services",
-                    description: "Review and cancel unused subscriptions",
-                    impact: "Save ₵150/month"
-                }
-            ];
-        }
-
-        if (actionItems.optimization.length === 0) {
-            actionItems.optimization = [
-                {
-                    title: "Implement 24-hour purchase rule",
-                    description: "Wait 24 hours before non-essential purchases",
-                    impact: "Reduce impulse buying"
-                }
-            ];
-        }
-
         Object.entries(actionItems).forEach(([priority, items]) => {
             const containerId = priority === 'high' ? 'highPriorityActions' :
                                priority === 'medium' ? 'mediumPriorityActions' : 'optimizationActions';
             const container = document.getElementById(containerId);
             
             if (container) {
-                container.innerHTML = items.map((item, index) => `
-                    <div class="action-item">
-                        <div class="action-checkbox">
-                            <input type="checkbox" id="${priority}_action_${index}">
-                            <label for="${priority}_action_${index}"></label>
+                if (items.length > 0) {
+                    container.innerHTML = items.map((item, index) => `
+                        <div class="action-item">
+                            <div class="action-checkbox">
+                                <input type="checkbox" id="${priority}_action_${index}">
+                                <label for="${priority}_action_${index}"></label>
+                            </div>
+                            <div class="action-content">
+                                <div class="action-title">${item.title}</div>
+                                <div class="action-description">${item.description || item.action}</div>
+                                <div class="action-impact">Impact: ${item.impact}</div>
+                            </div>
                         </div>
-                        <div class="action-content">
-                            <div class="action-title">${item.title}</div>
-                            <div class="action-description">${item.description || item.action}</div>
-                            <div class="action-impact">Impact: ${item.impact}</div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="action-item">
+                            <div class="action-content">
+                                <div class="action-title">No ${priority} priority actions</div>
+                                <div class="action-description">Complete your financial profile to get personalized recommendations</div>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }
             }
         });
     }
 
     initializeAllCharts() {
         if (this.chartsInitialized) {
-            console.log('📈 Charts already initialized, skipping...');
             return;
         }
         
-        console.log('📈 Initializing all charts...');
         
         // Initialize each chart with error handling
         this.safeInitChart('incomeExpenseChart', () => this.initIncomeExpenseChart());
@@ -608,7 +602,6 @@ class FinancialReportApp {
             }
             
             initFunction();
-            console.log(`✅ ${chartId} initialized successfully`);
             
             // Double-check canvas size after initialization
             if (canvas) {
@@ -649,8 +642,12 @@ class FinancialReportApp {
                 expenses: incomeMonths.map(month => expenseMap[month.month] || 0)
             };
         } else {
-            // Fallback to generated data
-            monthlyData = this.generateMonthlyTrendData();
+            // No real data available - show empty chart or message
+            monthlyData = {
+                labels: [],
+                income: [],
+                expenses: []
+            };
         }
         
         this.charts.incomeExpense = new Chart(ctx, {
@@ -721,10 +718,10 @@ class FinancialReportApp {
             wantsPercent = parseInt(userAllocation.wants_percentage) || 30;
             savingsPercent = parseInt(userAllocation.savings_percentage) || 20;
         } else {
-            // Fallback to defaults
-            needsPercent = 50;
-            wantsPercent = 30;
-            savingsPercent = 20;
+            // No allocation data available - show empty chart
+            needsPercent = 0;
+            wantsPercent = 0;
+            savingsPercent = 0;
         }
 
         this.charts.budgetBreakdown = new Chart(ctx, {
@@ -772,9 +769,9 @@ class FinancialReportApp {
             categoryLabels = categoryBreakdown.map(cat => cat.category);
             categoryData = categoryBreakdown.map(cat => parseFloat(cat.total_amount));
         } else {
-            // Fallback data
-            categoryLabels = ['Food', 'Transportation', 'Entertainment', 'Utilities', 'Shopping', 'Healthcare', 'Other'];
-            categoryData = [1200, 800, 600, 450, 380, 320, 250];
+            // No data available - show empty chart
+            categoryLabels = [];
+            categoryData = [];
         }
 
         this.charts.spendingDistribution = new Chart(ctx, {
@@ -836,8 +833,8 @@ class FinancialReportApp {
                 return dayData ? parseFloat(dayData.avg_amount) : 0;
             });
         } else {
-            // Friday typically higher spending (fallback)
-            weeklyData = [120, 95, 110, 130, 185, 220, 160];
+            // No data available - show empty chart
+            weeklyData = [0, 0, 0, 0, 0, 0, 0];
         }
 
         this.charts.weeklySpending = new Chart(ctx, {
@@ -913,15 +910,10 @@ class FinancialReportApp {
                 return colorList[index % colorList.length];
             });
         } else {
-            // Fallback data
-            labels = ['Emergency Fund', 'Vacation', 'New Car', 'Investment'];
-            data = [57, 58, 48, 23];
-            colors = [
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(139, 92, 246, 0.8)',
-                'rgba(245, 158, 11, 0.8)'
-            ];
+            // No data available - show empty chart
+            labels = [];
+            data = [];
+            colors = [];
         }
 
         this.charts.goalsProgress = new Chart(ctx, {
@@ -980,7 +972,11 @@ class FinancialReportApp {
                 values: monthlySavings.map(month => parseFloat(month.cumulative_savings || month.net_savings))
             };
         } else {
-            growthData = this.generateSavingsGrowthData();
+            // No data available - show empty chart
+            growthData = {
+                labels: [],
+                values: []
+            };
         }
 
         this.charts.savingsGrowth = new Chart(ctx, {
@@ -1027,23 +1023,31 @@ class FinancialReportApp {
         const ctx = document.getElementById('forecastChart');
         if (!ctx) return;
 
-        const forecastData = this.generateForecastData();
+        // Use real forecast data if available
+        const forecastData = this.data.trends_forecasts || {};
+        
+        // For now, show empty chart until proper forecast data is available
+        const chartData = {
+            labels: [],
+            historical: [],
+            projected: []
+        };
 
         this.charts.forecast = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: forecastData.labels,
+                labels: chartData.labels,
                 datasets: [
                     {
                         label: 'Historical',
-                        data: forecastData.historical,
+                        data: chartData.historical,
                         borderColor: 'rgb(59, 130, 246)',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         tension: 0.4
                     },
                     {
                         label: 'Projected',
-                        data: forecastData.projected,
+                        data: chartData.projected,
                         borderColor: 'rgb(139, 92, 246)',
                         backgroundColor: 'rgba(139, 92, 246, 0.1)',
                         borderDash: [5, 5],
@@ -1082,6 +1086,22 @@ class FinancialReportApp {
         const ctx = document.getElementById('benchmarkChart');
         if (!ctx) return;
 
+        // Use real benchmark data if available
+        const benchmarkData = this.data.benchmarks || {};
+        
+        let userPerformance = [0, 0, 0, 0, 0];
+        let averagePerformance = [65, 50, 70, 45, 75]; // Industry averages
+        
+        if (benchmarkData.savings_rate) {
+            userPerformance[0] = benchmarkData.savings_rate.your_rate || 0;
+        }
+        if (benchmarkData.emergency_fund) {
+            userPerformance[1] = (benchmarkData.emergency_fund.your_months || 0) * 16.67; // Convert to percentage
+        }
+        if (benchmarkData.expense_ratio) {
+            userPerformance[2] = Math.max(0, 100 - (benchmarkData.expense_ratio.your_ratio || 100));
+        }
+
         this.charts.benchmark = new Chart(ctx, {
             type: 'radar',
             data: {
@@ -1089,14 +1109,14 @@ class FinancialReportApp {
                 datasets: [
                     {
                         label: 'Your Performance',
-                        data: [85, 70, 90, 60, 88],
+                        data: userPerformance,
                         borderColor: 'rgb(59, 130, 246)',
                         backgroundColor: 'rgba(59, 130, 246, 0.2)',
                         pointBackgroundColor: 'rgb(59, 130, 246)'
                     },
                     {
                         label: 'Average',
-                        data: [65, 50, 70, 45, 75],
+                        data: averagePerformance,
                         borderColor: 'rgb(156, 163, 175)',
                         backgroundColor: 'rgba(156, 163, 175, 0.1)',
                         pointBackgroundColor: 'rgb(156, 163, 175)'
@@ -1124,45 +1144,6 @@ class FinancialReportApp {
         });
     }
 
-    // Data generation helpers
-    generateMonthlyTrendData() {
-        const months = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const baseIncome = 6500;
-        const baseExpenses = 4850;
-        
-        return {
-            labels: months,
-            income: months.map(() => baseIncome + (Math.random() * 400 - 200)),
-            expenses: months.map(() => baseExpenses + (Math.random() * 600 - 300))
-        };
-    }
-
-    generateWeeklySpendingData() {
-        // Friday typically higher spending
-        return [120, 95, 110, 130, 185, 220, 160];
-    }
-
-    generateSavingsGrowthData() {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        let balance = 15000;
-        const values = [balance];
-        
-        for (let i = 1; i < months.length; i++) {
-            balance += 800 + (Math.random() * 400 - 200);
-            values.push(balance);
-        }
-        
-        return { labels: months, values };
-    }
-
-    generateForecastData() {
-        const labels = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'];
-        const historical = [15000, 15800, 16200, null, null, null, null];
-        const projected = [null, null, 16200, 17000, 17850, 18600, 19400];
-        
-        return { labels, historical, projected };
-    }
-
     // Utility functions
     updateElement(selector, content, callback = null) {
         const element = document.querySelector(selector);
@@ -1186,7 +1167,6 @@ class FinancialReportApp {
     updateChartThemes() {
         // This would update chart colors based on theme
         // Implementation depends on specific color requirements
-        console.log(`🎨 Updating charts for ${this.currentTheme} theme`);
     }
 
     exportReport() {
@@ -1320,7 +1300,6 @@ class FinancialReportApp {
     }
 
     async exportToPDF() {
-        console.log('📄 Exporting report to PDF...');
         
         try {
             // Wait for any pending animations or dynamic content
@@ -1397,15 +1376,12 @@ class FinancialReportApp {
 
             const today = new Date().toISOString().split('T')[0];
             pdf.save(`financial-report-${today}.pdf`);
-            console.log('✅ PDF exported successfully');
         } catch (error) {
-            console.error('❌ Error exporting PDF:', error);
             alert('Error exporting PDF. Please try again.');
         }
     }
 
     async exportToExcel() {
-        console.log('📊 Exporting to Excel...');
         
         try {
             // Prepare data for Excel export
@@ -1458,7 +1434,6 @@ class FinancialReportApp {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            console.log('✅ Excel export completed');
         } catch (error) {
             console.error('❌ Error exporting to Excel:', error);
             alert('Error exporting to Excel. Please try again.');
@@ -1466,7 +1441,6 @@ class FinancialReportApp {
     }
 
     async exportToCSV() {
-        console.log('📄 Exporting to CSV...');
         
         try {
             let csvContent = "Financial Report CSV Export\n\n";
@@ -1502,7 +1476,6 @@ class FinancialReportApp {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            console.log('✅ CSV export completed');
         } catch (error) {
             console.error('❌ Error exporting to CSV:', error);
             alert('Error exporting to CSV. Please try again.');
@@ -1510,7 +1483,6 @@ class FinancialReportApp {
     }
 
     async refreshData() {
-        console.log('🔄 Refreshing all data...');
         this.showLoading();
         
         try {
@@ -1522,7 +1494,6 @@ class FinancialReportApp {
             this.updateFinancialHealth();
             this.updateRecommendations();
             
-            console.log('✅ Data refreshed successfully');
         } catch (error) {
             console.error('❌ Error refreshing data:', error);
         } finally {

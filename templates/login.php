@@ -79,18 +79,7 @@
                 </p>
             </div>
 
-            <!-- Demo Credentials -->
-            <div class="demo-credentials">
-                <p class="demo-title">Demo Credentials:</p>
-                <div class="demo-options">
-                    <button class="demo-btn" onclick="fillDemoCredentials('family')">
-                        👨‍👩‍👧‍👦 Family Dashboard
-                    </button>
-                    <button class="demo-btn" onclick="fillDemoCredentials('personal')">
-                        👤 Personal Dashboard
-                    </button>
-                </div>
-            </div>
+            
         </div>
     </div>
 

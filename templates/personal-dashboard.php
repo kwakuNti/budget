@@ -32,6 +32,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Dashboard </title>
     <link rel="stylesheet" href="../public/css/personal.css">
+    <link rel="stylesheet" href="../public/css/walkthrough.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -1215,11 +1216,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
                 ?></div>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="profile.php">Profile Settings</a>
-                    <a href="income-sources.php">Income Sources</a>
-                    <a href="categories.php">Categories</a>
-                    <hr>
-                    <a href="family-dashboard.php">Switch to Family</a>
+                    <!-- <a href="profile.php">Profile Settings</a> -->
+                    <!-- <a href="income-sources.php">Income Sources</a> -->
+                    <!-- <a href="categories.php">Categories</a> -->
+                    <!-- <hr> -->
+                    <!-- <a href="family-dashboard.php">Switch to Family</a> -->
                     <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
@@ -1471,59 +1472,81 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <!-- Add Income Modal -->
     <div id="addIncomeModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Income</h3>
-                <span class="close" onclick="closeModal('addIncomeModal')">&times;</span>
+        <div class="modal-content wide-modal">
+            <div class="modal-header gradient-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h3>Add New Income Source</h3>
+                        <p>Track your earnings and boost your financial growth</p>
+                    </div>
+                </div>
+                <span class="close modern-close" onclick="closeModal('addIncomeModal')">&times;</span>
             </div>
-            <form class="modal-form">
-                <div class="form-group">
-                    <label>Source Name</label>
-                    <input type="text" name="sourceName" placeholder="e.g., Freelance Work, Side Business" required>
+            <form class="modal-form compact-form">
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Source Name</label>
+                        <input type="text" name="sourceName" placeholder="e.g., Freelance Work, Side Business" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-money-bill-wave"></i> Amount (₵)</label>
+                        <input type="number" name="monthlyAmount" step="0.01" placeholder="0.00" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Amount (₵)</label>
-                    <input type="number" name="monthlyAmount" step="0.01" placeholder="0.00" required>
+                
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-briefcase"></i> Income Type</label>
+                        <select name="incomeType" required>
+                            <option value="">Select type</option>
+                            <option value="salary">💼 Salary</option>
+                            <option value="freelance">💻 Freelance</option>
+                            <option value="side-business">🏪 Side Business</option>
+                            <option value="part-time">⏰ Part-time Job</option>
+                            <option value="investment">📈 Investment</option>
+                            <option value="rental">🏠 Rental Income</option>
+                            <option value="bonus">🎁 Bonus</option>
+                            <option value="other">📋 Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Payment Frequency</label>
+                        <select name="paymentFrequency">
+                            <option value="monthly">📅 Monthly</option>
+                            <option value="bi-weekly">🗓️ Bi-weekly</option>
+                            <option value="weekly">📆 Weekly</option>
+                            <option value="quarterly">📊 Quarterly</option>
+                            <option value="annual">📈 Annual</option>
+                            <option value="variable">🔄 Variable</option>
+                            <option value="one-time">🔘 One-time</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Income Type</label>
-                    <select name="incomeType" required>
-                        <option value="">Select type</option>
-                        <option value="salary">Salary</option>
-                        <option value="freelance">Freelance</option>
-                        <option value="side-business">Side Business</option>
-                        <option value="part-time">Part-time Job</option>
-                        <option value="investment">Investment</option>
-                        <option value="rental">Rental Income</option>
-                        <option value="bonus">Bonus</option>
-                        <option value="other">Other</option>
-                    </select>
+                
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-file-alt"></i> Description (Optional)</label>
+                        <input type="text" name="description" placeholder="Additional details about this income source">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="includeInBudget" checked>
+                            <span class="checkmark"></span>
+                            Include in budget calculations
+                        </label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Payment Frequency</label>
-                    <select name="paymentFrequency">
-                        <option value="monthly">Monthly</option>
-                        <option value="bi-weekly">Bi-weekly</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="annual">Annual</option>
-                        <option value="variable">Variable</option>
-                        <option value="one-time">One-time</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Description (Optional)</label>
-                    <input type="text" name="description" placeholder="Additional details">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" name="includeInBudget" checked>
-                        Include in budget calculations
-                    </label>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addIncomeModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Income</button>
+                
+                <div class="modal-actions modern-actions">
+                    <button type="button" class="btn-secondary modern-btn" onclick="closeModal('addIncomeModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary modern-btn">
+                        <i class="fas fa-plus-circle"></i> Add Income
+                    </button>
                 </div>
             </form>
         </div>
@@ -1531,47 +1554,68 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <!-- Add Expense Modal -->
     <div id="addExpenseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add Expense</h3>
-                <span class="close" onclick="closeModal('addExpenseModal')">&times;</span>
+        <div class="modal-content wide-modal">
+            <div class="modal-header gradient-header expense-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon expense-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h3>Record New Expense</h3>
+                        <p>Keep track of your spending and stay within budget</p>
+                    </div>
+                </div>
+                <span class="close modern-close" onclick="closeModal('addExpenseModal')">&times;</span>
             </div>
-            <form class="modal-form">
-                <div class="form-group">
-                    <label>Amount (₵)</label>
-                    <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+            <form class="modal-form compact-form">
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-money-bill-wave"></i> Amount (₵)</label>
+                        <input type="number" name="amount" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Date</label>
+                        <input type="date" name="expense_date" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Budget Category</label>
-                    <select name="category_id" required>
-                        <option value="">Loading categories...</option>
-                    </select>
+                
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-tags"></i> Budget Category</label>
+                        <select name="category_id" required>
+                            <option value="">Loading categories...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                        <select name="payment_method">
+                            <option value="cash">💵 Cash</option>
+                            <option value="card">💳 Card</option>
+                            <option value="mobile_money">📱 Mobile Money</option>
+                            <option value="bank_transfer">🏦 Bank Transfer</option>
+                            <option value="cheque">📄 Cheque</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" name="description" placeholder="What was this for?" required>
+                
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-edit"></i> Description</label>
+                        <input type="text" name="description" placeholder="What was this for?" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> Notes (Optional)</label>
+                        <input type="text" name="notes" placeholder="Additional notes">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" name="expense_date" required>
-                </div>
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select name="payment_method">
-                        <option value="cash">Cash</option>
-                        <option value="card">Card</option>
-                        <option value="mobile_money">Mobile Money</option>
-                        <option value="bank_transfer">Bank Transfer</option>
-                        <option value="cheque">Cheque</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Notes (Optional)</label>
-                    <input type="text" name="notes" placeholder="Additional notes">
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addExpenseModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Expense</button>
+                
+                <div class="modal-actions modern-actions">
+                    <button type="button" class="btn-secondary modern-btn" onclick="closeModal('addExpenseModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary modern-btn expense-btn">
+                        <i class="fas fa-plus-circle"></i> Record Expense
+                    </button>
                 </div>
             </form>
         </div>
@@ -2377,7 +2421,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function confirmSalaryFromDashboard() {
-            console.log('Dashboard: Confirming salary received...');
             
             // Update button state
             const confirmBtn = document.querySelector('#salaryPaidModal .btn-primary');
@@ -2396,7 +2439,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 })
                 .then(response => response.json())
                 .then(result => {
-                    console.log('Salary confirmation result:', result);
                     
                     if (result.success) {
                         showSnackbar(result.message, 'success');
@@ -3052,5 +3094,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
         </div>
     </div>
+    
+    <!-- Walkthrough System Scripts -->
+    <script src="../public/js/walkthrough.js"></script>
 </body>
 </html>

@@ -95,16 +95,10 @@ CREATE TABLE IF NOT EXISTS personal_goal_allocation_rules (
 
 -- Add progress tracking to personal_goals
 ALTER TABLE personal_goals 
-ADD COLUMN IF NOT EXISTS current_amount DECIMAL(10,2) DEFAULT 0.00;
+ADD COLUMN current_amount DECIMAL(10,2) DEFAULT 0.00;
 
--- Update existing goals progress
-UPDATE personal_goals pg
-SET current_amount = COALESCE((
-    SELECT SUM(pgc.amount) 
-    FROM personal_goal_contributions pgc 
-    WHERE pgc.goal_id = pg.id
-), 0)
-WHERE pg.target_amount > 0;
+
+
 
 -- Create default global auto-save settings for existing users
 INSERT IGNORE INTO personal_goal_autosave (user_id, goal_id, enabled, trigger_salary, save_type, save_percentage)
@@ -220,6 +214,14 @@ CREATE TABLE IF NOT EXISTS personal_goal_contributions (
     INDEX idx_user_contributions (user_id, contribution_date)
 );
 
+-- Update existing goals progress
+UPDATE personal_goals pg
+SET current_amount = COALESCE((
+    SELECT SUM(pgc.amount) 
+    FROM personal_goal_contributions pgc 
+    WHERE pgc.goal_id = pg.id
+), 0)
+WHERE pg.target_amount > 0;
 -- ============================================================================
 -- 4. AUTO-SAVE HISTORY TABLE
 -- ============================================================================
@@ -420,6 +422,84 @@ WHERE u.user_type = 'personal';
 -- ============================================================================
 -- COMPLETION MESSAGE
 -- ============================================================================
+
+-- ============================================================================
+-- 12. USER WALKTHROUGH SYSTEM
+-- ============================================================================
+
+-- User walkthrough progress tracking
+CREATE TABLE IF NOT EXISTS user_walkthrough_progress (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    walkthrough_type ENUM('initial_setup', 'new_feature', 'help_guide') DEFAULT 'initial_setup',
+    current_step VARCHAR(50) NOT NULL,
+    steps_completed JSON NULL, -- no default, handle in app
+    is_completed BOOLEAN DEFAULT FALSE,
+    can_skip BOOLEAN DEFAULT FALSE,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    last_shown_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_walkthrough (user_id, walkthrough_type),
+    INDEX idx_walkthrough_progress (user_id, walkthrough_type, is_completed)
+);
+
+-- Walkthrough step definitions
+CREATE TABLE IF NOT EXISTS walkthrough_steps (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    walkthrough_type ENUM('initial_setup', 'new_feature', 'help_guide') NOT NULL,
+    step_name VARCHAR(50) NOT NULL,
+    step_order INT NOT NULL,
+    page_url VARCHAR(255) NOT NULL,
+    target_element VARCHAR(255) NOT NULL, -- CSS selector for the element to highlight
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    action_required BOOLEAN DEFAULT TRUE, -- Whether user must perform action to continue
+    can_skip BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    UNIQUE KEY unique_step (walkthrough_type, step_name),
+    INDEX idx_walkthrough_order (walkthrough_type, step_order, is_active)
+);
+
+-- Insert initial setup walkthrough steps
+INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
+('initial_setup', 'setup_income', 1, 'templates/personal-dashboard.php', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click "Set Up Income" to begin.', TRUE, FALSE),
+('initial_setup', 'configure_salary', 2, 'templates/salary.php', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. This will help us calculate your available budget and auto-save for your goals.', TRUE, FALSE),
+('initial_setup', 'setup_budget', 3, 'templates/budget.php', 'button[onclick="showBudgetTemplateModal()"]', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can click "Use Template" to choose from our popular templates, or you can skip this step to create a custom budget later.', FALSE, TRUE);
+
+-- Insert page-specific help tours with reliable target elements
+INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
+-- Dashboard page tour
+('help_guide', 'dashboard_overview', 1, 'templates/personal-dashboard.php', '.main-content', 'Welcome to Your Dashboard', 'This is your personal finance dashboard. Here you can see your financial overview, track goals, and manage your budget.', FALSE, TRUE),
+('help_guide', 'dashboard_navigation', 2, 'templates/personal-dashboard.php', '.header-nav', 'Navigation Menu', 'Use the navigation menu to access different sections: Dashboard, Budget, Expenses, Salary, Goals, and Analytics.', FALSE, TRUE),
+('help_guide', 'dashboard_actions', 3, 'templates/personal-dashboard.php', '.quick-actions', 'Quick Actions', 'Use these quick action buttons to add expenses, income, or access key features quickly.', FALSE, TRUE),
+
+-- Budget page tour  
+('help_guide', 'budget_overview', 1, 'templates/budget.php', '.page-header', 'Budget Management', 'This is where you manage your budget categories and allocations. You can create templates or custom budgets.', FALSE, TRUE),
+('help_guide', 'budget_templates', 2, 'templates/budget.php', '.template-section', 'Budget Templates', 'Choose from popular budget templates like 50/30/20 rule, envelope method, or zero-based budgeting.', FALSE, TRUE),
+('help_guide', 'budget_categories', 3, 'templates/budget.php', '.budget-categories', 'Budget Categories', 'View and manage your spending categories. Set limits for each category to stay within your budget.', FALSE, TRUE),
+
+-- Salary page tour
+('help_guide', 'salary_overview', 1, 'templates/salary.php', '.page-header', 'Income Management', 'Set up and manage your income sources here. This is essential for accurate budget planning.', FALSE, TRUE),
+('help_guide', 'salary_setup', 2, 'templates/salary.php', '#salaryActionBtn', 'Set Up Salary', 'Click here to configure your primary salary. Include your monthly amount and pay frequency.', FALSE, TRUE),
+('help_guide', 'salary_schedule', 3, 'templates/salary.php', '.salary-overview', 'Payment Schedule', 'View your upcoming payments and manage additional income sources if you have multiple income streams.', FALSE, TRUE),
+
+-- Expenses page tour
+('help_guide', 'expenses_overview', 1, 'templates/personal-expense.php', '.page-header', 'Expense Tracking', 'Track your daily expenses here. Categorize spending to see where your money goes.', FALSE, TRUE),
+('help_guide', 'expenses_add', 2, 'templates/personal-expense.php', '.page-actions', 'Add Expense', 'Click to add a new expense. Choose the category and amount to keep your budget on track.', FALSE, TRUE),
+('help_guide', 'expenses_categories', 3, 'templates/personal-expense.php', '.main-content', 'Expense Categories', 'View your expenses organized by categories to understand your spending patterns.', FALSE, TRUE),
+
+-- Savings page tour
+('help_guide', 'savings_overview', 1, 'templates/savings.php', '.page-header', 'Savings Goals', 'Set and track progress towards your financial goals. Whether it\'s an emergency fund, vacation, or major purchase.', FALSE, TRUE),
+('help_guide', 'savings_create', 2, 'templates/savings.php', '.page-actions', 'Create Goal', 'Click to create a new savings goal. Set your target amount and deadline.', FALSE, TRUE),
+('help_guide', 'savings_autosave', 3, 'templates/savings.php', '.auto-save-section', 'Auto-Save System', 'Configure automatic savings to reach your goals faster with smart allocation rules.', FALSE, TRUE),
+
+-- Reports page tour
+('help_guide', 'reports_overview', 1, 'templates/report.php', '.page-header', 'Financial Reports', 'View detailed reports and analytics about your spending patterns and financial health.', FALSE, TRUE),
+('help_guide', 'reports_insights', 2, 'templates/report.php', '.main-content', 'Financial Insights', 'Get personalized insights and recommendations to improve your financial habits.', FALSE, TRUE);
 
 -- ============================================================================
 -- 11. USER FEEDBACK SYSTEM

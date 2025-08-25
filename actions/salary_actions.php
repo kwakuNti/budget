@@ -409,9 +409,9 @@ function updateBudgetAllocation($conn, $userId) {
                 'total_monthly_income' => $totalMonthlyIncome,
                 'base_salary' => $monthlySalary,
                 'additional_income' => ($additionalResult['total_additional_income'] ?? 0),
-                'needs_amount' => round($totalMonthlyIncome * $needsPercent / 100, 2),
-                'wants_amount' => round($totalMonthlyIncome * $wantsPercent / 100, 2),
-                'savings_amount' => round($totalMonthlyIncome * $savingsPercent / 100, 2)
+                'needs_amount' => round($totalMonthlyIncome * $needsPercent * 100) / 10000,
+                'wants_amount' => round($totalMonthlyIncome * $wantsPercent * 100) / 10000,
+                'savings_amount' => round($totalMonthlyIncome * $savingsPercent * 100) / 10000
             ]
         ]);
         

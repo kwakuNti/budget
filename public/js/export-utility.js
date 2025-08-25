@@ -69,7 +69,6 @@ class ExportUtility {
                 quality = 2
             } = options;
 
-            console.log(`📄 Exporting ${title} to PDF...`);
 
             // Show loading indicator
             this.showExportLoading('Generating PDF...');
@@ -168,7 +167,6 @@ class ExportUtility {
                 title = 'Export Data'
             } = options;
 
-            console.log(`📊 Exporting ${title} to Excel...`);
             this.showExportLoading('Generating Excel file...');
 
             const wb = window.XLSX.utils.book_new();
@@ -224,7 +222,6 @@ class ExportUtility {
                 title = 'Export Data'
             } = options;
 
-            console.log(`📄 Exporting ${title} to CSV...`);
             this.showExportLoading('Generating CSV file...');
 
             let csvContent = '';

@@ -300,7 +300,6 @@ CREATE TABLE personal_goals (
     user_id INT NOT NULL,
     goal_name VARCHAR(100) NOT NULL,
     target_amount DECIMAL(12,2) NOT NULL,
-    current_amount DECIMAL(12,2) DEFAULT 0.00,
     target_date DATE,
     goal_type ENUM('emergency_fund', 'vacation', 'car', 'house', 'education', 'other') DEFAULT 'other',
     priority ENUM('low', 'medium', 'high') DEFAULT 'medium',

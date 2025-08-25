@@ -3,7 +3,11 @@ Options -Indexes
 
 RewriteEngine On
 
-# Block directory access - redirect using smart redirect handler
+# Allow specific API endpoints that need to be accessible
+RewriteCond %{REQUEST_URI} !^/budget/api/(walkthrough_status|get_walkthrough_step|complete_walkthrough_step|skip_walkthrough|reset_walkthrough|personal_dashboard_data|enhanced_insights_data|debug_session)\.php$
+# Allow public walkthrough directory
+RewriteCond %{REQUEST_URI} !^/budget/public/walkthrough/.*\.php$
+# Block directory access - redirect using smart redirect handler  
 RewriteRule ^(templates|config|db|includes|actions|ajax|api|cron|logs)/?$ redirect_to_login.php [R=302,L]
 
 # Remove .php extension from URLs

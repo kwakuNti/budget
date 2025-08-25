@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check if user needs to complete salary setup first
+require_once '../includes/walkthrough_guard.php';
+
 // Get user information from session
 $user_first_name = $_SESSION['first_name'] ?? 'User';
 $user_full_name = $_SESSION['full_name'] ?? 'User';
@@ -21,6 +24,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <link rel="stylesheet" href="../public/css/budget.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Universal Snackbar -->
+    <script src="../public/js/snackbar.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -206,92 +211,136 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <!-- Add Category Modal -->
     <div id="addCategoryModal" class="budget-modal">
-        <div class="budget-modal-content">
-            <div class="budget-modal-header">
-                <h3>Add New Category</h3>
-                <span class="budget-modal-close" onclick="closeModal('addCategoryModal')">&times;</span>
+        <div class="budget-modal-content add-category-modal">
+            <div class="budget-modal-header clean-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h3>Create New Budget Category</h3>
+                        <p>Organize your spending with custom categories</p>
+                    </div>
+                </div>
+                <span class="budget-modal-close modern-close" onclick="closeModal('addCategoryModal')">&times;</span>
             </div>
-            <form class="budget-modal-form" id="addCategoryForm">
-                <div class="form-section">
-                    <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" name="name" placeholder="e.g., Healthcare" required>
+            <form class="budget-modal-form well-organized-form" id="addCategoryForm">
+                <div class="form-section basic-info">
+                    <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+                    <div class="form-grid two-column spaced">
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Category Name</label>
+                            <input type="text" name="name" placeholder="e.g., Healthcare, Groceries" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-list"></i> Category Type</label>
+                            <select name="category_type" required>
+                                <option value="">Select type</option>
+                                <option value="needs">🏠 Needs (Essential)</option>
+                                <option value="wants">🎉 Wants (Lifestyle)</option>
+                                <option value="savings">💰 Savings & Investments</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Category Type</label>
-                        <select name="category_type" required>
-                            <option value="">Select type</option>
-                            <option value="needs">Needs (Essential)</option>
-                            <option value="wants">Wants (Lifestyle)</option>
-                            <option value="savings">Savings & Investments</option>
-                        </select>
-                        <small class="form-note"><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> For savings goals, use the <a href="savings.php">Savings</a> page to create and track specific goals. Savings categories here are for budget allocation only.</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Budget Period</label>
-                        <select name="budget_period" required>
-                            <option value="monthly" selected>Monthly</option>
-                            <option value="weekly">Weekly</option>
-                        </select>
-                        <small class="form-note"><i class="fas fa-lightbulb"></i> <strong>Note:</strong> You can set your budget limit as weekly or monthly. All calculations and storage are monthly, but your original choice will be shown for clarity.</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Budget Limit</label>
-                        <div class="budget-input-group">
-                            <div class="budget-type-selector">
-                                <input type="radio" id="budgetAmount" name="budget_input_type" value="amount" checked onchange="toggleBudgetInputType()">
-                                <label for="budgetAmount">Fixed Amount (₵)</label>
-                                
-                                <input type="radio" id="budgetPercentage" name="budget_input_type" value="percentage" onchange="toggleBudgetInputType()">
-                                <label for="budgetPercentage">Percentage (%)</label>
+                </div>
+
+                <div class="form-section budget-setup">
+                    <h4><i class="fas fa-calculator"></i> Budget Setup</h4>
+                    <div class="form-grid two-column spaced">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Budget Period</label>
+                            <select name="budget_period" required>
+                                <option value="monthly" selected>📅 Monthly</option>
+                                <option value="weekly">📆 Weekly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-calculator"></i> Budget Input Type</label>
+                            <div class="budget-type-selector enhanced-radio">
+                                <label class="radio-option">
+                                    <input type="radio" name="budget_input_type" value="amount" checked onchange="toggleBudgetInputType()">
+                                    <span class="radio-label">💵 Fixed Amount</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="budget_input_type" value="percentage" onchange="toggleBudgetInputType()">
+                                    <span class="radio-label">📊 Percentage</span>
+                                </label>
                             </div>
-                            
-                            <div class="budget-input-container">
-                                <div id="amountInput" class="budget-input-section">
-                                    <input type="number" name="budget_limit" step="0.01" placeholder="0.00" min="0" required>
-                                    <span class="input-suffix">₵</span>
-                                </div>
-                                
-                                <div id="percentageInput" class="budget-input-section" style="display: none;">
-                                    <input type="number" name="budget_percentage" step="0.1" placeholder="0.0" min="0" max="100">
-                                    <span class="input-suffix">%</span>
-                                </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width budget-input-wrapper">
+                        <label><i class="fas fa-money-bill-wave"></i> Budget Limit</label>
+                        <div class="budget-input-container enhanced-input">
+                            <div id="amountInput" class="budget-input-section active">
+                                <input type="number" name="budget_limit" step="0.01" placeholder="0.00" min="0" required>
+                                <span class="input-suffix">₵</span>
+                            </div>
+                            <div id="percentageInput" class="budget-input-section" style="display: none;">
+                                <input type="number" name="budget_percentage" step="0.1" placeholder="0.0" min="0" max="100">
+                                <span class="input-suffix">%</span>
                                 <div class="percentage-info">
                                     <small id="percentageCalculation">of section allocation</small>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Icon</label>
-                        <div class="icon-selector">
-                            <div class="icon-option selected" data-icon="fas fa-hospital"><i class="fas fa-hospital"></i></div>
-                            <div class="icon-option" data-icon="fas fa-pills"><i class="fas fa-pills"></i></div>
-                            <div class="icon-option" data-icon="fas fa-car"><i class="fas fa-car"></i></div>
-                            <div class="icon-option" data-icon="fas fa-book"><i class="fas fa-book"></i></div>
-                            <div class="icon-option" data-icon="fas fa-bullseye"><i class="fas fa-bullseye"></i></div>
-                            <div class="icon-option" data-icon="fas fa-credit-card"><i class="fas fa-credit-card"></i></div>
-                            <div class="icon-option" data-icon="fas fa-home"><i class="fas fa-home"></i></div>
-                            <div class="icon-option" data-icon="fas fa-utensils"><i class="fas fa-utensils"></i></div>
+                </div>
+
+                <div class="form-section customization">
+                    <h4><i class="fas fa-palette"></i> Customization</h4>
+                    <div class="form-grid two-column spaced">
+                        <div class="form-group">
+                            <label><i class="fas fa-icons"></i> Choose Icon</label>
+                            <div class="icon-selector enhanced-selector">
+                                <div class="icon-option selected" data-icon="hospital"><i class="fas fa-hospital"></i></div>
+                                <div class="icon-option" data-icon="pills"><i class="fas fa-pills"></i></div>
+                                <div class="icon-option" data-icon="car"><i class="fas fa-car"></i></div>
+                                <div class="icon-option" data-icon="book"><i class="fas fa-book"></i></div>
+                                <div class="icon-option" data-icon="bullseye"><i class="fas fa-bullseye"></i></div>
+                                <div class="icon-option" data-icon="credit-card"><i class="fas fa-credit-card"></i></div>
+                                <div class="icon-option" data-icon="home"><i class="fas fa-home"></i></div>
+                                <div class="icon-option" data-icon="utensils"><i class="fas fa-utensils"></i></div>
+                            </div>
+                            <input type="hidden" name="icon" value="hospital">
                         </div>
-                        <input type="hidden" name="icon" value="fas fa-hospital">
-                    </div>
-                    <div class="form-group">
-                        <label>Color</label>
-                        <div class="color-selector">
-                            <div class="color-option selected" data-color="#007bff" style="background-color: #007bff;"></div>
-                            <div class="color-option" data-color="#28a745" style="background-color: #28a745;"></div>
-                            <div class="color-option" data-color="#dc3545" style="background-color: #dc3545;"></div>
-                            <div class="color-option" data-color="#ffc107" style="background-color: #ffc107;"></div>
-                            <div class="color-option" data-color="#6f42c1" style="background-color: #6f42c1;"></div>
-                            <div class="color-option" data-color="#fd7e14" style="background-color: #fd7e14;"></div>
+                        <div class="form-group">
+                            <label><i class="fas fa-palette"></i> Choose Color</label>
+                            <div class="color-selector enhanced-selector">
+                                <div class="color-option selected" data-color="#007bff" style="background-color: #007bff;"></div>
+                                <div class="color-option" data-color="#28a745" style="background-color: #28a745;"></div>
+                                <div class="color-option" data-color="#dc3545" style="background-color: #dc3545;"></div>
+                                <div class="color-option" data-color="#ffc107" style="background-color: #ffc107;"></div>
+                                <div class="color-option" data-color="#6f42c1" style="background-color: #6f42c1;"></div>
+                                <div class="color-option" data-color="#fd7e14" style="background-color: #fd7e14;"></div>
+                            </div>
+                            <input type="hidden" name="color" value="#007bff">
                         </div>
-                        <input type="hidden" name="color" value="#007bff">
                     </div>
                 </div>
-                <div class="budget-modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addCategoryModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Category</button>
+
+                <div class="form-notes organized-notes">
+                    <div class="form-note helpful-note">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Tip:</strong> For savings goals, use the <a href="savings.php">Savings</a> page to create and track specific goals. Savings categories here are for budget allocation only.
+                        </div>
+                    </div>
+                    <div class="form-note info-note">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Note:</strong> All calculations are stored monthly, but your original choice will be shown for clarity.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="budget-modal-actions enhanced-actions">
+                    <button type="button" class="btn-secondary enhanced-btn" onclick="closeModal('addCategoryModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary enhanced-btn">
+                        <i class="fas fa-plus-circle"></i> Create Category
+                    </button>
                 </div>
             </form>
         </div>
@@ -706,6 +755,52 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </div>
 
     <script>
+        // Toggle budget input type between amount and percentage
+        function toggleBudgetInputType() {
+            const amountRadio = document.querySelector('input[name="budget_input_type"][value="amount"]');
+            const percentageRadio = document.querySelector('input[name="budget_input_type"][value="percentage"]');
+            const amountInput = document.getElementById('amountInput');
+            const percentageInput = document.getElementById('percentageInput');
+            
+            if (percentageRadio && percentageRadio.checked) {
+                if (amountInput) {
+                    amountInput.style.display = 'none';
+                    amountInput.classList.remove('active');
+                }
+                if (percentageInput) {
+                    percentageInput.style.display = 'block';
+                    percentageInput.classList.add('active');
+                }
+                // Remove required from amount input and add to percentage
+                const amountInputField = amountInput?.querySelector('input');
+                const percentageInputField = percentageInput?.querySelector('input');
+                if (amountInputField) amountInputField.required = false;
+                if (percentageInputField) percentageInputField.required = true;
+            } else {
+                if (amountInput) {
+                    amountInput.style.display = 'block';
+                    amountInput.classList.add('active');
+                }
+                if (percentageInput) {
+                    percentageInput.style.display = 'none';
+                    percentageInput.classList.remove('active');
+                }
+                // Add required to amount input and remove from percentage
+                const amountInputField = amountInput?.querySelector('input');
+                const percentageInputField = percentageInput?.querySelector('input');
+                if (amountInputField) amountInputField.required = true;
+                if (percentageInputField) percentageInputField.required = false;
+            }
+        }
+
+        // Coming soon message for auto-save features
+        function showComingSoonMessage(event) {
+            event.preventDefault();
+            event.target.checked = false;
+            showSnackbar('Auto-Save features are coming soon! Stay tuned for automated savings.', 'info');
+            return false;
+        }
+
         // Load saved theme on page load
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('personalTheme') || 'light';
@@ -916,5 +1011,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         });
     </script>
     <script src="../public/js/budget.js"></script>
+    
+    <!-- Walkthrough System -->
+    <script src="../public/js/walkthrough.js"></script>
 </body>
 </html>

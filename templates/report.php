@@ -14,6 +14,8 @@ if (!$user || $user['user_type'] !== 'personal') {
     exit;
 }
 
+// Check if user needs to complete salary setup first
+require_once '../includes/walkthrough_guard.php';
 
 // Get user information from session
 $user_first_name = $_SESSION['first_name'] ?? 'User';
@@ -33,6 +35,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="../public/js/export-utility.js"></script>
+    <!-- Universal Snackbar -->
+    <script src="../public/js/snackbar.js"></script>
 </head>
 <body>
     <!-- Navigation -->

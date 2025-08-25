@@ -394,7 +394,6 @@ foreach ($members as $member) {
 
     <script src="../public/js/contribution.js"></script>
     <script>
-    console.log("Chart Data:", chartData);
 </script>
 
 </body>

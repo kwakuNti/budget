@@ -17,19 +17,15 @@ document.addEventListener('DOMContentLoaded', function() {
 // API Integration Functions
 async function loadPersonalDashboardData() {
     try {
-        console.log('Loading personal dashboard data...');
         const response = await fetch('../api/personal_dashboard_data.php');
         if (!response.ok) {
             throw new Error('Failed to fetch dashboard data');
         }
         
         const data = await response.json();
-        console.log('API Response:', data); // Debug log
-        console.log('Data keys:', Object.keys(data)); // Show available keys
         
         if (data.success) {
             populateDashboardWithData(data);
-            console.log('Dashboard populated successfully');
         } else {
             console.error('API Error:', data.message);
             showNotification('Failed to load dashboard data: ' + data.message, 'error');
@@ -41,11 +37,9 @@ async function loadPersonalDashboardData() {
 }
 
 function populateDashboardWithData(data) {
-    console.log('Populating dashboard with data:', data);
     
     // Update user info
     if (data.user) {
-        console.log('User data found:', data.user);
         const userAvatar = document.querySelector('.user-avatar');
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoUserName = document.getElementById('logoUserName');
@@ -69,7 +63,6 @@ function populateDashboardWithData(data) {
     const additionalIncome = totalMonthlyIncome - baseSalary;
     
     if (data.salary && data.salary.monthly_salary) {
-        console.log('Salary data found:', data.salary);
         const salaryDueInfo = document.getElementById('salaryDueInfo');
         const monthlySalary = document.getElementById('monthlySalary');
         const salaryAllocationTitle = document.getElementById('salaryAllocationTitle');
@@ -94,7 +87,6 @@ function populateDashboardWithData(data) {
             salaryAllocationTitle.textContent = `Budget Allocation & Preview (₵${totalMonthlyIncome.toLocaleString()} total income)`;
         }
     } else {
-        console.log('No salary data found - showing setup prompts');
         const salaryDueInfo = document.getElementById('salaryDueInfo');
         const monthlySalary = document.getElementById('monthlySalary');
         const salaryAllocationTitle = document.getElementById('salaryAllocationTitle');
@@ -1493,15 +1485,12 @@ function showSalaryPaidModal() {
 
 // Confirm salary from dashboard
 function confirmSalaryFromDashboard() {
-    console.log('confirmSalaryFromDashboard called');
     const confirmBtn = document.querySelector('#salaryPaidModal .btn-primary');
-    console.log('confirmBtn:', confirmBtn);
     const originalText = confirmBtn.textContent;
     
     confirmBtn.textContent = 'Processing...';
     confirmBtn.disabled = true;
     
-    console.log('Making API call...');
     fetch('../actions/salary_actions.php', {
         method: 'POST',
         headers: {
@@ -1510,13 +1499,10 @@ function confirmSalaryFromDashboard() {
         body: 'action=confirm_salary_received'
     })
     .then(response => {
-        console.log('Response received:', response);
         return response.json();
     })
     .then(result => {
-        console.log('Result:', result);
         if (result.success) {
-            console.log('Success - showing notification and closing modal');
             showSnackbar(result.message, 'success');
             closeModal('salaryPaidModal');
             
@@ -1525,7 +1511,6 @@ function confirmSalaryFromDashboard() {
                 loadDashboardData();
             }, 1000);
         } else {
-            console.log('Error result:', result.message);
             showSnackbar(result.message, 'error');
         }
     })

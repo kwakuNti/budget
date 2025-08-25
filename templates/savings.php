@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check if user needs to complete salary setup first
+require_once '../includes/walkthrough_guard.php';
+
 // Get user information from session
 $user_first_name = $_SESSION['first_name'] ?? 'User';
 $user_full_name = $_SESSION['full_name'] ?? 'User';
@@ -24,6 +27,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Universal Snackbar -->
+    <script src="../public/js/snackbar.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -113,11 +118,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
                 ?></div>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="profile.php">Profile Settings</a>
-                    <a href="income-sources.php">Income Sources</a>
-                    <a href="categories.php">Categories</a>
-                    <hr>
-                    <a href="family-dashboard.php">Switch to Family</a>
+                    <!-- <a href="profile.php">Profile Settings</a> -->
+                    <!-- <a href="income-sources.php">Income Sources</a> -->
+                    <!-- <a href="categories.php">Categories</a> -->
+                    <!-- <hr> -->
+                    <!-- <a href="family-dashboard.php">Switch to Family</a> -->
                     <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
@@ -279,103 +284,102 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <!-- Modals -->
 <!-- Fixed New Goal Modal -->
 <div id="newGoalModal" class="modal">
-    <div class="modal-content large">
-        <div class="modal-header">
-            <h3>Create New Savings Goal</h3>
-            <span class="close" onclick="closeModal('newGoalModal')">&times;</span>
+    <div class="modal-content wide-modal">
+        <div class="modal-header gradient-header">
+            <div class="modal-header-content">
+                <div class="modal-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="modal-title-section">
+                    <h3>Create New Savings Goal</h3>
+                    <p>Set targets and watch your savings grow</p>
+                </div>
+            </div>
+            <span class="close modern-close" onclick="closeModal('newGoalModal')">&times;</span>
         </div>
-        <form class="modal-form" id="newGoalForm">
-            <div class="form-section">
-                <h4>Goal Details</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Goal Name</label>
-                        <input type="text" name="goal_name" id="goalName" placeholder="e.g., Dream Vacation" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Goal Type</label>
-                        <select name="goal_type" id="goalType" required>
-                            <option value="">Choose type</option>
-                            <!-- Options will be populated dynamically from database -->
-                        </select>
-                    </div>
+        <form class="modal-form compact-form" id="newGoalForm">
+            <div class="form-grid two-column">
+                <div class="form-group">
+                    <label><i class="fas fa-flag"></i> Goal Name</label>
+                    <input type="text" name="goal_name" id="goalName" placeholder="e.g., Dream Vacation, New Car" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-list"></i> Goal Type</label>
+                    <select name="goal_type" id="goalType" required>
+                        <option value="">Choose type</option>
+                        <!-- Options will be populated dynamically from database -->
+                    </select>
                 </div>
             </div>
 
-            <div class="form-section">
-                <h4>Financial Details</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Target Amount (₵)</label>
-                        <input type="number" name="target_amount" id="targetAmount" step="1" placeholder="0" required>
-                    </div>
+            <div class="form-grid two-column">
+                <div class="form-group">
+                    <label><i class="fas fa-target"></i> Target Amount (₵)</label>
+                    <input type="number" name="target_amount" id="targetAmount" step="1" placeholder="0" required>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Priority</label>
-                        <select name="priority" id="priority" required>
-                            <option value="high">High Priority</option>
-                            <option value="medium" selected>Medium Priority</option>
-                            <option value="low">Low Priority</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Initial Deposit (₵)</label>
-                        <input type="number" name="initial_deposit" id="initialDeposit" step="0.01" placeholder="0.00">
-                    </div>
+                <div class="form-group">
+                    <label><i class="fas fa-star"></i> Priority</label>
+                    <select name="priority" id="priority" required>
+                        <option value="high">🔴 High Priority</option>
+                        <option value="medium" selected>🟡 Medium Priority</option>
+                        <option value="low">🟢 Low Priority</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="form-section">
-                <h4>Auto-Save Settings</h4>
-                <div class="checkbox-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="auto_save_enabled" id="autoSaveEnabled" value="1">
-                        <span class="checkmark"></span>
-                        Enable automatic savings for this goal
+            <div class="form-group full-width">
+                <label><i class="fas fa-piggy-bank"></i> Initial Deposit (₵)</label>
+                <input type="number" name="initial_deposit" id="initialDeposit" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="auto-save-section">
+                <div class="section-header">
+                    <h4><i class="fas fa-robot"></i> Auto-Save Settings</h4>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="auto_save_enabled" id="autoSaveEnabled" value="1" onclick="showComingSoonMessage(event)">
+                        <span class="toggle-slider"></span>
                     </label>
                 </div>
                 
-                <div id="autoSaveOptions" style="display: none;">
-                    <div class="form-group">
-                        <label>Save Method</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="save_method" value="percentage" id="saveMethodPercentage" checked>
-                                <span class="radio-mark"></span>
-                                Percentage of Income
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="save_method" value="fixed" id="saveMethodFixed">
-                                <span class="radio-mark"></span>
-                                Fixed Amount
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group" id="percentageGroup">
-                            <label>Percentage of Income (%)</label>
-                            <div class="input-with-slider">
-                                <input type="range" name="save_percentage" id="savePercentage" min="1" max="50" value="10" class="config-slider">
-                                <span class="slider-value">10%</span>
+                <div id="autoSaveOptions" class="auto-save-options" style="display: none;">
+                    <div class="form-grid two-column">
+                        <div class="form-group">
+                            <label><i class="fas fa-cog"></i> Save Method</label>
+                            <div class="radio-group modern-radio">
+                                <label class="radio-option">
+                                    <input type="radio" name="save_method" value="percentage" checked>
+                                    <span class="radio-label">📊 Percentage of Income</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="save_method" value="fixed">
+                                    <span class="radio-label">💰 Fixed Amount</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="form-group" id="fixedAmountGroup" style="display: none;">
-                            <label>Fixed Amount (₵)</label>
-                            <input type="number" name="save_amount" id="fixedSaveAmount" step="0.01" placeholder="0.00">
+                        <div class="form-group">
+                            <div id="percentageGroup">
+                                <label><i class="fas fa-percentage"></i> Percentage of Income (%)</label>
+                                <div class="input-with-slider modern-slider">
+                                    <input type="range" name="save_percentage" id="savePercentage" min="1" max="50" value="10" class="config-slider">
+                                    <span class="slider-value">10%</span>
+                                </div>
+                            </div>
+                            <div id="fixedAmountGroup" style="display: none;">
+                                <label><i class="fas fa-money-bill"></i> Fixed Amount (₵)</label>
+                                <input type="number" name="save_amount" id="fixedSaveAmount" step="0.01" placeholder="0.00">
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="save-preview">
-                        <div class="preview-info">
+                    <div class="save-preview modern-preview">
+                        <div class="preview-content">
                             <span class="preview-label">Estimated monthly save:</span>
                             <span class="preview-amount" id="savePreviewAmount">₵350.00</span>
                         </div>
                         <small class="preview-note">Based on current income settings</small>
                     </div>
                     
-                    <div class="checkbox-group">
+                    <div class="form-group checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" name="deduct_from_income" id="deductFromIncome" value="1">
                             <span class="checkmark"></span>
@@ -385,9 +389,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeModal('newGoalModal')">Cancel</button>
-                <button type="submit" class="btn-primary">Create Goal</button>
+            <div class="modal-actions modern-actions">
+                <button type="button" class="btn-secondary modern-btn" onclick="closeModal('newGoalModal')">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="submit" class="btn-primary modern-btn">
+                    <i class="fas fa-bullseye"></i> Create Goal
+                </button>
             </div>
         </form>
     </div>
@@ -423,99 +431,113 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <!-- Auto-Save Configuration Modal -->
     <div id="autoSaveModal" class="modal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <h3>Smart Auto-Save Configuration</h3>
-                <span class="close" onclick="closeModal('autoSaveModal')">&times;</span>
-            </div>
-            <form class="modal-form" onsubmit="saveAutoSaveConfig(event)">
-                <div class="form-section">
-                    <h4><i class="fas fa-bullseye"></i> Auto-Save Settings</h4>
-                    <div class="auto-save-config">
-                        <div class="config-header">
-                            <div class="config-info">
-                                <h5>Enable Automatic Savings</h5>
-                                <p>Automatically distribute your savings allocation to active goals</p>
-                            </div>
-                            <div class="config-toggle">
-                                <input type="checkbox" id="autoSaveEnabled">
-                                <label for="autoSaveEnabled" class="toggle-switch"></label>
-                            </div>
-                        </div>
-                        <div class="config-details" id="autoSaveDetails">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Save Frequency</label>
-                                    <select id="saveFrequency">
-                                        <option value="weekly">Weekly</option>
-                                        <option value="biweekly">Bi-weekly</option>
-                                        <option value="monthly" selected>Monthly</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Save Day</label>
-                                    <select id="saveDay">
-                                        <option value="1">1st of month</option>
-                                        <option value="15">15th of month</option>
-                                        <option value="30">30th of month</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="emergencyFundPriority" checked>
-                                        Prioritize Emergency Fund
-                                    </label>
-                                    <small>Fill emergency fund first before other goals</small>
-                                </div>
-                                <div class="form-group">
-                                    <label>Emergency Fund Target</label>
-                                    <input type="number" id="emergencyFundTarget" value="1000" step="0.01" min="0">
-                                </div>
-                            </div>
-                        </div>
+        <div class="modal-content wide-modal">
+            <div class="modal-header gradient-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h3>Smart Auto-Save Configuration</h3>
+                        <p>Automate your savings and reach goals faster</p>
                     </div>
                 </div>
-
-                <div class="form-section">
-                    <h4><i class="fas fa-lightbulb"></i> Round-Up Savings</h4>
-                    <div class="auto-save-config">
-                        <div class="config-header">
-                            <div class="config-info">
-                                <h5>Round up expenses</h5>
-                                <p>Round up expenses and save the spare change</p>
-                            </div>
-                            <div class="config-toggle">
-                                <input type="checkbox" id="roundUpEnabled">
-                                <label for="roundUpEnabled" class="toggle-switch"></label>
-                            </div>
-                        </div>
-                        <div class="config-details">
+                <span class="close modern-close" onclick="closeModal('autoSaveModal')">&times;</span>
+            </div>
+            <form class="modal-form compact-form" onsubmit="saveAutoSaveConfig(event)">
+                <div class="auto-save-section">
+                    <div class="section-header">
+                        <h4><i class="fas fa-bullseye"></i> Automatic Savings</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoSaveEnabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="auto-save-options" id="autoSaveDetails">
+                        <div class="form-grid two-column">
                             <div class="form-group">
-                                <label>Round up to nearest</label>
-                                <select id="roundUpThreshold">
-                                    <option value="1">₵1.00</option>
-                                    <option value="5" selected>₵5.00</option>
-                                    <option value="10">₵10.00</option>
+                                <label><i class="fas fa-calendar-alt"></i> Save Frequency</label>
+                                <select id="saveFrequency">
+                                    <option value="weekly">📅 Weekly</option>
+                                    <option value="biweekly">🗓️ Bi-weekly</option>
+                                    <option value="monthly" selected>📆 Monthly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-day"></i> Save Day</label>
+                                <select id="saveDay">
+                                    <option value="1">1st of month</option>
+                                    <option value="15">15th of month</option>
+                                    <option value="30">30th of month</option>
                                 </select>
                             </div>
                         </div>
+                        
+                        <div class="form-grid two-column">
+                            <div class="form-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="emergencyFundPriority" checked>
+                                    <span class="checkmark"></span>
+                                    Prioritize Emergency Fund
+                                </label>
+                                <small class="field-note">Fill emergency fund first before other goals</small>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-shield-alt"></i> Emergency Fund Target (₵)</label>
+                                <input type="number" id="emergencyFundTarget" value="1000" step="0.01" min="0">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-section">
-                    <h4><i class="fas fa-chart-bar"></i> Goal Allocation Priority</h4>
-                    <div class="goal-allocation-list" id="goalAllocationList">
+                <div class="auto-save-section">
+                    <div class="section-header">
+                        <h4><i class="fas fa-coins"></i> Round-Up Savings</h4>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="roundUpEnabled">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="auto-save-options">
+                        <div class="form-group">
+                            <label><i class="fas fa-arrow-up"></i> Round up to nearest</label>
+                            <select id="roundUpThreshold">
+                                <option value="1">₵1.00</option>
+                                <option value="5" selected>₵5.00</option>
+                                <option value="10">₵10.00</option>
+                            </select>
+                        </div>
+                        <div class="round-up-preview modern-preview">
+                            <div class="preview-content">
+                                <span class="preview-label">Example:</span>
+                                <span class="preview-amount">₵27.30 → ₵30.00 (saves ₵2.70)</span>
+                            </div>
+                            <small class="preview-note">Based on selected round-up amount</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auto-save-section">
+                    <div class="section-header">
+                        <h4><i class="fas fa-sort"></i> Goal Allocation Priority</h4>
+                    </div>
+                    <div class="goal-allocation-list modern-list" id="goalAllocationList">
                         <div class="loading-placeholder">
+                            <div class="loading-icon"><i class="fas fa-spinner fa-spin"></i></div>
                             <p>Loading goals...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('autoSaveModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                <div class="modal-actions modern-actions">
+                    <button type="button" class="btn-secondary modern-btn" onclick="closeModal('autoSaveModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary modern-btn">
+                        <i class="fas fa-save"></i> Save Configuration
+                    </button>
                 </div>
             </form>
         </div>
@@ -913,6 +935,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </div>
 
     <script>
+        // Show coming soon message for auto-save features
+        function showComingSoonMessage(event) {
+            event.preventDefault();
+            event.target.checked = false; // Keep the toggle off
+            
+            // Show snackbar notification
+            showSnackbar('Auto-save features are coming soon! Stay tuned for automated savings.', 'info');
+        }
+
         // Animation function for counting numbers
         function animateNumber(element, start, end, duration, prefix = '', suffix = '') {
             const startTime = performance.now();

@@ -8,7 +8,6 @@ let debugMode = true;
 // Debug function
 function debugLog(message, data = null) {
     if (debugMode) {
-        console.log(`[SIGNUP DEBUG] ${message}`, data || '');
         const debugInfo = document.getElementById('debugInfo');
         if (debugInfo) {
             const timestamp = new Date().toLocaleTimeString();

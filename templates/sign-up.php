@@ -33,7 +33,7 @@
                     <div class="account-type-selection">
                         <div class="account-type-card" data-type="family">
                             <div class="card-icon">👨‍👩‍👧‍👦</div>
-                            <h4>Family Account</h4>
+                            <h4 >Family Account</h4>
                         </div>
                         
                         <div class="account-type-card" data-type="personal">

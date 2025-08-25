@@ -43,6 +43,17 @@ function formatPercent(value) {
     return `${numValue.toFixed(1)}%`;
 }
 
+function getIconHTML(iconName) {
+    // Convert icon name to FontAwesome HTML
+    if (!iconName) return '<i class="fas fa-tag"></i>';
+    
+    // If it's already HTML (contains '<i'), return as is
+    if (iconName.includes('<i')) return iconName;
+    
+    // If it's just the icon name, convert to FontAwesome
+    return `<i class="fas fa-${iconName}"></i>`;
+}
+
 function showSnackbar(message, type = 'info') {
     // Remove existing snackbar if any
     const existingSnackbar = document.querySelector('.snackbar');
@@ -80,26 +91,35 @@ function showSnackbar(message, type = 'info') {
 
 // Budget input type toggle
 function toggleBudgetInputType() {
-    const amountRadio = document.getElementById('budgetAmount');
-    const percentageRadio = document.getElementById('budgetPercentage');
+    const amountRadio = document.querySelector('input[name="budget_input_type"][value="amount"]');
+    const percentageRadio = document.querySelector('input[name="budget_input_type"][value="percentage"]');
     const amountInput = document.getElementById('amountInput');
     const percentageInput = document.getElementById('percentageInput');
     const percentageInfo = document.querySelector('.percentage-info');
+    
+    if (!amountRadio || !percentageRadio || !amountInput || !percentageInput) {
+        console.warn('Budget input type elements not found');
+        return;
+    }
     
     if (amountRadio.checked) {
         amountInput.style.display = 'flex';
         percentageInput.style.display = 'none';
         if (percentageInfo) percentageInfo.classList.remove('show');
         // Make amount input required, remove from percentage
-        amountInput.querySelector('input').required = true;
-        percentageInput.querySelector('input').required = false;
-    } else {
+        const amountInputField = amountInput.querySelector('input');
+        const percentageInputField = percentageInput.querySelector('input');
+        if (amountInputField) amountInputField.required = true;
+        if (percentageInputField) percentageInputField.required = false;
+    } else if (percentageRadio.checked) {
         amountInput.style.display = 'none';
         percentageInput.style.display = 'flex';
         if (percentageInfo) percentageInfo.classList.add('show');
         // Make percentage input required, remove from amount
-        amountInput.querySelector('input').required = false;
-        percentageInput.querySelector('input').required = true;
+        const amountInputField = amountInput.querySelector('input');
+        const percentageInputField = percentageInput.querySelector('input');
+        if (amountInputField) amountInputField.required = false;
+        if (percentageInputField) percentageInputField.required = true;
         
         // Update percentage calculation display
         updatePercentageCalculation();
@@ -1532,7 +1552,6 @@ function clearAllocation() {
 }
 
 function renderBudgetCategories() {
-    console.log('renderBudgetCategories called with budgetData:', budgetData);
     
     if (!budgetData || !budgetData.categories || budgetData.categories.length === 0) {
         showEmptyState();
@@ -1911,7 +1930,7 @@ function createCategoryTable(categories) {
         tableHTML += `
             <div class="budget-item ${statusInfo.status === 'over_budget' ? 'over-budget' : ''}" data-category-id="${category.id}">
                 <div class="col-item">
-                    <span class="item-icon" style="color: ${category.color}">${category.icon}</span>
+                    <span class="item-icon" style="color: ${category.color}">${getIconHTML(category.icon)}</span>
                     <div class="item-info">
                         <h5>${category.name}</h5>
                         <p>${expenseCount} transaction${expenseCount !== 1 ? 's' : ''} this month</p>
@@ -2006,7 +2025,7 @@ function createSavingsCategoryTable(categories) {
         tableHTML += `
             <div class="budget-item savings-item" data-category-id="${category.id}" data-goal-id="${goalId}">
                 <div class="col-item">
-                    <span class="item-icon" style="color: ${category.color}">${category.icon}</span>
+                    <span class="item-icon" style="color: ${category.color}">${getIconHTML(category.icon)}</span>
                     <div class="item-info">
                         <h5>${displayName}</h5>
                         <p>${contributionCount} contribution${contributionCount !== 1 ? 's' : ''} this month</p>
@@ -2629,6 +2648,7 @@ window.showAddCategoryModal = (categoryType = '') => {
 window.closeModal = closeModal;
 window.toggleUserMenu = toggleUserMenu;
 window.switchView = switchView;
+window.toggleBudgetInputType = toggleBudgetInputType;
 
 // Savings-specific functions for budget integration
 window.editSavingsGoal = function(goalId) {

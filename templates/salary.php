@@ -27,6 +27,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Salary Setup - Personal Budget Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../public/css/personal.css">
+    <!-- Universal Snackbar -->
+    <script src="../public/js/snackbar.js"></script>
     <style>
         /* Additional styles for salary setup page */
         .salary-config-form {
@@ -626,26 +628,37 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid #dee2e6;
-            background: #e9ecef;
+            padding: 2rem;
+            border-bottom: 1px solid rgba(241, 245, 249, 0.8);
+            background: linear-gradient(135deg, var(--card-background) 0%, var(--background-light) 100%);
+            border-radius: 20px 20px 0 0;
         }
 
         .modal-header h3 {
             margin: 0;
-            color: #343a40;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: var(--text-primary);
         }
 
         .close {
-            color: #6c757d;
-            font-size: 28px;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
             line-height: 1;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
         }
 
         .close:hover {
-            color: #343a40;
+            color: var(--text-primary);
+            background: rgba(156, 163, 175, 0.1);
         }
 
         .modal-form {
@@ -1273,11 +1286,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                                                                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1));
                                                                                     ?></div>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="profile.php">Profile Settings</a>
-                    <a href="income-sources.php">Income Sources</a>
-                    <a href="categories.php">Categories</a>
-                    <hr>
-                    <a href="family-dashboard.php">Switch to Family</a>
+                    <!-- <a href="profile.php">Profile Settings</a> -->
+                    <!-- <a href="income-sources.php">Income Sources</a> -->
+                    <!-- <a href="categories.php">Categories</a> -->
+                    <!-- <hr> -->
+                    <!-- <a href="family-dashboard.php">Switch to Family</a> -->
                     <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
@@ -1743,81 +1756,91 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <!-- Add Income Source Modal -->
     <div id="addIncomeSourceModal" class="modal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <h3>Add Income Source</h3>
-                <span class="close" onclick="closeModal('addIncomeSourceModal')">&times;</span>
+        <div class="modal-content wide-modal">
+            <div class="modal-header gradient-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h3>Add New Income Source</h3>
+                        <p>Diversify your income streams and boost your earnings</p>
+                    </div>
+                </div>
+                <span class="close modern-close" onclick="closeModal('addIncomeSourceModal')">&times;</span>
             </div>
-            <form class="modal-form" id="addIncomeForm">
-                <div class="form-section">
-                    <h4>Income Source Details</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Source Name</label>
-                            <input type="text" name="sourceName" placeholder="e.g., Freelance Design" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Income Type</label>
-                            <select name="incomeType" required>
-                                <option value="">Select type</option>
-                                <option value="freelance">Freelance Work</option>
-                                <option value="side-business">Side Business</option>
-                                <option value="part-time">Part-time Job</option>
-                                <option value="investment">Investment Returns</option>
-                                <option value="rental">Rental Income</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Average Monthly Amount (₵)</label>
-                            <input type="number" name="monthlyAmount" step="0.01" placeholder="0.00" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Frequency</label>
-                            <select name="paymentFrequency" required>
-                                <option value="monthly">Monthly</option>
-                                <option value="bi-weekly">Bi-weekly</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="variable">Variable</option>
-                                <option value="one-time">One-time</option>
-                            </select>
-                        </div>
-                    </div>
-
+            <form class="modal-form compact-form" id="addIncomeForm">
+                <div class="form-grid two-column">
                     <div class="form-group">
-                        <label>Payment Method</label>
-                        <div class="payment-method-group">
-                            <div class="payment-method selected" onclick="selectModalPaymentMethod('bank')">
-                                <div class="payment-method-icon"><i class="fas fa-university"></i></div>
-                                <div class="payment-method-name">Bank Account</div>
-                            </div>
-                            <div class="payment-method" onclick="selectModalPaymentMethod('mobile')">
-                                <div class="payment-method-icon"><i class="fas fa-mobile-alt"></i></div>
-                                <div class="payment-method-name">Mobile Money</div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="paymentMethod" value="bank">
+                        <label><i class="fas fa-tag"></i> Source Name</label>
+                        <input type="text" name="sourceName" placeholder="e.g., Freelance Design, Part-time Job" required>
                     </div>
-
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea name="description" placeholder="Brief description of this income source"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="includeInBudget" name="includeInBudget" checked>
-                            <label for="includeInBudget">Include in automatic budget planning</label>
-                        </div>
+                        <label><i class="fas fa-briefcase"></i> Income Type</label>
+                        <select name="incomeType" required>
+                            <option value="">Select type</option>
+                            <option value="freelance">💻 Freelance Work</option>
+                            <option value="side-business">🏪 Side Business</option>
+                            <option value="part-time">⏰ Part-time Job</option>
+                            <option value="investment">📈 Investment Returns</option>
+                            <option value="rental">🏠 Rental Income</option>
+                            <option value="other">📋 Other</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addIncomeSourceModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Income Source</button>
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-money-bill-wave"></i> Average Monthly Amount (₵)</label>
+                        <input type="number" name="monthlyAmount" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Payment Frequency</label>
+                        <select name="paymentFrequency" required>
+                            <option value="monthly">📅 Monthly</option>
+                            <option value="bi-weekly">🗓️ Bi-weekly</option>
+                            <option value="weekly">📆 Weekly</option>
+                            <option value="variable">🔄 Variable</option>
+                            <option value="one-time">🔘 One-time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                    <div class="payment-method-group modern-selector">
+                        <div class="payment-method selected modern-option" onclick="selectModalPaymentMethod('bank')">
+                            <div class="payment-method-icon"><i class="fas fa-university"></i></div>
+                            <div class="payment-method-name">Bank Account</div>
+                        </div>
+                        <div class="payment-method modern-option" onclick="selectModalPaymentMethod('mobile')">
+                            <div class="payment-method-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <div class="payment-method-name">Mobile Money</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="paymentMethod" value="bank">
+                </div>
+
+                <div class="form-group full-width">
+                    <label><i class="fas fa-file-alt"></i> Description</label>
+                    <textarea name="description" placeholder="Brief description of this income source" rows="3"></textarea>
+                </div>
+
+                <div class="form-group full-width checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="includeInBudget" checked>
+                        <span class="checkmark"></span>
+                        Include in automatic budget planning
+                    </label>
+                </div>
+
+                <div class="modal-actions modern-actions">
+                    <button type="button" class="btn-secondary modern-btn" onclick="closeModal('addIncomeSourceModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary modern-btn">
+                        <i class="fas fa-plus-circle"></i> Add Income Source
+                    </button>
                 </div>
             </form>
         </div>
@@ -2798,11 +2821,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Toggle user dropdown
             dropdown.classList.toggle('show');
-            console.log('User dropdown toggled, has show class:', dropdown.classList.contains('show'));
         }
 
         function toggleThemeSelector() {
-            console.log('Toggling theme selector');
             const dropdown = document.getElementById('themeDropdown');
             const userDropdown = document.getElementById('userDropdown');
 
@@ -2814,12 +2835,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             // Close user dropdown if open
             if (userDropdown && userDropdown.classList.contains('show')) {
                 userDropdown.classList.remove('show');
-                console.log('Closed user dropdown');
             }
 
             // Toggle theme dropdown
             dropdown.classList.toggle('show');
-            console.log('Theme dropdown toggled, has show class:', dropdown.classList.contains('show'));
         }
 
         function showAddIncomeSourceModal() {
@@ -2829,6 +2848,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function showModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
+                // Dispatch modal show event for walkthrough
+                document.dispatchEvent(new CustomEvent('modalShow', { detail: { modalId } }));
+                
                 modal.style.display = 'flex';
                 setTimeout(() => {
                     modal.classList.add('show');
@@ -2838,14 +2860,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 if (firstInput) {
                     firstInput.focus();
                 }
-                console.log('Modal display set to flex with show class');
             } else {
                 console.error('Modal not found:', modalId);
             }
         }
 
         function closeModal(modalId) {
-            console.log('Closing modal:', modalId);
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('show');
@@ -2856,8 +2876,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     if (form) {
                         form.reset();
                     }
+                    
+                    // Dispatch modal hide event for walkthrough
+                    document.dispatchEvent(new CustomEvent('modalHide', { detail: { modalId } }));
                 }, 300);
-                console.log('Modal closing with fade out animation');
             } else {
                 console.error('Modal not found:', modalId);
             }
@@ -3056,7 +3078,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
                 if (slider) {
                     const percentage = parseInt(slider.value);
-                    const amount = (salary * percentage) / 100;
+                    // Fix precision issue by rounding to 2 decimal places
+                    const amount = Math.round((salary * percentage) * 100) / 10000;
 
                     // Update amount element if exists
                     const amountElement = document.getElementById(category + 'Amount');
@@ -3200,9 +3223,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             const message = `Budget Preview:\n\n` +
                 `Total Salary: ₵${salary.toFixed(2)}\n` +
-                `Needs (${needs}%): ₵${(salary * needs / 100).toFixed(2)}\n` +
-                `Wants (${wants}%): ₵${(salary * wants / 100).toFixed(2)}\n` +
-                `Savings (${savings}%): ₵${(salary * savings / 100).toFixed(2)}`;
+                `Needs (${needs}%): ₵${(Math.round(salary * needs * 100) / 10000).toFixed(2)}\n` +
+                `Wants (${wants}%): ₵${(Math.round(salary * wants * 100) / 10000).toFixed(2)}\n` +
+                `Savings (${savings}%): ₵${(Math.round(salary * savings * 100) / 10000).toFixed(2)}`;
 
             showSnackbar('Check console for budget preview details', 'info');
         }
@@ -3212,7 +3235,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function manageReminders() {
-            console.log('Opening pay schedule modal');
             showModal('payScheduleModal');
             populatePayDayOptions();
         }
@@ -3362,13 +3384,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const dashboardData = await dashboardResponse.json();
                 const salaryData = await salaryResponse.json();
 
-                console.log('Fresh dashboard data:', dashboardData);
-                console.log('Fresh salary data:', salaryData);
 
                 // Update the global budget allocation data
                 if (dashboardData.success && dashboardData.budget_allocation) {
                     window.currentBudgetAllocation = dashboardData.budget_allocation;
-                    console.log('Updated global budget allocation:', window.currentBudgetAllocation);
                 }
 
                 // Set preview data directly from API responses
@@ -3381,7 +3400,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         wantsPercent: parseInt(dashboardData.budget_allocation?.[0]?.wants_percentage || 30),
                         savingsPercent: parseInt(dashboardData.budget_allocation?.[0]?.savings_percentage || 20)
                     };
-                    console.log('Set preview modal data:', window.previewModalData);
                 }
 
             } catch (error) {
@@ -3399,13 +3417,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Force update after modal is shown (safety net)
             setTimeout(async () => {
-                console.log('Safety update of preview data after modal shown...');
                 await updatePreviewBudgetData();
             }, 100);
         }
 
         async function updatePreviewBudgetData() {
-            console.log('Updating budget preview data...');
 
             // Try to use fresh API data first
             let salaryAmount = 0;
@@ -3423,10 +3439,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 needsPercent = window.previewModalData.needsPercent;
                 wantsPercent = window.previewModalData.wantsPercent;
                 savingsPercent = window.previewModalData.savingsPercent;
-                console.log('Using fresh API data for preview:', window.previewModalData);
             } else {
                 // Fallback: Try to get from page elements
-                console.log('Falling back to page elements...');
 
                 const totalIncomeElement = document.getElementById('totalIncome');
                 if (totalIncomeElement) {
@@ -3457,7 +3471,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     needsPercent = 60;
                     wantsPercent = 20;
                     savingsPercent = 20;
-                    console.log('Forced correct allocation for ₵6,500 total income: 60/20/20');
                 } else {
                     // Try to get allocation percentages from global data
                     if (window.currentBudgetAllocation && window.currentBudgetAllocation.length > 0) {
@@ -3468,14 +3481,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     }
                 }
 
-                console.log('Using page element data:', {
-                    totalIncome,
-                    salaryAmount,
-                    additionalIncome,
-                    needsPercent,
-                    wantsPercent,
-                    savingsPercent
-                });
+
             }
 
             // Calculate allocation amounts based on TOTAL INCOME
@@ -3483,17 +3489,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             const wantsAmount = (totalIncome * wantsPercent) / 100;
             const savingsAmount = (totalIncome * savingsPercent) / 100;
 
-            console.log('Final calculated amounts:', {
-                totalIncome: `₵${totalIncome.toFixed(2)}`,
-                salary: `₵${salaryAmount.toFixed(2)}`,
-                additional: `₵${additionalIncome.toFixed(2)}`,
-                needsPercent: `${needsPercent}%`,
-                needsAmount: `₵${needsAmount.toFixed(2)}`,
-                wantsPercent: `${wantsPercent}%`,
-                wantsAmount: `₵${wantsAmount.toFixed(2)}`,
-                savingsPercent: `${savingsPercent}%`,
-                savingsAmount: `₵${savingsAmount.toFixed(2)}`
-            });
+
 
             // Update preview modal with calculated values
             const previewTotalIncomeEl = document.getElementById('previewTotalIncome');
@@ -3515,30 +3511,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             if (previewNeedsAmountEl) previewNeedsAmountEl.textContent = `₵${needsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewNeedsPercentEl) {
                 previewNeedsPercentEl.textContent = `${needsPercent}%`;
-                console.log('Updated Needs percent element:', previewNeedsPercentEl.textContent, 'Element found:', !!previewNeedsPercentEl);
             }
 
             if (previewWantsAmountEl) previewWantsAmountEl.textContent = `₵${wantsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewWantsPercentEl) {
                 previewWantsPercentEl.textContent = `${wantsPercent}%`;
-                console.log('Updated Wants percent element:', previewWantsPercentEl.textContent, 'Element found:', !!previewWantsPercentEl);
             }
 
             if (previewSavingsAmountEl) previewSavingsAmountEl.textContent = `₵${savingsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             if (previewSavingsPercentEl) {
                 previewSavingsPercentEl.textContent = `${savingsPercent}%`;
-                console.log('Updated Savings percent element:', previewSavingsPercentEl.textContent, 'Element found:', !!previewSavingsPercentEl);
             }
 
-            console.log('Budget Preview - Updated DOM elements:', {
-                needsPercent: `${needsPercent}%`,
-                needsAmount: previewNeedsAmountEl ? previewNeedsAmountEl.textContent : 'element not found',
-                wantsPercent: `${wantsPercent}%`,
-                wantsAmount: previewWantsAmountEl ? previewWantsAmountEl.textContent : 'element not found',
-                savingsPercent: `${savingsPercent}%`,
-                savingsAmount: previewSavingsAmountEl ? previewSavingsAmountEl.textContent : 'element not found',
-                totalCheck: `${needsAmount + wantsAmount + savingsAmount} should equal ${totalIncome}`
-            });
+
 
             // Calculate realistic health score based on allocation percentages and total income
             let healthScore = 0;
@@ -3859,6 +3844,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
         });
     </script>
+    
+    <!-- Walkthrough System -->
+    <script src="../public/js/walkthrough.js"></script>
 </body>
 
 </html>

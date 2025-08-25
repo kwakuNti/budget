@@ -576,17 +576,7 @@ $debug_display = false; // Set to true to show debug info on page
             userId: <?= json_encode($user_id) ?>
         };
         
-        // Enhanced debug logging
-        console.log('=== MOMO PAGE JAVASCRIPT DEBUG ===');
-        console.log('MoMo Data:', window.momoData);
-        console.log('MoMo Account specifically:', window.momoData.account);
-        console.log('Account exists:', window.momoData.account ? 'YES' : 'NO');
-        if (window.momoData.account) {
-            console.log('Account phone:', window.momoData.account.phone_number);
-            console.log('Account network:', window.momoData.account.network);
-            console.log('Account balance:', window.momoData.account.balance);
-        }
-        console.log('=== END JAVASCRIPT DEBUG ===');
+
     </script>
 
     <script src="../public/js/momo.js"></script>

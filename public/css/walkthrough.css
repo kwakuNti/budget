@@ -1,0 +1,527 @@
+/* ===================================
+   TOOLTIP WALKTHROUGH SYSTEM
+   =================================== */
+
+/* Overlay for highlighting elements */
+.walkthrough-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.walkthrough-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Highlight cutout for focused element */
+.walkthrough-highlight {
+    position: absolute;
+    background: transparent;
+    border-radius: 8px;
+    box-shadow: 
+        0 0 0 4px rgba(59, 130, 246, 0.8),
+        0 0 0 9999px rgba(0, 0, 0, 0.7);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Tooltip container */
+.walkthrough-tooltip {
+    position: absolute;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 320px;
+    min-width: 280px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.walkthrough-tooltip.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Tooltip arrow */
+.walkthrough-tooltip::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+}
+
+.walkthrough-tooltip.arrow-top::before {
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom-color: white;
+}
+
+.walkthrough-tooltip.arrow-bottom::before {
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-top-color: white;
+}
+
+.walkthrough-tooltip.arrow-left::before {
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-right-color: white;
+}
+
+.walkthrough-tooltip.arrow-right::before {
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left-color: white;
+}
+
+/* Tooltip content */
+.walkthrough-tooltip-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Alternative class names for compatibility */
+.tooltip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tooltip-header h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+    flex: 1;
+    word-wrap: break-word;
+    line-height: 1.3;
+}
+
+.tooltip-progress {
+    font-size: 12px;
+    color: #718096;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.tooltip-content {
+    color: #4a5568;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.tooltip-content p {
+    margin: 0 0 10px 0;
+    word-wrap: break-word;
+    line-height: 1.5;
+}
+
+.tooltip-content p:last-child {
+    margin-bottom: 0;
+}
+
+.tooltip-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e53e3e;
+    font-size: 14px;
+    margin: 0;
+    padding: 8px 12px;
+    background: #fed7d7;
+    border-radius: 6px;
+    border: 1px solid #feb2b2;
+}
+
+.action-note i {
+    font-size: 16px;
+}
+
+.tooltip-next,
+.tooltip-skip {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    width: 100%;
+}
+
+.tooltip-next {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.tooltip-next:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.tooltip-skip {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.tooltip-skip:hover {
+    background: #cbd5e0;
+}
+
+.walkthrough-tooltip-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.walkthrough-tooltip-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+}
+
+.walkthrough-tooltip-content {
+    color: #4a5568;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.walkthrough-tooltip-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.walkthrough-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.walkthrough-btn-skip {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.walkthrough-btn-skip:hover {
+    background: #cbd5e0;
+}
+
+.walkthrough-btn-next {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.walkthrough-btn-next:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.walkthrough-btn-next:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Progress indicator */
+.walkthrough-progress {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 25px;
+    padding: 8px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.walkthrough-progress-text {
+    font-size: 14px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.walkthrough-progress-bar {
+    width: 100px;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.walkthrough-progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+/* Pulsing animation for highlighted elements */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.8);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.8);
+    }
+}
+
+.walkthrough-highlight.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Element highlighting without overlay */
+.walkthrough-element-highlight {
+    position: relative;
+    z-index: 10000;
+}
+
+.walkthrough-element-highlight::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 3px solid #667eea;
+    border-radius: 8px;
+    animation: pulse 2s infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Skip all button */
+.walkthrough-skip-all {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #4a5568;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.2s ease;
+}
+
+.walkthrough-skip-all:hover {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .walkthrough-tooltip {
+        max-width: calc(100vw - 20px) !important;
+        min-width: calc(100vw - 20px) !important;
+        width: calc(100vw - 20px) !important;
+        padding: 12px !important;
+        left: 10px !important;
+        right: auto !important;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    .tooltip-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+    }
+    
+    .tooltip-header h4 {
+        font-size: 15px;
+        line-height: 1.2;
+        width: 100%;
+        margin: 0;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    .tooltip-progress {
+        font-size: 11px;
+        margin-left: 0;
+        color: #718096;
+    }
+    
+    .tooltip-content {
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 15px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    .tooltip-content p {
+        margin: 0 0 8px 0;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .action-note {
+        font-size: 12px;
+        padding: 8px 10px;
+        line-height: 1.3;
+    }
+    
+    .tooltip-next,
+    .tooltip-skip {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    
+    /* On mobile, always position tooltips at bottom or top center */
+    .walkthrough-tooltip.arrow-left,
+    .walkthrough-tooltip.arrow-right {
+        left: 10px !important;
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+    }
+    
+    .walkthrough-tooltip.arrow-left::before,
+    .walkthrough-tooltip.arrow-right::before {
+        left: 50% !important;
+        right: auto !important;
+        top: -20px !important;
+        bottom: auto !important;
+        transform: translateX(-50%) !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom-color: white !important;
+        border-top-color: transparent !important;
+    }
+    
+    .walkthrough-progress {
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+    }
+    
+    .walkthrough-progress-bar {
+        width: 80px;
+    }
+    
+    .walkthrough-skip-all {
+        top: 10px;
+        left: 10px;
+        padding: 6px 10px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .walkthrough-tooltip {
+        max-width: calc(100vw - 10px) !important;
+        min-width: calc(100vw - 10px) !important;
+        width: calc(100vw - 10px) !important;
+        padding: 10px !important;
+        left: 5px !important;
+        font-size: 13px;
+    }
+    
+    .tooltip-header h4 {
+        font-size: 14px;
+        line-height: 1.1;
+    }
+    
+    .tooltip-progress {
+        font-size: 10px;
+    }
+    
+    .tooltip-content {
+        font-size: 12px;
+        line-height: 1.3;
+        margin-bottom: 12px;
+    }
+    
+    .action-note {
+        font-size: 11px;
+        padding: 6px 8px;
+    }
+    
+    .tooltip-next,
+    .tooltip-skip {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+}
+
+/* Very small screens (under 360px) */
+@media (max-width: 360px) {
+    .walkthrough-tooltip {
+        max-width: calc(100vw - 5px) !important;
+        min-width: calc(100vw - 5px) !important;
+        width: calc(100vw - 5px) !important;
+        padding: 8px !important;
+        left: 2px !important;
+        font-size: 12px;
+    }
+    
+    .tooltip-header h4 {
+        font-size: 13px;
+        line-height: 1.0;
+    }
+    
+    .tooltip-content {
+        font-size: 11px;
+        line-height: 1.2;
+    }
+}

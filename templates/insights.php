@@ -2553,7 +2553,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     return;
                 }
                 
-                console.log(`Smart refresh triggered: ${reason}`);
                 isRefreshing = true;
                 lastRefreshTime = now;
                 

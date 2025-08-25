@@ -317,7 +317,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 loadWithRetry(refreshPredictions, 'Predictions')
             ]).then(() => {
                 hideLoadingOverlay();
-                console.log('All insights loading completed');
             }).catch((error) => {
                 hideLoadingOverlay();
                 console.error('Error loading insights:', error);
@@ -329,7 +328,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             for (let i = 0; i < maxRetries; i++) {
                 try {
                     await loadFunction();
-                    console.log(componentName + ' loaded successfully');
                     return;
                 } catch (error) {
                     console.warn(componentName + ' failed attempt ' + (i + 1) + ':', error);

@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check if user needs to complete salary setup first
+require_once '../includes/walkthrough_guard.php';
+
 // Get user information from session
 $user_first_name = $_SESSION['first_name'] ?? 'User';
 $user_full_name = $_SESSION['full_name'] ?? 'User';
@@ -22,6 +25,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/personal-expense.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Universal Snackbar -->
+    <script src="../public/js/snackbar.js"></script>
     <style>
         .chart-content {
             padding: 20px;
@@ -588,55 +593,70 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <!-- Add/Edit Expense Modal -->
     <div id="addExpenseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Expense</h3>
-                <span class="close" onclick="closeModal('addExpenseModal')">&times;</span>
+        <div class="modal-content wide-modal">
+            <div class="modal-header gradient-header expense-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon expense-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h3>Record New Expense</h3>
+                        <p>Track your spending and manage your budget</p>
+                    </div>
+                </div>
+                <span class="close modern-close" onclick="closeModal('addExpenseModal')">&times;</span>
             </div>
-            <form class="modal-form" onsubmit="saveExpense(event)">
-                <div class="form-group">
-                    <label>Amount (₵)</label>
-                    <input type="number" step="0.01" placeholder="0.00" id="expenseAmount" required>
+            <form class="modal-form compact-form" onsubmit="saveExpense(event)">
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-money-bill-wave"></i> Amount (₵)</label>
+                        <input type="number" step="0.01" placeholder="0.00" id="expenseAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Date</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Budget Category</label>
-                    <select id="expenseCategory" onchange="updateCategoryBudget()" required>
-                        <option value="">Loading categories...</option>
-                    </select>
-                    <div id="categoryBudgetInfo" class="category-budget-info" style="display: none;">
-                        <span id="budgetStatus"></span>
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-tags"></i> Budget Category</label>
+                        <select id="expenseCategory" onchange="updateCategoryBudget()" required>
+                            <option value="">Loading categories...</option>
+                        </select>
+                        <div id="categoryBudgetInfo" class="category-budget-info" style="display: none;">
+                            <span id="budgetStatus"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-credit-card"></i> Payment Method</label>
+                        <select id="paymentMethod">
+                            <option value="cash">💵 Cash</option>
+                            <option value="card">💳 Debit Card</option>
+                            <option value="mobile">📱 Mobile Money</option>
+                            <option value="bank">🏦 Bank Transfer</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" placeholder="What was this expense for?" id="expenseDescription" required>
+                <div class="form-grid two-column">
+                    <div class="form-group">
+                        <label><i class="fas fa-edit"></i> Description</label>
+                        <input type="text" placeholder="What was this expense for?" id="expenseDescription" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sticky-note"></i> Notes (Optional)</label>
+                        <input type="text" placeholder="Additional notes..." id="expenseNotes">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="expenseDate" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select id="paymentMethod">
-                        <option value="cash">Cash</option>
-                        <option value="card">Debit Card</option>
-                        <option value="mobile">Mobile Money</option>
-                        <option value="bank">Bank Transfer</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Notes (Optional)</label>
-                    <textarea placeholder="Additional notes..." id="expenseNotes" rows="3"></textarea>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeModal('addExpenseModal')">Cancel</button>
-                    <button type="submit" class="btn-primary">Add Expense</button>
+                <div class="modal-actions modern-actions">
+                    <button type="button" class="btn-secondary modern-btn" onclick="closeModal('addExpenseModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary modern-btn expense-btn">
+                        <i class="fas fa-plus-circle"></i> Record Expense
+                    </button>
                 </div>
             </form>
         </div>
@@ -679,6 +699,18 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
             
             requestAnimationFrame(updateNumber);
+        }
+
+        // Helper function to convert icon names to FontAwesome HTML
+        function getIconHTML(iconName) {
+            // Convert icon name to FontAwesome HTML
+            if (!iconName) return '<i class="fas fa-tag"></i>';
+            
+            // If it's already HTML (contains '<i'), return as is
+            if (iconName.includes('<i')) return iconName;
+            
+            // If it's just the icon name, convert to FontAwesome
+            return `<i class="fas fa-${iconName}"></i>`;
         }
 
         // Initialize page
@@ -845,7 +877,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             event.target.classList.add('active');
             
             // Chart switching logic would go here
-            console.log(`Showing ${chartType} chart`);
         }
 
         // Load expense summary data
@@ -859,7 +890,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Summary response:', data); // Debug log
                 if (data.success && data.summary) {
                     updateSummaryCards(data.summary);
                 } else {
@@ -953,7 +983,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Categories response:', data); // Debug log
                 if (data.success && data.categories) {
                     const categorySelect = document.getElementById('expenseCategory');
                     categorySelect.innerHTML = '<option value="">Select Category</option>';
@@ -1082,7 +1111,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 
                 categoryElement.innerHTML = `
                     <div class="category-header">
-                        <span class="category-icon">${category.icon || '📝'}</span>
+                        <span class="category-icon">${getIconHTML(category.icon) || '📝'}</span>
                         <div class="category-info">
                             <h4>${category.name}</h4>
                             <p>${category.transactions} transaction${category.transactions !== 1 ? 's' : ''}</p>
@@ -1156,7 +1185,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 };
                 
                 const categoryKey = expense.category_name.toLowerCase();
-                const icon = iconMap[categoryKey] || expense.category_icon || '📝';
+                const icon = iconMap[categoryKey] || getIconHTML(expense.category_icon) || '📝';
                 
                 expenseElement.innerHTML = `
                     <div class="expense-icon ${expense.category_type}">${icon}</div>
@@ -1260,14 +1289,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         function editExpense(id) {
             // In real app, load expense data and show edit modal
-            console.log('Editing expense:', id);
             showSnackbar('Edit functionality coming soon!', 'info');
         }
 
         function deleteExpense(id) {
             if (confirm('Are you sure you want to delete this expense?')) {
                 // In real app, delete from database
-                console.log('Deleting expense:', id);
                 showSnackbar('Expense deleted successfully!', 'success');
             }
         }
@@ -1546,7 +1573,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         function loadMoreExpenses() {
             // In real app, load more expenses from server
-            console.log('Loading more expenses...');
             showSnackbar('Loading more expenses...', 'info');
         }
 
