@@ -27,11 +27,40 @@ function debugLog($message, $data = null) {
     }
 }
 
-// Function to redirect with message
-function redirectWithMessage($location, $status, $message) {
-    $encodedMessage = urlencode($message);
-    header("Location: {$location}?status={$status}&message={$encodedMessage}");
+// Function to check if this is a fetch request
+function isFetchRequest() {
+    return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest'
+        || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+        || (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
+}
+
+// Function to send JSON response
+function sendJsonResponse($success, $message, $redirect = null, $data = null) {
+    header('Content-Type: application/json');
+    $response = [
+        'success' => $success,
+        'message' => $message,
+        'timestamp' => date('Y-m-d H:i:s')
+    ];
+    if ($redirect) {
+        $response['redirect'] = $redirect;
+    }
+    if ($data) {
+        $response['data'] = $data;
+    }
+    echo json_encode($response);
     exit();
+}
+
+// Function to redirect with message (traditional form) or send JSON (fetch)
+function redirectWithMessage($location, $status, $message) {
+    if (isFetchRequest()) {
+        sendJsonResponse($status === 'success', $message, $location);
+    } else {
+        $encodedMessage = urlencode($message);
+        header("Location: {$location}?status={$status}&message={$encodedMessage}");
+        exit();
+    }
 }
 
 debugLog("Login script started");

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Input Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        .phone-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+            transition: border-color 0.3s ease;
+        }
+        .phone-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .help-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .test-results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid #2563eb;
+        }
+        .valid {
+            border-color: #10b981 !important;
+            background-color: #f0fdf4;
+        }
+        .invalid {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2;
+        }
+        .test-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+        .test-button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📱 Ghana Phone Number Input Test</h1>
+        <p>Test the enhanced phone number input with fixed +233 prefix and 9-digit validation.</p>
+        
+        <div class="form-group">
+            <label for="phoneTest">Phone Number</label>
+            <input type="tel" 
+                   id="phoneTest" 
+                   class="phone-input"
+                   placeholder="+233 XX XXX XXXX"
+                   maxlength="16">
+            <div class="help-text">
+                • +233 prefix is always present<br>
+                • Maximum 9 digits after +233<br>
+                • Auto-formatted as: +233 XX XXX XXXX
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="momoTest">Mobile Money Number</label>
+            <input type="tel" 
+                   id="momoTest" 
+                   class="phone-input"
+                   placeholder="+233 XX XXX XXXX"
+                   maxlength="16">
+            <div class="help-text">Same validation as phone number</div>
+        </div>
+        
+        <div class="test-controls">
+            <h3>Test Cases</h3>
+            <button class="test-button" onclick="testNumber('0241234567')">Test: 0241234567</button>
+            <button class="test-button" onclick="testNumber('233241234567')">Test: 233241234567</button>
+            <button class="test-button" onclick="testNumber('0501234567')">Test: 0501234567</button>
+            <button class="test-button" onclick="testNumber('241234567')">Test: 241234567</button>
+            <button class="test-button" onclick="clearInputs()">Clear All</button>
+        </div>
+        
+        <div class="test-results" id="results">
+            <h4>Validation Results</h4>
+            <div id="phoneResult">Phone: Not tested</div>
+            <div id="momoResult">MoMo: Not tested</div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced phone number formatting for Ghana numbers (same as sign-up page)
+        document.querySelectorAll('.phone-input').forEach(input => {
+            // Set initial value
+            if (!input.value) {
+                input.value = '+233 ';
+            }
+            
+            input.addEventListener('focus', function() {
+                // Ensure +233 is always present when focused
+                if (!this.value.startsWith('+233')) {
+                    this.value = '+233 ';
+                }
+                // Position cursor after +233 space
+                setTimeout(() => {
+                    this.setSelectionRange(5, 5);
+                }, 0);
+            });
+            
+            input.addEventListener('input', function(e) {
+                let value = this.value;
+                
+                // Always ensure it starts with +233
+                if (!value.startsWith('+233')) {
+                    value = '+233 ' + value.replace(/^\+?233\s?/, '');
+                }
+                
+                // Remove all non-digits after +233
+                let phoneDigits = value.substring(5).replace(/\D/g, '');
+                
+                // Limit to 9 digits maximum
+                if (phoneDigits.length > 9) {
+                    phoneDigits = phoneDigits.substring(0, 9);
+                }
+                
+                // Format the number: +233 XX XXX XXXX
+                let formattedNumber = '+233 ';
+                if (phoneDigits.length > 0) {
+                    formattedNumber += phoneDigits.substring(0, 2);
+                    if (phoneDigits.length > 2) {
+                        formattedNumber += ' ' + phoneDigits.substring(2, 5);
+                        if (phoneDigits.length > 5) {
+                            formattedNumber += ' ' + phoneDigits.substring(5, 9);
+                        }
+                    }
+                }
+                
+                this.value = formattedNumber;
+                
+                // Validate and style
+                validatePhone(this);
+                
+                // Prevent cursor from moving to beginning
+                const cursorPos = this.value.length;
+                setTimeout(() => {
+                    this.setSelectionRange(cursorPos, cursorPos);
+                }, 0);
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                const cursorPos = this.selectionStart;
+                
+                // Prevent deleting +233 prefix
+                if ((e.key === 'Backspace' || e.key === 'Delete') && cursorPos <= 5) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Prevent typing before +233
+                if (cursorPos < 5 && e.key.length === 1) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                
+                let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                let phoneDigits = pastedText.replace(/\D/g, '');
+                
+                // Handle different paste formats
+                if (phoneDigits.startsWith('233')) {
+                    phoneDigits = phoneDigits.substring(3);
+                } else if (phoneDigits.startsWith('0')) {
+                    phoneDigits = phoneDigits.substring(1);
+                }
+                
+                // Limit to 9 digits
+                phoneDigits = phoneDigits.substring(0, 9);
+                
+                // Format the number
+                let formattedNumber = '+233 ';
+                if (phoneDigits.length > 0) {
+                    formattedNumber += phoneDigits.substring(0, 2);
+                    if (phoneDigits.length > 2) {
+                        formattedNumber += ' ' + phoneDigits.substring(2, 5);
+                        if (phoneDigits.length > 5) {
+                            formattedNumber += ' ' + phoneDigits.substring(5, 9);
+                        }
+                    }
+                }
+                
+                this.value = formattedNumber;
+                validatePhone(this);
+            });
+        });
+        
+        function validatePhone(input) {
+            const phoneDigits = input.value.replace(/\D/g, '');
+            const isValid = phoneDigits.length === 12 && phoneDigits.startsWith('233');
+            
+            if (isValid) {
+                input.classList.remove('invalid');
+                input.classList.add('valid');
+            } else {
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+            }
+            
+            updateResults();
+        }
+        
+        function updateResults() {
+            const phoneInput = document.getElementById('phoneTest');
+            const momoInput = document.getElementById('momoTest');
+            
+            const phoneDigits = phoneInput.value.replace(/\D/g, '');
+            const momoDigits = momoInput.value.replace(/\D/g, '');
+            
+            const phoneValid = phoneDigits.length === 12 && phoneDigits.startsWith('233');
+            const momoValid = momoDigits.length === 12 && momoDigits.startsWith('233');
+            
+            document.getElementById('phoneResult').innerHTML = 
+                `Phone: ${phoneInput.value} (${phoneValid ? '✅ Valid' : '❌ Invalid'} - ${phoneDigits.length - 3} digits)`;
+            document.getElementById('momoResult').innerHTML = 
+                `MoMo: ${momoInput.value} (${momoValid ? '✅ Valid' : '❌ Invalid'} - ${momoDigits.length - 3} digits)`;
+        }
+        
+        function testNumber(number) {
+            const phoneInput = document.getElementById('phoneTest');
+            const momoInput = document.getElementById('momoTest');
+            
+            // Simulate pasting the test number
+            phoneInput.value = '+233 ';
+            phoneInput.focus();
+            
+            const event = new Event('paste', { bubbles: true });
+            event.clipboardData = {
+                getData: () => number
+            };
+            phoneInput.dispatchEvent(event);
+            
+            // Also update MoMo field
+            setTimeout(() => {
+                momoInput.value = phoneInput.value;
+                validatePhone(momoInput);
+            }, 100);
+        }
+        
+        function clearInputs() {
+            document.querySelectorAll('.phone-input').forEach(input => {
+                input.value = '+233 ';
+                input.classList.remove('valid', 'invalid');
+            });
+            updateResults();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateResults();
+        });
+    </script>
+</body>
+</html>

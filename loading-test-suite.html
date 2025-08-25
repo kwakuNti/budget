@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Screen Test - All Pages</title>
+    <link rel="stylesheet" href="public/css/loading.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .page-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .page-link {
+            display: block;
+            padding: 15px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .page-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .test-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+        .test-button:hover {
+            background: #059669;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔄 Loading Screen Test Suite</h1>
+        <p>Test the enhanced loading screens across all budget pages</p>
+        
+        <div class="test-controls">
+            <h3>Loading Screen Tests</h3>
+            <button class="test-button" onclick="testLoadingScreen()">Test Loading Screen</button>
+            <button class="test-button" onclick="testCustomMessage()">Test Custom Message</button>
+            <button class="test-button" onclick="testAutoHide()">Test Auto Hide (3s)</button>
+        </div>
+
+        <div class="page-links">
+            <a href="templates/personal-dashboard.php" class="page-link">
+                <i class="fas fa-home"></i><br>
+                Personal Dashboard
+            </a>
+            <a href="templates/budget.php" class="page-link">
+                <i class="fas fa-chart-bar"></i><br>
+                Budget Planning
+            </a>
+            <a href="templates/personal-expense.php" class="page-link">
+                <i class="fas fa-credit-card"></i><br>
+                Expense Tracking
+            </a>
+            <a href="templates/savings.php" class="page-link">
+                <i class="fas fa-piggy-bank"></i><br>
+                Savings Goals
+            </a>
+            <a href="templates/report.php" class="page-link">
+                <i class="fas fa-chart-line"></i><br>
+                Financial Reports
+            </a>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script src="public/js/loading.js"></script>
+    <script>
+        let loader;
+        
+        function initLoader() {
+            if (window.LoadingScreen) {
+                loader = new window.LoadingScreen();
+                showStatus('✅ LoadingScreen initialized successfully!', 'success');
+                console.log('Test: Loader initialized:', loader);
+            } else {
+                showStatus('❌ LoadingScreen not available', 'error');
+                setTimeout(initLoader, 100);
+            }
+        }
+        
+        function testLoadingScreen() {
+            if (loader) {
+                loader.show();
+                setTimeout(() => {
+                    loader.hide();
+                    showStatus('✅ Basic loading screen test completed', 'success');
+                }, 2000);
+            } else {
+                showStatus('❌ Loader not initialized', 'error');
+            }
+        }
+        
+        function testCustomMessage() {
+            if (loader) {
+                const loadingMessage = loader.loadingElement.querySelector('.loading-message p');
+                if (loadingMessage) {
+                    const originalMessage = loadingMessage.innerHTML;
+                    loadingMessage.innerHTML = 'Testing custom message<span class="loading-dots-text">...</span>';
+                    loader.show();
+                    setTimeout(() => {
+                        loader.hide();
+                        loadingMessage.innerHTML = originalMessage;
+                        showStatus('✅ Custom message test completed', 'success');
+                    }, 2000);
+                } else {
+                    showStatus('❌ Could not find loading message element', 'error');
+                }
+            } else {
+                showStatus('❌ Loader not initialized', 'error');
+            }
+        }
+        
+        function testAutoHide() {
+            if (loader) {
+                loader.show();
+                loader.autoHide(3000);
+                showStatus('✅ Auto-hide test started (3 seconds)', 'success');
+            } else {
+                showStatus('❌ Loader not initialized', 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', initLoader);
+        
+        // Test the enhanced loading pattern
+        console.log('Test Suite: Running LoadingScreen availability test...');
+        function checkLoadingScreen(attempts = 0) {
+            const maxAttempts = 10;
+            
+            if (window.LoadingScreen) {
+                console.log('Test Suite: LoadingScreen found after', attempts, 'attempts');
+                showStatus(`✅ LoadingScreen available after ${attempts} attempts`, 'success');
+            } else if (attempts < maxAttempts) {
+                console.log('Test Suite: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
+                setTimeout(() => checkLoadingScreen(attempts + 1), 50);
+            } else {
+                console.error('Test Suite: LoadingScreen still not available after', maxAttempts, 'attempts');
+                showStatus('❌ LoadingScreen not available after 10 attempts', 'error');
+            }
+        }
+        
+        setTimeout(() => checkLoadingScreen(), 100);
+    </script>
+</body>
+</html>

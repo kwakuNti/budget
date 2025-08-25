@@ -24,7 +24,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../public/css/personal.css">
+    <link rel="stylesheet" href="../public/css/mobile-nav.css">
     <link rel="stylesheet" href="../public/css/personal-expense.css">
+    <link rel="stylesheet" href="../public/css/loading.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Universal Snackbar -->
     <script src="../public/js/snackbar.js"></script>
@@ -96,7 +98,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
             
-            <nav class="header-nav">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <nav class="header-nav" id="headerNav">
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
                 <a href="salary.php" class="nav-item ">Salary Setup</a>
                 <a href="budget.php" class="nav-item">Budget</a>
@@ -714,10 +722,76 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             return `<i class="fas fa-${iconName}"></i>`;
         }
 
-        // Initialize page
+        // Enhanced Personal Expense Page JavaScript
+        // Wait for loading.js to be available
+        function initializeExpense() {
+            console.log('Expense: Initializing expense page');
+            console.log('Expense: LoadingScreen available?', typeof window.LoadingScreen);
+            
+            // Initialize loading screen with expense-specific message
+            if (window.LoadingScreen) {
+                console.log('Expense: Creating LoadingScreen');
+                window.budgetlyLoader = new LoadingScreen();
+                console.log('Expense: LoadingScreen created', window.budgetlyLoader);
+                
+                // Customize the loading message for expenses
+                const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+                if (loadingMessage) {
+                    loadingMessage.innerHTML = 'Loading your expenses<span class="loading-dots-text">...</span>';
+                    console.log('Expense: Loading message customized');
+                } else {
+                    console.error('Expense: Could not find loading message element');
+                }
+            } else {
+                console.error('Expense: LoadingScreen class not available');
+            }
+
+            // Show initial loading for data fetch
+            if (window.budgetlyLoader) {
+                console.log('Expense: Showing loading screen');
+                window.budgetlyLoader.show();
+            } else {
+                console.error('Expense: budgetlyLoader not available');
+            }
+
+            // Initialize expense page
+            loadExpenseData();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Expense: DOMContentLoaded fired');
+            
+            // Enhanced loading screen availability check
+            function checkLoadingScreen(attempts = 0) {
+                const maxAttempts = 10;
+                
+                if (window.LoadingScreen) {
+                    console.log('Expense: LoadingScreen found after', attempts, 'attempts');
+                    initializeExpense();
+                } else if (attempts < maxAttempts) {
+                    console.log('Expense: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
+                    setTimeout(() => checkLoadingScreen(attempts + 1), 50);
+                } else {
+                    console.error('Expense: LoadingScreen still not available after', maxAttempts, 'attempts');
+                    // Initialize without loading screen
+                    loadExpenseData();
+                }
+            }
+            
+            checkLoadingScreen();
+        });
+
+        function loadExpenseData() {
+            // Show loading screen for data refresh (but only if not initial load)
+            if (window.budgetlyLoader && document.body.classList.contains('loaded')) {
+                window.budgetlyLoader.show();
+            }
+
             // Set today's date as default
-            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
+            const expenseDateField = document.getElementById('expenseDate');
+            if (expenseDateField) {
+                expenseDateField.value = new Date().toISOString().split('T')[0];
+            }
             
             // Load saved theme
             const savedTheme = localStorage.getItem('personalTheme') || 'default';
@@ -732,13 +806,37 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 activeOption.classList.add('active');
             }
             
-            // Initialize page features
-            loadCategories();
-            loadExpenseSummary();
-            loadCategoryBreakdown();
-            loadRecentExpenses();
-            initializeCharts();
-        });
+            // Initialize page features - only call functions that actually exist
+            const functionsToLoad = [
+                'loadCategories',
+                'loadExpenseSummary', 
+                'loadCategoryBreakdown',
+                'loadRecentExpenses',
+                'initializeCharts'
+            ];
+            
+            console.log('Expense: Loading page functions...');
+            functionsToLoad.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    console.log(`Expense: Loading ${funcName}...`);
+                    window[funcName]();
+                } else {
+                    console.warn(`Expense: Function ${funcName} not found, skipping`);
+                }
+            });
+            
+            // Mark body as loaded after first successful load
+            document.body.classList.add('loaded');
+            
+            // Hide loading screen after data processing
+            if (window.budgetlyLoader) {
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                }, 2000);
+            }
+        }
+
+        // Legacy initialization removed - now handled by enhanced loading system above
 
         // Add visibility change listener for auto-refresh when returning to page
         document.addEventListener('visibilitychange', function() {
@@ -1243,6 +1341,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             submitBtn.textContent = 'Saving...';
             submitBtn.disabled = true;
             
+            // Show loading screen
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.show();
+            }
+            
             // Prepare form data
             const formData = new FormData();
             formData.append('action', 'add_expense');
@@ -1282,6 +1385,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 showSnackbar('Failed to add expense. Please try again.', 'error');
             })
             .finally(() => {
+                // Hide loading screen
+                if (window.budgetlyLoader) {
+                    window.budgetlyLoader.hide();
+                }
+                
                 // Restore button state
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
@@ -1612,8 +1720,24 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 setTimeout(() => snackbar.remove(), 300);
             }, 4000);
         }
+        
+        // Test function for loading screen (can be called from browser console)
+        window.testExpenseLoadingScreen = function(duration = 3000) {
+            if (window.budgetlyLoader) {
+                console.log('Testing expense loading screen for', duration, 'ms');
+                window.budgetlyLoader.show();
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                    console.log('Expense loading screen test complete');
+                }, duration);
+            } else {
+                console.log('Loading screen not available');
+            }
+        };
     </script>
-        <script src="../public/js/privacy.js"></script>
+    <script src="../public/js/loading.js"></script>
+    <script src="../public/js/mobile-nav.js"></script>
+    <script src="../public/js/privacy.js"></script>
 
 </body>
 </html>

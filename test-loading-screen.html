@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Screen Test</title>
+    <link rel="stylesheet" href="public/css/loading.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <h1>Loading Screen Test</h1>
+    <button onclick="testShow()">Show Loading</button>
+    <button onclick="testHide()">Hide Loading</button>
+    <button onclick="testAutoHide()">Auto Hide (3s)</button>
+    
+    <script src="public/js/loading.js"></script>
+    <script>
+        let loader;
+        
+        function initLoader() {
+            if (window.LoadingScreen) {
+                loader = new window.LoadingScreen();
+                console.log('Loader initialized:', loader);
+            } else {
+                console.error('LoadingScreen not available');
+                setTimeout(initLoader, 100);
+            }
+        }
+        
+        function testShow() {
+            if (loader) {
+                loader.show();
+            } else {
+                console.error('Loader not initialized');
+            }
+        }
+        
+        function testHide() {
+            if (loader) {
+                loader.hide();
+            } else {
+                console.error('Loader not initialized');
+            }
+        }
+        
+        function testAutoHide() {
+            if (loader) {
+                loader.show();
+                loader.autoHide(3000);
+            } else {
+                console.error('Loader not initialized');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initLoader);
+    </script>
+</body>
+</html>

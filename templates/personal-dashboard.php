@@ -33,8 +33,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Personal Dashboard </title>
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/personal.css">
+    <link rel="stylesheet" href="../public/css/mobile-nav.css">
     <link rel="stylesheet" href="../public/css/walkthrough.css">
     <link rel="stylesheet" href="../public/css/privacy.css">
+    <link rel="stylesheet" href="../public/css/loading.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -321,11 +323,12 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 top: 80px;
                 left: 0;
                 right: 0;
-                background: rgba(255, 255, 255, 0.95);
+                background: rgba(255, 255, 255, 0.98);
                 backdrop-filter: blur(10px);
                 border-radius: 0 0 20px 20px;
                 padding: 20px;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(0, 0, 0, 0.1);
                 transform: translateY(-100%);
                 opacity: 0;
                 visibility: hidden;
@@ -342,19 +345,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
 
             .header-nav .nav-item {
-                color: var(--text-color);
+                color: #1f2937;
                 padding: 12px 16px;
                 border-radius: 10px;
                 transition: all 0.3s ease;
                 text-align: center;
-                font-weight: 500;
+                font-weight: 600;
+                text-decoration: none;
+                display: block;
+                border: 1px solid transparent;
             }
 
             .header-nav .nav-item:hover,
             .header-nav .nav-item.active {
-                background: var(--primary-color);
+                background: #3b82f6;
                 color: white;
                 transform: translateX(5px);
+                border-color: #2563eb;
             }
 
             .theme-selector {
@@ -1258,6 +1265,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </style>
 </head>
 <body>
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -1802,7 +1810,37 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
     <script>
         // Enhanced Dashboard JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
+        // Wait for loading.js to be available
+        function initializeDashboard() {
+            console.log('Dashboard: Initializing dashboard');
+            console.log('Dashboard: LoadingScreen available?', typeof window.LoadingScreen);
+            
+            // Initialize loading screen with dashboard-specific message
+            if (window.LoadingScreen) {
+                console.log('Dashboard: Creating LoadingScreen');
+                window.budgetlyLoader = new LoadingScreen();
+                console.log('Dashboard: LoadingScreen created', window.budgetlyLoader);
+                
+                // Customize the loading message for dashboard
+                const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+                if (loadingMessage) {
+                    loadingMessage.innerHTML = 'Loading your dashboard<span class="loading-dots-text">...</span>';
+                    console.log('Dashboard: Loading message customized');
+                } else {
+                    console.error('Dashboard: Could not find loading message element');
+                }
+            } else {
+                console.error('Dashboard: LoadingScreen class not available');
+            }
+
+            // Show initial loading for data fetch
+            if (window.budgetlyLoader) {
+                console.log('Dashboard: Showing loading screen');
+                window.budgetlyLoader.show();
+            } else {
+                console.error('Dashboard: budgetlyLoader not available');
+            }
+
             // Initialize dashboard
             loadDashboardData();
             updatePaydayCountdown();
@@ -1812,6 +1850,32 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             
             // Update countdown every hour
             setInterval(updatePaydayCountdown, 3600000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard: DOMContentLoaded fired');
+            
+            // Enhanced loading screen availability check
+            function checkLoadingScreen(attempts = 0) {
+                const maxAttempts = 10;
+                
+                if (window.LoadingScreen) {
+                    console.log('Dashboard: LoadingScreen found after', attempts, 'attempts');
+                    initializeDashboard();
+                } else if (attempts < maxAttempts) {
+                    console.log('Dashboard: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
+                    setTimeout(() => checkLoadingScreen(attempts + 1), 50);
+                } else {
+                    console.error('Dashboard: LoadingScreen still not available after', maxAttempts, 'attempts');
+                    // Initialize without loading screen
+                    loadDashboardData();
+                    updatePaydayCountdown();
+                    setInterval(loadDashboardData, 30000);
+                    setInterval(updatePaydayCountdown, 3600000);
+                }
+            }
+            
+            checkLoadingScreen();
         });
 
         // Animated number counting function
@@ -1847,6 +1911,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function loadDashboardData() {
+            // Show loading screen for data refresh (but only if not initial load)
+            if (window.budgetlyLoader && document.body.classList.contains('loaded')) {
+                window.budgetlyLoader.show();
+            }
+
             fetch('../api/personal_dashboard_data.php')
                 .then(response => response.json())
                 .then(data => {
@@ -1854,6 +1923,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         updateDashboardUI(data);
                         // Load enhanced insights after main dashboard data
                         loadEnhancedInsights();
+                        
+                        // Mark body as loaded after first successful load
+                        document.body.classList.add('loaded');
                     } else {
                         console.error('Failed to load dashboard data:', data.message);
                         showSnackbar('Failed to load dashboard data', 'error');
@@ -1862,6 +1934,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 .catch(error => {
                     console.error('Error fetching dashboard data:', error);
                     showSnackbar('Error loading dashboard data', 'error');
+                })
+                .finally(() => {
+                    // Hide loading screen after data processing
+                    if (window.budgetlyLoader) {
+                        setTimeout(() => {
+                            window.budgetlyLoader.hide();
+                        }, 500);
+                    }
                 });
         }
 
@@ -3216,6 +3296,20 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 closeTransactionsModal();
             }
         });
+
+        // Test function for loading screen (can be called from browser console)
+        window.testDashboardLoadingScreen = function(duration = 3000) {
+            if (window.budgetlyLoader) {
+                console.log('Testing dashboard loading screen for', duration, 'ms');
+                window.budgetlyLoader.show();
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                    console.log('Dashboard loading screen test complete');
+                }, duration);
+            } else {
+                console.log('Loading screen not available');
+            }
+        };
     </script>
 
     <!-- Transactions Modal -->
@@ -3275,9 +3369,62 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         </div>
     </div>
     
+    <!-- Loading Screen Script -->
+    <script src="../public/js/loading.js"></script>
     <!-- Privacy System Script -->
     <script src="../public/js/privacy.js"></script>
     <!-- Walkthrough System Scripts -->
     <script src="../public/js/walkthrough.js"></script>
+    <!-- Mobile Navigation Script -->
+    <script src="../public/js/mobile-nav.js"></script>
+    
+    <script>
+        // Test function for loading screen (can be called from browser console)
+        window.testDashboardLoadingScreen = function(duration = 3000) {
+            if (window.budgetlyLoader) {
+                console.log('Testing dashboard loading screen for', duration, 'ms');
+                window.budgetlyLoader.show();
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                    console.log('Dashboard loading screen test complete');
+                }, duration);
+            } else {
+                console.log('Loading screen not available');
+            }
+        };
+
+        // Emergency function to hide loading screen (can be called from browser console)
+        window.hideLoadingScreen = function() {
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.hide();
+                console.log('Loading screen forcefully hidden');
+            } else {
+                console.log('Loading screen not available');
+            }
+        };
+
+        // Keyboard shortcut to hide loading screen (Escape key)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                window.hideLoadingScreen();
+            }
+        });
+
+        // Global error handler to ensure loading screen is hidden
+        window.addEventListener('error', function(event) {
+            console.error('Global error caught:', event.error);
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.hide();
+            }
+        });
+
+        // Promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.hide();
+            }
+        });
+    </script>
 </body>
 </html>

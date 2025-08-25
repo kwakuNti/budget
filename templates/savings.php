@@ -23,7 +23,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Savings - Nkansah Budget Manager</title>
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/personal.css">
+    <link rel="stylesheet" href="../public/css/mobile-nav.css">
     <link rel="stylesheet" href="../public/css/savings.css">
+    <link rel="stylesheet" href="../public/css/loading.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 CDN -->
@@ -43,7 +45,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
             
-            <nav class="header-nav">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <nav class="header-nav" id="headerNav">
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
                 <a href="salary.php" class="nav-item">Salary Setup</a>
                 <a href="budget.php" class="nav-item">Budget</a>
@@ -1516,6 +1524,11 @@ function toggleAutoSaveDetails() {
 function saveAutoSaveConfig(event) {
     event.preventDefault();
     
+    // Show loading screen during save
+    if (window.budgetlyLoader) {
+        window.budgetlyLoader.show();
+    }
+    
     const formData = new FormData();
     formData.append('action', 'update_config');
     formData.append('enabled', document.getElementById('autoSaveEnabled').checked);
@@ -1532,6 +1545,11 @@ function saveAutoSaveConfig(event) {
     })
     .then(response => response.json())
     .then(data => {
+        // Hide loading screen
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
+        
         if (data.success) {
             showSnackbar('Auto-save configuration updated successfully', 'success');
             closeModal('autoSaveModal');
@@ -1541,6 +1559,10 @@ function saveAutoSaveConfig(event) {
         }
     })
     .catch(error => {
+        // Hide loading screen on error
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
         console.error('Error saving config:', error);
         showSnackbar('Error saving configuration', 'error');
     });
@@ -1736,12 +1758,117 @@ function renderChallenges(challenges) {
     container.innerHTML = html;
 }
 
-// Event listeners for auto-save functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Load initial data
-    loadAutoSaveOverview();
-    loadChallenges();
+// Enhanced Savings Page JavaScript
+// Wait for loading.js to be available
+function initializeSavings() {
+    console.log('Savings: Initializing savings page');
+    console.log('Savings: LoadingScreen available?', typeof window.LoadingScreen);
     
+    // Initialize loading screen with savings-specific message
+    if (window.LoadingScreen) {
+        console.log('Savings: Creating LoadingScreen');
+        window.budgetlyLoader = new LoadingScreen();
+        console.log('Savings: LoadingScreen created', window.budgetlyLoader);
+        
+        // Customize the loading message for savings
+        const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+        if (loadingMessage) {
+            loadingMessage.innerHTML = 'Loading your savings<span class="loading-dots-text">...</span>';
+            console.log('Savings: Loading message customized');
+        } else {
+            console.error('Savings: Could not find loading message element');
+        }
+    } else {
+        console.error('Savings: LoadingScreen class not available');
+    }
+
+    // Show initial loading for data fetch
+    if (window.budgetlyLoader) {
+        console.log('Savings: Showing loading screen');
+        window.budgetlyLoader.show();
+    } else {
+        console.error('Savings: budgetlyLoader not available');
+    }
+
+    // Initialize savings page
+    loadSavingsData();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Savings: DOMContentLoaded fired');
+    
+    // Enhanced loading screen availability check
+    function checkLoadingScreen(attempts = 0) {
+        const maxAttempts = 10;
+        
+        if (window.LoadingScreen) {
+            console.log('Savings: LoadingScreen found after', attempts, 'attempts');
+            initializeSavings();
+        } else if (attempts < maxAttempts) {
+            console.log('Savings: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
+            setTimeout(() => checkLoadingScreen(attempts + 1), 50);
+        } else {
+            console.error('Savings: LoadingScreen still not available after', maxAttempts, 'attempts');
+            // Initialize without loading screen
+            loadSavingsData();
+        }
+    }
+    
+    checkLoadingScreen();
+});
+
+function loadSavingsData() {
+    // Show loading screen for data refresh (but only if not initial load)
+    if (window.budgetlyLoader && document.body.classList.contains('loaded')) {
+        window.budgetlyLoader.show();
+    }
+
+    // Initialize savings manager
+    if (typeof SavingsManager !== 'undefined') {
+        window.savingsManager = new SavingsManager();
+    }
+    
+    // Load goal types dynamically
+    if (typeof loadGoalTypes === 'function') {
+        loadGoalTypes();
+    }
+    
+    // Load saved theme
+    if (typeof changeTheme === 'function') {
+        const savedTheme = localStorage.getItem('personalTheme') || 'default';
+        changeTheme(savedTheme);
+    }
+
+    // Load initial data - only call functions that exist
+    const functionsToLoad = [
+        'loadAutoSaveOverview',
+        'loadChallenges',
+        'loadAutoSaveConfig'
+    ];
+    
+    console.log('Savings: Loading page functions...');
+    functionsToLoad.forEach(funcName => {
+        if (typeof window[funcName] === 'function') {
+            console.log(`Savings: Loading ${funcName}...`);
+            window[funcName]();
+        } else {
+            console.warn(`Savings: Function ${funcName} not found, skipping`);
+        }
+    });
+    
+    // Mark body as loaded after first successful load
+    document.body.classList.add('loaded');
+    
+    // Hide loading screen after data processing
+    if (window.budgetlyLoader) {
+        setTimeout(() => {
+            window.budgetlyLoader.hide();
+        }, 2000);
+    }
+}
+
+// Event listeners for auto-save functionality (legacy - removed redundant loading code)
+document.addEventListener('DOMContentLoaded', function() {    
     // Save frequency change handler
     const saveFrequencySelect = document.getElementById('saveFrequency');
     if (saveFrequencySelect) {
@@ -1924,6 +2051,11 @@ function abandonChallenge(challengeId) {
 }
 
 function processAutoSave() {
+    // Show loading screen during auto-save processing
+    if (window.budgetlyLoader) {
+        window.budgetlyLoader.show();
+    }
+    
     fetch('/budget/api/autosave_config.php', {
         method: 'POST',
         headers: {
@@ -1933,6 +2065,11 @@ function processAutoSave() {
     })
     .then(response => response.json())
     .then(data => {
+        // Hide loading screen
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
+        
         if (data.success) {
             showSnackbar(`Auto-save processed! Saved ₵${data.total_saved.toLocaleString()} to ${data.goals_processed} goals`, 'success');
             // Reload data to show updated amounts
@@ -1944,6 +2081,10 @@ function processAutoSave() {
         }
     })
     .catch(error => {
+        // Hide loading screen on error
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
         console.error('Error processing auto-save:', error);
         showSnackbar('Error processing auto-save', 'error');
     });
@@ -3083,17 +3224,8 @@ class SavingsManager {
     }
 }
 
-// Initialize when DOM is loaded
+// Initialize when DOM is loaded (simplified - main init handled above)
 document.addEventListener('DOMContentLoaded', function() {
-    window.savingsManager = new SavingsManager();
-    
-    // Load goal types dynamically
-    loadGoalTypes();
-    
-    // Load saved theme
-    const savedTheme = localStorage.getItem('personalTheme') || 'default';
-    changeTheme(savedTheme);
-    
     // Add visibility change listener for auto-refresh
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && window.savingsManager) {
@@ -3610,12 +3742,22 @@ function saveComprehensiveAutoSaveConfig() {
     formData.append('action', 'save_config');
     formData.append('config', JSON.stringify(config));
     
+    // Show loading screen during save
+    if (window.budgetlyLoader) {
+        window.budgetlyLoader.show();
+    }
+    
     fetch('/budget/api/comprehensive_autosave.php', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
+        // Hide loading screen
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
+        
         if (data.success) {
             showSnackbar('Auto-save configuration saved successfully!', 'success');
             closeModal('comprehensiveAutoSaveModal');
@@ -3625,6 +3767,10 @@ function saveComprehensiveAutoSaveConfig() {
         }
     })
     .catch(error => {
+        // Hide loading screen on error
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
         console.error('Error saving configuration:', error);
         showSnackbar('Error saving configuration', 'error');
     });
@@ -3666,6 +3812,22 @@ function showSnackbar(message, type = 'info') {
     }, 4000);
 }
 
+// Test function for loading screen (can be called from browser console)
+window.testLoadingScreen = function(duration = 3000) {
+    if (window.budgetlyLoader) {
+        console.log('Testing loading screen for', duration, 'ms');
+        window.budgetlyLoader.show();
+        setTimeout(() => {
+            window.budgetlyLoader.hide();
+            console.log('Loading screen test complete');
+        }, duration);
+    } else {
+        console.log('Loading screen not available');
+    }
+};
+
     </script>
+    <script src="../public/js/loading.js"></script>
+    <script src="../public/js/mobile-nav.js"></script>
 </body>
 </html>

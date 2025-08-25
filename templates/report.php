@@ -30,6 +30,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/report.css">
     <link rel="stylesheet" href="../public/css/export-utility.css">
+    <link rel="stylesheet" href="../public/css/loading.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
@@ -498,6 +499,33 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </div>
 
     <!-- Scripts -->
+    <script src="../public/js/loading.js"></script>
     <script src="../public/js/report.js"></script>
+    <script>
+        // Enhanced Report Page Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Report: DOMContentLoaded fired');
+            
+            // Enhanced loading screen availability check
+            function checkLoadingScreen(attempts = 0) {
+                const maxAttempts = 10;
+                
+                if (window.LoadingScreen) {
+                    console.log('Report: LoadingScreen found after', attempts, 'attempts');
+                    // Initialize the report app
+                    window.reportApp = new FinancialReportApp();
+                } else if (attempts < maxAttempts) {
+                    console.log('Report: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
+                    setTimeout(() => checkLoadingScreen(attempts + 1), 50);
+                } else {
+                    console.error('Report: LoadingScreen still not available after', maxAttempts, 'attempts');
+                    // Initialize without loading screen
+                    window.reportApp = new FinancialReportApp();
+                }
+            }
+            
+            checkLoadingScreen();
+        });
+    </script>
 </body>
 </html>

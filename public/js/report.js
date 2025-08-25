@@ -10,11 +10,28 @@ class FinancialReportApp {
         this.currentTheme = 'ocean';
         this.isLoading = false;
         this.chartsInitialized = false; // Flag to prevent multiple initializations
+        this.budgetlyLoader = null; // Reference to the loading screen
         
         this.init();
     }
 
     async init() {
+        console.log('Report: Initializing report app');
+        
+        // Initialize loading screen with report-specific message
+        if (window.LoadingScreen) {
+            console.log('Report: Creating LoadingScreen');
+            this.budgetlyLoader = new LoadingScreen();
+            
+            // Customize the loading message for reports
+            const loadingMessage = this.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+            if (loadingMessage) {
+                loadingMessage.innerHTML = 'Generating your report<span class="loading-dots-text">...</span>';
+                console.log('Report: Loading message customized');
+            }
+        } else {
+            console.error('Report: LoadingScreen class not available');
+        }
         
         // Show loading overlay
         this.showLoading();
@@ -95,6 +112,12 @@ class FinancialReportApp {
         if (overlay) {
             overlay.style.display = 'flex';
         }
+        
+        // Also show the new loading screen
+        if (this.budgetlyLoader) {
+            this.budgetlyLoader.show();
+        }
+        
         this.isLoading = true;
     }
 
@@ -103,6 +126,12 @@ class FinancialReportApp {
         if (overlay) {
             overlay.style.display = 'none';
         }
+        
+        // Also hide the new loading screen
+        if (this.budgetlyLoader) {
+            this.budgetlyLoader.hide();
+        }
+        
         this.isLoading = false;
     }
 
@@ -1525,10 +1554,21 @@ class FinancialReportApp {
     }
 }
 
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    window.reportApp = new FinancialReportApp();
-});
+// Auto-initialization removed - now controlled by the HTML page for better loading screen coordination
 
 // Export for global access
 window.FinancialReportApp = FinancialReportApp;
+
+// Test function for loading screen (can be called from browser console)
+window.testReportLoadingScreen = function(duration = 3000) {
+    if (window.budgetlyLoader) {
+        console.log('Testing report loading screen for', duration, 'ms');
+        window.budgetlyLoader.show();
+        setTimeout(() => {
+            window.budgetlyLoader.hide();
+            console.log('Report loading screen test complete');
+        }, duration);
+    } else {
+        console.log('Loading screen not available');
+    }
+};

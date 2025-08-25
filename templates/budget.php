@@ -22,7 +22,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Budget Planning - Nkansah Budget Manager</title>
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/personal.css">
+    <link rel="stylesheet" href="../public/css/mobile-nav.css">
     <link rel="stylesheet" href="../public/css/budget.css">
+    <link rel="stylesheet" href="../public/css/loading.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Universal Snackbar -->
@@ -40,7 +42,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
             
-            <nav class="header-nav">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <nav class="header-nav" id="headerNav">
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
                 <a href="salary.php" class="nav-item">Salary Setup</a>
                 <a href="budget.php" class="nav-item active">Budget</a>
@@ -802,6 +810,108 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             return false;
         }
 
+        // Enhanced Budget Page JavaScript
+        // Wait for loading.js to be available
+        function initializeBudget() {
+            console.log('Budget: Initializing budget page');
+            console.log('Budget: LoadingScreen available?', typeof window.LoadingScreen);
+            
+            // Initialize loading screen with budget-specific message
+            if (window.LoadingScreen) {
+                console.log('Budget: Creating LoadingScreen');
+                window.budgetlyLoader = new LoadingScreen();
+                console.log('Budget: LoadingScreen created', window.budgetlyLoader);
+                
+                // Customize the loading message for budget
+                const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+                if (loadingMessage) {
+                    loadingMessage.innerHTML = 'Loading your budget<span class="loading-dots-text">...</span>';
+                    console.log('Budget: Loading message customized');
+                } else {
+                    console.error('Budget: Could not find loading message element');
+                }
+            } else {
+                console.error('Budget: LoadingScreen class not available');
+            }
+
+            // Show initial loading for data fetch
+            if (window.budgetlyLoader) {
+                console.log('Budget: Showing loading screen');
+                window.budgetlyLoader.show();
+            } else {
+                console.error('Budget: budgetlyLoader not available');
+            }
+
+            // Initialize budget page
+            loadBudgetData();
+            
+            // Hide loading screen after initialization
+            if (window.budgetlyLoader) {
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                }, 500);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Budget: DOMContentLoaded fired');
+            
+            // Enhanced loading screen availability check
+            function checkLoadingScreen(attempts = 0) {
+                const maxAttempts = 10;
+                
+                if (window.LoadingScreen) {
+                    console.log('Budget: LoadingScreen found after', attempts, 'attempts');
+                    initializeBudget();
+                } else if (attempts < maxAttempts) {
+                    console.log('Budget: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
+                    setTimeout(() => checkLoadingScreen(attempts + 1), 50);
+                } else {
+                    console.error('Budget: LoadingScreen still not available after', maxAttempts, 'attempts');
+                    // Initialize without loading screen
+                    loadBudgetData();
+                }
+            }
+            
+            checkLoadingScreen();
+        });
+
+        function loadBudgetData() {
+            // Show loading screen for data refresh (but only if not initial load)
+            if (window.budgetlyLoader && document.body.classList.contains('loaded')) {
+                window.budgetlyLoader.show();
+            }
+
+            // Add your existing budget data loading logic here
+            console.log('Budget: Loading budget data...');
+            
+            // Load budget template data if available
+            const functionsToLoad = [
+                'loadBudgetTemplate',
+                'loadExpenseCategories'
+            ];
+            
+            console.log('Budget: Loading page functions...');
+            functionsToLoad.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    console.log(`Budget: Loading ${funcName}...`);
+                    window[funcName]();
+                } else {
+                    console.warn(`Budget: Function ${funcName} not found, skipping`);
+                }
+            });
+            
+            // Mark body as loaded after first successful load
+            document.body.classList.add('loaded');
+            
+            // Hide loading screen after data processing
+            if (window.budgetlyLoader) {
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                }, 500);
+            }
+        }
+
         // Load saved theme on page load
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('personalTheme') || 'light';
@@ -1011,7 +1121,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
         });
     </script>
+    <script src="../public/js/loading.js"></script>
     <script src="../public/js/budget.js"></script>
+    <script src="../public/js/mobile-nav.js"></script>
     
     <!-- Walkthrough System -->
     <script src="../public/js/walkthrough.js"></script>

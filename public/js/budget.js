@@ -898,6 +898,11 @@ function selectTemplate(needsPercent, wantsPercent, savingsPercent, templateName
 }
 
 function applyTemplate(needsPercent, wantsPercent, savingsPercent, templateName, templateId = null) {
+    // Show loading screen during template application
+    if (window.budgetlyLoader) {
+        window.budgetlyLoader.show();
+    }
+    
     // Save applied template to localStorage
     const appliedTemplate = {
         name: templateName,
@@ -920,6 +925,11 @@ function applyTemplate(needsPercent, wantsPercent, savingsPercent, templateName,
     })
     .then(response => response.json())
     .then(data => {
+        // Hide loading screen
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
+        
         if (data.success) {
             // Close template modal
             closeModal('budgetTemplateModal');
@@ -936,6 +946,10 @@ function applyTemplate(needsPercent, wantsPercent, savingsPercent, templateName,
         }
     })
     .catch(error => {
+        // Hide loading screen on error
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
         console.error('Error saving budget allocation:', error);
         showSnackbar('Error saving budget allocation', 'error');
     });
@@ -1255,6 +1269,11 @@ function syncSliderWithInput(inputId, sliderId) {
 
 // Initialize custom templates on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Show loading screen while data loads
+    if (window.budgetlyLoader) {
+        window.budgetlyLoader.show();
+    }
+    
     if (typeof loadCustomTemplates === 'function') {
         loadCustomTemplates();
     }
@@ -1262,6 +1281,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize period management
     loadAvailablePeriods();
     loadBudgetDataForPeriod(currentBudgetPeriod.month, currentBudgetPeriod.year);
+    
+    // Hide loading screen after data loads (with a slight delay for better UX)
+    setTimeout(() => {
+        if (window.budgetlyLoader) {
+            window.budgetlyLoader.hide();
+        }
+    }, 2000);
     
     // Add event listeners for budget input functionality
     const categoryTypeSelect = document.querySelector('select[name="category_type"]');
@@ -2667,4 +2693,18 @@ window.viewGoalDetails = function(goalId, goalName) {
 
 window.goToSavingsPage = function() {
     window.open('savings.php', '_blank');
+};
+
+// Test function for loading screen (can be called from browser console)
+window.testBudgetLoadingScreen = function(duration = 3000) {
+    if (window.budgetlyLoader) {
+        console.log('Testing budget loading screen for', duration, 'ms');
+        window.budgetlyLoader.show();
+        setTimeout(() => {
+            window.budgetlyLoader.hide();
+            console.log('Budget loading screen test complete');
+        }, duration);
+    } else {
+        console.log('Loading screen not available');
+    }
 };

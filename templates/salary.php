@@ -28,8 +28,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../public/css/personal.css">
+    <link rel="stylesheet" href="../public/css/mobile-nav.css">
+    <link rel="stylesheet" href="../public/css/loading.css">
     <!-- Universal Snackbar -->
     <script src="../public/js/snackbar.js"></script>
+    <script src="../public/js/loading.js"></script>
     <style>
         /* Additional styles for salary setup page */
         .salary-config-form {
@@ -1199,6 +1202,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 </head>
 
 <body>
+    <!-- Loading Screen -->
+
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -1210,7 +1216,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
 
-            <nav class="header-nav">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+
+            <nav class="header-nav" id="headerNav">
                 <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
                 <a href="salary.php" class="nav-item active">Salary Setup</a>
                 <a href="budget.php" class="nav-item">Budget</a>
@@ -1985,6 +1997,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Function to load fresh salary data via AJAX with animations
         async function loadSalaryData() {
+            // Show loading screen for salary data loading
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.show();
+            }
+
             try {
                 // Load data from both endpoints
                 const [dashboardResponse, salaryResponse] = await Promise.all([
@@ -2022,6 +2039,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 console.error('Error loading salary data:', error);
                 showEmptyStates();
                 updateIncomeSources([]);
+            } finally {
+                // Hide loading screen after data processing
+                if (window.budgetlyLoader) {
+                    setTimeout(() => {
+                        window.budgetlyLoader.hide();
+                    }, 800); // Small delay to show the loading animation
+                }
             }
         }
 
@@ -3352,6 +3376,10 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Preview Budget Modal Functions
         async function showPreviewBudgetModal() {
+            // Show loading screen while fetching preview data
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.show();
+            }
 
             // Show loading state
             const modal = document.getElementById('previewBudgetModal');
@@ -3405,11 +3433,16 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             } catch (error) {
                 console.error('Error loading fresh data:', error);
-            }
-
-            // Remove loading state
-            if (modal) {
-                modal.style.opacity = '1';
+            } finally {
+                // Hide loading screen
+                if (window.budgetlyLoader) {
+                    window.budgetlyLoader.hide();
+                }
+                
+                // Remove loading state
+                if (modal) {
+                    modal.style.opacity = '1';
+                }
             }
 
             // Update preview with fresh data and show modal
@@ -3595,6 +3628,24 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         // Form submission handlers
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize loading screen
+            if (window.LoadingScreen) {
+                window.budgetlyLoader = new LoadingScreen();
+                // Customize the loading message for salary page
+                const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+                if (loadingMessage) {
+                    loadingMessage.innerHTML = 'Loading your salary information<span class="loading-dots-text">...</span>';
+                    console.log('Salary: Loading message customized');
+                } else {
+                    console.error('Salary: Could not find loading message element');
+                }
+            }
+
+            // Show initial loading for data fetch
+            if (window.budgetlyLoader) {
+                window.budgetlyLoader.show();
+            }
+
             updateBudgetPreview();
             updateTotalAllocation();
             setupModalListeners(); // Add modal event listeners
@@ -3603,6 +3654,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             setTimeout(() => {
                 loadSalaryData();
             }, 200);
+
+            // Hide loading screen after initial setup
+            setTimeout(() => {
+                if (window.budgetlyLoader) {
+                    window.budgetlyLoader.hide();
+                }
+            }, 2000);
 
             // Add visibility change listener for auto-refresh
             document.addEventListener('visibilitychange', function() {
@@ -3844,11 +3902,26 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 salaryInput.addEventListener('input', updateBudgetPreview);
             }
         });
+
+        // Test function for loading screen (can be called from browser console)
+        window.testSalaryLoadingScreen = function(duration = 3000) {
+            if (window.budgetlyLoader) {
+                console.log('Testing salary loading screen for', duration, 'ms');
+                window.budgetlyLoader.show();
+                setTimeout(() => {
+                    window.budgetlyLoader.hide();
+                    console.log('Salary loading screen test complete');
+                }, duration);
+            } else {
+                console.log('Loading screen not available');
+            }
+        };
     </script>
     
     <!-- Walkthrough System -->
     <script src="../public/js/walkthrough.js"></script>
-        <script src="../public/js/privacy.js"></script>
+    <script src="../public/js/mobile-nav.js"></script>
+    <script src="../public/js/privacy.js"></script>
 
 </body>
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Screen Test</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/loading.css">
+</head>
+<body>
+    <h1>Loading Screen Test</h1>
+    <button onclick="testLoadingScreen()">Test Loading Screen</button>
+    <button onclick="hideLoadingScreen()">Hide Loading Screen</button>
+    
+    <script src="public/js/loading.js"></script>
+    <script>
+        let loader = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test: DOMContentLoaded fired');
+            console.log('Test: LoadingScreen available?', typeof window.LoadingScreen);
+            
+            if (window.LoadingScreen) {
+                console.log('Test: Creating LoadingScreen');
+                loader = new LoadingScreen();
+                console.log('Test: LoadingScreen created', loader);
+            } else {
+                console.error('Test: LoadingScreen class not available');
+            }
+        });
+        
+        function testLoadingScreen() {
+            console.log('Test: Test button clicked');
+            if (loader) {
+                console.log('Test: Showing loading screen');
+                loader.show();
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    console.log('Test: Auto-hiding loading screen');
+                    loader.hide();
+                }, 3000);
+            } else {
+                console.error('Test: No loader available');
+            }
+        }
+        
+        function hideLoadingScreen() {
+            if (loader) {
+                loader.hide();
+            }
+        }
+    </script>
+</body>
+</html>

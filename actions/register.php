@@ -534,7 +534,7 @@ try {
         $redirectUrl = ($accountType === 'family') ? '../templates/dashboard' : '../templates/login';
 
         // Send success response
-        sendResponse(true, "Account created successfully! Redirecting to your dashboard...", [
+        sendResponse(true, "Account created successfully! Redirecting to login...", [
             'user_id' => $userId,
             'username' => $username,
             'account_type' => $accountType,
