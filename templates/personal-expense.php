@@ -1612,5 +1612,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }, 4000);
         }
     </script>
+        <script src="../public/js/privacy.js"></script>
+
 </body>
 </html>

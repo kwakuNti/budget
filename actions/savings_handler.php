@@ -464,40 +464,32 @@ function createGoal($conn, $userId) {
         $stmt->execute();
         $statusExists = $stmt->get_result()->num_rows > 0;
         
-        // Create corresponding budget category in savings section FIRST
-        $categoryIcon = getGoalTypeIcon($goalType);
-        $categoryColor = getGoalTypeColor($goalType);
-        
-        // Set budget limit equal to target amount as requested
+        // Always use or create a single shared 'General Savings' category for all goals
+        $sharedCategoryName = 'General Savings';
+        $categoryIcon = 'piggy-bank';
+        $categoryColor = '#10b981';
         $budgetLimit = floatval($targetAmount);
         
-        // Check if category already exists with same name
+        // Check if the shared category exists
         $stmt = $conn->prepare("
             SELECT id FROM budget_categories 
             WHERE user_id = ? AND name = ? AND category_type = 'savings'
         ");
-        $stmt->bind_param("is", $userId, $goalName);
+        $stmt->bind_param("is", $userId, $sharedCategoryName);
         $stmt->execute();
         $existingCategory = $stmt->get_result()->fetch_assoc();
         
         if (!$existingCategory) {
             $stmt = $conn->prepare("
                 INSERT INTO budget_categories 
-                (user_id, name, category_type, icon, color, budget_limit) 
-                VALUES (?, ?, 'savings', ?, ?, ?)
+                (user_id, name, category_type, icon, color, budget_limit, is_active) 
+                VALUES (?, ?, 'savings', ?, ?, ?, 1)
             ");
-            $stmt->bind_param("isssd", $userId, $goalName, $categoryIcon, $categoryColor, $budgetLimit);
+            $stmt->bind_param("isssd", $userId, $sharedCategoryName, $categoryIcon, $categoryColor, $budgetLimit);
             $stmt->execute();
             $categoryId = $conn->insert_id;
         } else {
-            // Update existing category with new budget limit
-            $stmt = $conn->prepare("
-                UPDATE budget_categories 
-                SET budget_limit = ?, icon = ?, color = ?, is_active = 1
-                WHERE id = ?
-            ");
-            $stmt->bind_param("dssi", $budgetLimit, $categoryIcon, $categoryColor, $existingCategory['id']);
-            $stmt->execute();
+            // Use existing shared category
             $categoryId = $existingCategory['id'];
         }
         

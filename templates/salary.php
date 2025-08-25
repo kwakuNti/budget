@@ -3847,6 +3847,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     
     <!-- Walkthrough System -->
     <script src="../public/js/walkthrough.js"></script>
+        <script src="../public/js/privacy.js"></script>
+
 </body>
 
 </html>

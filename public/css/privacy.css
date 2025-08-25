@@ -1,0 +1,149 @@
+/* Privacy System Enhanced Styles - Updated Version */
+
+/* Privacy Toggle Button */
+.privacy-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When inside payday-countdown-hero */
+.payday-countdown-hero .privacy-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+/* When not inside payday-countdown-hero (fixed positioning) */
+.privacy-toggle[style*="position: fixed"] {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 8px;
+}
+
+.privacy-eye-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.privacy-eye-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.privacy-eye-btn:hover::before {
+    left: 100%;
+}
+
+.privacy-eye-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.privacy-eye-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.privacy-eye-btn i {
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.privacy-eye-btn:hover i {
+    transform: scale(1.1);
+}
+
+/* Loading state */
+.privacy-eye-btn.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.privacy-eye-btn.loading i {
+    animation: privacy-spin 1s linear infinite;
+}
+
+@keyframes privacy-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Privacy Modal Styles */
+.privacy-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.privacy-modal.show {
+    opacity: 1;
+}
+
+.privacy-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    cursor: pointer;
+}
+
+.privacy-modal-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    max-width: 450px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    transform: translateY(30px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.privacy-modal.show .privacy-modal-content {
+    transform: translateY(0) scale(1);
+}

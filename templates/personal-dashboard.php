@@ -33,6 +33,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <title>Personal Dashboard </title>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/walkthrough.css">
+    <link rel="stylesheet" href="../public/css/privacy.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -3095,6 +3096,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         </div>
     </div>
     
+    <!-- Privacy System Script -->
+    <script src="../public/js/privacy.js"></script>
     <!-- Walkthrough System Scripts -->
     <script src="../public/js/walkthrough.js"></script>
 </body>

@@ -298,9 +298,9 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                 <div class="icon-option" data-icon="car"><i class="fas fa-car"></i></div>
                                 <div class="icon-option" data-icon="book"><i class="fas fa-book"></i></div>
                                 <div class="icon-option" data-icon="bullseye"><i class="fas fa-bullseye"></i></div>
-                                <div class="icon-option" data-icon="credit-card"><i class="fas fa-credit-card"></i></div>
-                                <div class="icon-option" data-icon="home"><i class="fas fa-home"></i></div>
-                                <div class="icon-option" data-icon="utensils"><i class="fas fa-utensils"></i></div>
+                                <!-- <div class="icon-option" data-icon="credit-card"><i class="fas fa-credit-card"></i></div> -->
+                                <!-- <div class="icon-option" data-icon="home"><i class="fas fa-home"></i></div> -->
+                                <!-- <div class="icon-option" data-icon="utensils"><i class="fas fa-utensils"></i></div> -->
                             </div>
                             <input type="hidden" name="icon" value="hospital">
                         </div>
@@ -1014,5 +1014,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     
     <!-- Walkthrough System -->
     <script src="../public/js/walkthrough.js"></script>
+        <script src="../public/js/privacy.js"></script>
+
 </body>
 </html>
