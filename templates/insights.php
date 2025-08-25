@@ -31,6 +31,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Financial Insights - Smart Analytics</title>
+    <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/insights.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>

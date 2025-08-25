@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nkansah Family - Cycle Management</title>
+    <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="css/cycle-management.css">
         <title>Cycle Management Dashboard</title>
     <style>

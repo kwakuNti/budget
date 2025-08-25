@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Dashboard - Monthly Goal Tracking</title>
+    <?php include '../includes/favicon.php'; ?>
     <style>
         * {
             margin: 0;

@@ -31,6 +31,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Dashboard </title>
+    <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/walkthrough.css">
     <link rel="stylesheet" href="../public/css/privacy.css">
@@ -195,14 +196,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             .countdown-main-display {
                 flex-direction: column;
                 gap: 1.5rem;
+                align-items: center;
+                text-align: center;
             }
 
             .countdown-number-large {
                 font-size: 4rem;
+                order: 1;
             }
 
             .countdown-details {
                 text-align: center;
+                order: 2;
+            }
+
+            .progress-ring-large {
+                order: 3;
+                margin-top: 1rem;
             }
 
             .salary-display {
@@ -228,8 +238,21 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 font-size: 1rem;
             }
 
+            .countdown-main-display {
+                gap: 1rem;
+            }
+
             .countdown-number-large {
                 font-size: 3rem;
+            }
+
+            .progress-ring-large svg {
+                width: 80px;
+                height: 80px;
+            }
+
+            .progress-percentage-large {
+                font-size: 0.9rem;
             }
 
             .countdown-label-large {
@@ -243,6 +266,114 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             .progress-percentage-large {
                 font-size: 1rem;
+            }
+        }
+
+        /* Mobile Navigation Styles */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background-color: white;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        .hamburger-line:not(:last-child) {
+            margin-bottom: 4px;
+        }
+
+        /* Mobile menu toggle animation */
+        .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+                order: 2;
+            }
+
+            .header-nav {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 0 0 20px 20px;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 1000;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-nav.mobile-open {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .header-nav .nav-item {
+                color: var(--text-color);
+                padding: 12px 16px;
+                border-radius: 10px;
+                transition: all 0.3s ease;
+                text-align: center;
+                font-weight: 500;
+            }
+
+            .header-nav .nav-item:hover,
+            .header-nav .nav-item.active {
+                background: var(--primary-color);
+                color: white;
+                transform: translateX(5px);
+            }
+
+            .theme-selector {
+                order: 3;
+            }
+
+            .logo {
+                order: 1;
+            }
+
+            .header-content {
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-nav {
+                top: 70px;
+                padding: 15px;
             }
         }
 
@@ -1138,7 +1269,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
             
-            <nav class="header-nav">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <nav class="header-nav" id="headerNav">
                 <a href="personal-dashboard.php" class="nav-item active">Dashboard</a>
                 <a href="salary.php" class="nav-item">Salary Setup</a>
                 <a href="budget.php" class="nav-item">Budget</a>
@@ -2328,6 +2465,48 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             // Save theme preference
             localStorage.setItem('personalTheme', theme);
         }
+
+        // Mobile Menu functionality
+        function toggleMobileMenu() {
+            const nav = document.getElementById('headerNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            nav.classList.toggle('mobile-open');
+            toggle.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const nav = document.getElementById('headerNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            nav.classList.remove('mobile-open');
+            toggle.classList.remove('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const nav = document.getElementById('headerNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+                closeMobileMenu();
+            }
+        });
+
+        // Close mobile menu when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        });
+
+        // Add click listeners to nav items to close mobile menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', closeMobileMenu);
+            });
+        });
 
         // User menu functionality
         function toggleUserMenu() {

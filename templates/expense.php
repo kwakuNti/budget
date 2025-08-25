@@ -30,6 +30,7 @@ $quickSuggestions = getQuickAddSuggestions($conn, $family_id, 6);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nkansah Family - Expenses</title>
+    <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/expense.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>

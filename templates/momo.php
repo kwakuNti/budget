@@ -132,6 +132,7 @@ $debug_display = false; // Set to true to show debug info on page
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nkansah Family - MoMo Account</title>
+    <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/dashboard.css">
     <link rel="stylesheet" href="../public/css/momo.css">
 </head>
