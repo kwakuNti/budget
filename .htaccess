@@ -1,7 +1,10 @@
+# Redirect IP access to domain
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^18\.208\.215\.173$
+RewriteRule ^(.*)$ https://budgetly.online/$1 [R=301,L]
+
 # Disable directory browsing
 Options -Indexes
-
-RewriteEngine On
 
 # Allow specific API endpoints that need to be accessible
 RewriteCond %{REQUEST_URI} !^/budget/api/(walkthrough_status|get_walkthrough_step|complete_walkthrough_step|skip_walkthrough|reset_walkthrough|personal_dashboard_data|enhanced_insights_data|debug_session)\.php$
