@@ -90,7 +90,7 @@ function getAutoSaveConfig($conn, $userId) {
     
     // Get per-goal auto-save configurations
     $stmt = $conn->prepare("
-        SELECT pga.*, pg.title as goal_title, pg.target_amount, pg.current_amount, pg.status
+        SELECT pga.*, pg.goal_name as goal_title, pg.target_amount, pg.current_amount, pg.status
         FROM personal_goal_autosave pga
         JOIN personal_goals pg ON pga.goal_id = pg.id
         WHERE pga.user_id = ? AND pga.goal_id IS NOT NULL
@@ -102,7 +102,7 @@ function getAutoSaveConfig($conn, $userId) {
     
     // Get user's active goals
     $stmt = $conn->prepare("
-        SELECT id, title, target_amount, current_amount, status, priority,
+        SELECT id, goal_name as title, target_amount, current_amount, status, priority,
                CASE 
                    WHEN target_amount > 0 THEN (current_amount / target_amount) * 100
                    ELSE 0 
@@ -192,7 +192,7 @@ function getGoalProgress($conn, $userId) {
     $stmt = $conn->prepare("
         SELECT 
             pg.id,
-            pg.title,
+            pg.goal_name as title,
             pg.target_amount,
             pg.current_amount,
             pg.status,
@@ -350,7 +350,7 @@ function processAutoSave($conn, $userId) {
     
     // Get active goals
     $stmt = $conn->prepare("
-        SELECT id, title, target_amount, current_amount, priority
+        SELECT id, goal_name as title, target_amount, current_amount, priority
         FROM personal_goals 
         WHERE user_id = ? AND status = 'active'
         ORDER BY priority ASC, created_at ASC
@@ -515,7 +515,7 @@ function getAllocationRules($conn, $userId) {
     $stmt = $conn->prepare("
         SELECT 
             pgar.*,
-            pg.title as goal_title,
+            pg.goal_name as goal_title,
             pg.target_amount,
             pg.current_amount
         FROM personal_goal_allocation_rules pgar

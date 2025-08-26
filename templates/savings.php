@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+// Check session timeout
+require_once '../includes/session_timeout_middleware.php';
+$session_check = checkSessionTimeout();
+if (!$session_check['valid']) {
+    header('Location: ../login.php?timeout=1');
+    exit;
+}
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -122,6 +130,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
 
+            
             <div class="user-menu">
                 <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php 
                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 

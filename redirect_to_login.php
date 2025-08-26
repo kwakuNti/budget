@@ -49,6 +49,10 @@ session_start();
             var currentPath = window.location.pathname;
             var basePath = '';
             
+            // Check if timeout parameter was passed
+            var urlParams = new URLSearchParams(window.location.search);
+            var isTimeout = urlParams.get('timeout') === '1';
+            
             // Find the budget folder in the current path
             if (currentPath.includes('/budget/')) {
                 var budgetIndex = currentPath.indexOf('/budget/');
@@ -60,6 +64,11 @@ session_start();
             
             // Construct the login URL
             var loginUrl = basePath + 'templates/login.php';
+            
+            // Add timeout parameter if session expired
+            if (isTimeout) {
+                loginUrl += '?timeout=1';
+            }
             
             // Clean up any double slashes
             loginUrl = loginUrl.replace(/\/+/g, '/');

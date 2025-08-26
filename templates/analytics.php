@@ -1,6 +1,15 @@
 <?php
 //analytics.php
 session_start();
+
+// Check session timeout
+require_once '../includes/session_timeout_middleware.php';
+$session_check = checkSessionTimeout();
+if (!$session_check['valid']) {
+    header('Location: ../login.php?timeout=1');
+    exit;
+}
+
 require_once '../config/connection.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['family_id'])) {

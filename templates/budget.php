@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+// Check session timeout
+require_once '../includes/session_timeout_middleware.php';
+$session_check = checkSessionTimeout();
+if (!$session_check['valid']) {
+    header('Location: ../login.php?timeout=1');
+    exit;
+}
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -58,17 +66,18 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <a href="report.php" class="nav-item">Reports</a>
             </nav>
 
+            
             <div class="user-menu">
-                <div class="user-avatar" onclick="toggleUserMenu()"><?php 
+                <div class="user-avatar" onclick="toggleUserMenu()" id="userAvatar"><?php 
                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
                 ?></div>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="profile.php">Profile Settings</a>
-                    <a href="income-sources.php">Income Sources</a>
-                    <a href="categories.php">Categories</a>
-                    <hr>
-                    <a href="family-dashboard.php">Switch to Family</a>
-                    <a href="logout.php">Logout</a>
+                    <!-- <a href="profile.php">Profile Settings</a> -->
+                    <!-- <a href="income-sources.php">Income Sources</a> -->
+                    <!-- <a href="categories.php">Categories</a> -->
+                    <!-- <hr> -->
+                    <!-- <a href="family-dashboard.php">Switch to Family</a> -->
+                    <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
         </div>

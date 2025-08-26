@@ -2536,7 +2536,7 @@ function setupIconAndColorSelectors() {
 function toggleUserMenu() {
     const dropdown = document.getElementById('userDropdown');
     if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        dropdown.classList.toggle('show');
     }
 }
 
@@ -2583,7 +2583,7 @@ async function initializePage() {
         const dropdown = document.getElementById('userDropdown');
         
         if (userMenu && dropdown && !userMenu.contains(event.target)) {
-            dropdown.style.display = 'none';
+            dropdown.classList.remove('show');
         }
     });
     

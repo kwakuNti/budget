@@ -821,6 +821,17 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     min-width: 200px;
     z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.user-dropdown.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 .user-dropdown a {

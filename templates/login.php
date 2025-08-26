@@ -1,3 +1,7 @@
+<?php
+// Check if user was redirected due to session timeout
+$showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budgetly - Sign In</title>
+    <?php include '../includes/favicon.php'; ?>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../public/css/loading.css">
     <link rel="stylesheet" href="../public/css/personal.css">
@@ -151,6 +156,45 @@
         /* Form Styles */
         .login-form {
             margin-bottom: 32px;
+        }
+
+        /* Timeout Message Styles */
+        .timeout-message {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .timeout-message .icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .timeout-message .message {
+            flex-grow: 1;
+        }
+
+        .timeout-message.show {
+            animation: slideInFromTop 0.5s ease-out;
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-group {
@@ -783,6 +827,16 @@
                     <h2 class="form-title">Sign in to Budgetly</h2>
                     <p class="form-subtitle">Welcome back! Please enter your details.</p>
                 </div>
+
+                <?php if ($showTimeoutMessage): ?>
+                <div class="timeout-message show">
+                    <span class="icon">⏰</span>
+                    <div class="message">
+                        <strong>Session Expired</strong><br>
+                        Your session has timed out due to inactivity. Please sign in again to continue.
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <form id="loginForm" class="login-form" action="../actions/login.php" method="POST">
                     <div class="form-group">

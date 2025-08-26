@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+// Check session timeout
+require_once '../includes/session_timeout_middleware.php';
+$session_check = checkSessionTimeout();
+if (!$session_check['valid']) {
+    header('Location: ../login.php?timeout=1');
+    exit;
+}
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -1845,8 +1853,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             loadDashboardData();
             updatePaydayCountdown();
             
-            // Update data every 30 seconds
-            setInterval(loadDashboardData, 30000);
+            // Update data every 5 minutes (instead of 30 seconds)
+            setInterval(loadDashboardData, 300000);
             
             // Update countdown every hour
             setInterval(updatePaydayCountdown, 3600000);
@@ -1870,7 +1878,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     // Initialize without loading screen
                     loadDashboardData();
                     updatePaydayCountdown();
-                    setInterval(loadDashboardData, 30000);
+                    setInterval(loadDashboardData, 300000);
                     setInterval(updatePaydayCountdown, 3600000);
                 }
             }
@@ -2628,7 +2636,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                                 categories.forEach(category => {
                                     const option = document.createElement('option');
                                     option.value = category.id;
-                                    option.textContent = `${category.name} (₵${category.remaining} remaining)`;
+                                    const remaining = category.remaining_budget !== undefined ? category.remaining_budget : 0;
+                                    option.textContent = `${category.name} (₵${remaining.toFixed(2)} remaining)`;
                                     optgroup.appendChild(option);
                                 });
                                 

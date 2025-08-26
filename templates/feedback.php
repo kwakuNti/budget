@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+// Check session timeout
+require_once '../includes/session_timeout_middleware.php';
+$session_check = checkSessionTimeout();
+if (!$session_check['valid']) {
+    header('Location: ../login.php?timeout=1');
+    exit;
+}
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
