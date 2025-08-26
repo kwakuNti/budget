@@ -1,7 +1,7 @@
 # Redirect IP access to domain ROOT only
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^18\.208\.215\.173$
-RewriteRule ^(.*)$ https://budgetly.online/ [R=301,L]
+RewriteRule ^(.*)$ https://budgetly.online/budget/ [R=301,L]
 
 # Disable directory browsing
 Options -Indexes
