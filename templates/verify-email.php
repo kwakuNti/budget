@@ -19,72 +19,75 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
         
         .verification-container {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            max-width: 480px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            max-width: 750px;
             width: 100%;
             overflow: hidden;
+            min-height: 600px;
         }
         
         .verification-header {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            padding: 40px 40px 30px;
+            padding: 60px 60px 50px;
             text-align: center;
             color: white;
         }
         
         .brand-logo {
-            width: 70px;
-            height: 70px;
+            width: 90px;
+            height: 90px;
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 18px;
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
+            margin: 0 auto 30px;
             backdrop-filter: blur(10px);
         }
         
         .brand-logo i {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: white;
         }
         
         .header-title {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         
         .header-subtitle {
-            font-size: 1rem;
+            font-size: 1.1rem;
             opacity: 0.9;
-            line-height: 1.5;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
         }
         
         .verification-body {
-            padding: 40px;
+            padding: 60px;
         }
         
         .status-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
         }
         
         .status-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 1.8rem;
+            margin: 0 auto 30px;
+            font-size: 2.2rem;
         }
         
         .status-icon.loading {
@@ -109,45 +112,50 @@
         }
         
         .status-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         
         .status-message {
             color: #6b7280;
             line-height: 1.6;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            max-width: 450px;
+            margin: 0 auto;
         }
         
         .verification-form {
             background: #f8fafc;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 30px 0;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .form-label {
             display: block;
             font-weight: 600;
             color: #374151;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+            margin-bottom: 12px;
+            font-size: 1rem;
         }
         
         .verification-input {
             width: 100%;
-            padding: 16px;
+            padding: 20px;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 18px;
+            border-radius: 14px;
+            font-size: 22px;
             text-align: center;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             text-transform: uppercase;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -170,16 +178,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 14px 28px;
+            gap: 10px;
+            padding: 16px 32px;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 14px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            min-width: 140px;
+            min-width: 160px;
         }
         
         .btn-primary {
@@ -238,12 +246,15 @@
         }
         
         .alert {
-            padding: 16px;
-            border-radius: 12px;
-            margin: 20px 0;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 25px 0;
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 15px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .alert-success {
@@ -271,7 +282,7 @@
         
         .divider {
             border-top: 1px solid #e5e7eb;
-            margin: 30px 0;
+            margin: 40px 0;
             position: relative;
         }
         
@@ -289,21 +300,23 @@
         
         .resend-section {
             text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
         }
         
         .resend-section p {
             color: #6b7280;
-            margin-bottom: 15px;
-            font-size: 0.95rem;
+            margin-bottom: 20px;
+            font-size: 1rem;
         }
         
         .email-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 16px 20px;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-size: 1rem;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
             transition: all 0.3s ease;
         }
         
@@ -315,32 +328,55 @@
         
         .action-buttons {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 30px;
+            margin-top: 40px;
         }
         
         @media (max-width: 768px) {
             .verification-container {
-                margin: 10px;
+                margin: 20px 10px;
+                max-width: 95%;
             }
             
             .verification-header,
             .verification-body {
-                padding: 30px 25px;
+                padding: 40px 30px;
             }
             
             .verification-form {
-                padding: 25px 20px;
+                padding: 30px 25px;
             }
             
             .action-buttons {
                 flex-direction: column;
+                gap: 15px;
             }
             
             .btn {
                 width: 100%;
+            }
+            
+            .verification-input {
+                font-size: 20px;
+                letter-spacing: 3px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .verification-header,
+            .verification-body {
+                padding: 30px 20px;
+            }
+            
+            .header-title {
+                font-size: 1.8rem;
+            }
+            
+            .brand-logo {
+                width: 70px;
+                height: 70px;
             }
         }
     </style>
