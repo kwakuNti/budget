@@ -82,7 +82,7 @@ try {
         $next_page_url = $next_step['page_url'];
         
         if (!str_contains($current_page, basename($next_page_url))) {
-            $redirect_url = '/budget/' . $next_page_url;
+            $redirect_url = '/budgets/' . $next_page_url;
         }
     } else {
         // No more steps - walkthrough completed

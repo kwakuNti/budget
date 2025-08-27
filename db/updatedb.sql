@@ -466,9 +466,9 @@ CREATE TABLE IF NOT EXISTS walkthrough_steps (
 
 -- Insert initial setup walkthrough steps
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('initial_setup', 'setup_income', 1, 'templates/personal-dashboard.php', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click "Set Up Income" to begin.', TRUE, FALSE),
-('initial_setup', 'configure_salary', 2, 'templates/salary.php', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. This will help us calculate your available budget and auto-save for your goals.', TRUE, FALSE),
-('initial_setup', 'setup_budget', 3, 'templates/budget.php', 'button[onclick="showBudgetTemplateModal()"]', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can click "Use Template" to choose from our popular templates, or you can skip this step to create a custom budget later.', FALSE, TRUE);
+('initial_setup', 'setup_income', 1, '/dashboard', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click "Set Up Income" to begin.', TRUE, FALSE),
+('initial_setup', 'configure_salary', 2, '/salary', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. This will help us calculate your available budget and auto-save for your goals.', TRUE, FALSE),
+('initial_setup', 'setup_budget', 3, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can click "Use Template" to choose from our popular templates, or you can skip this step to create a custom budget later.', FALSE, TRUE);
 
 -- Insert page-specific help tours with reliable target elements
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
@@ -478,28 +478,28 @@ INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url
 ('help_guide', 'dashboard_actions', 3, 'templates/personal-dashboard.php', '.quick-actions', 'Quick Actions', 'Use these quick action buttons to add expenses, income, or access key features quickly.', FALSE, TRUE),
 
 -- Budget page tour  
-('help_guide', 'budget_overview', 1, 'templates/budget.php', '.page-header', 'Budget Management', 'This is where you manage your budget categories and allocations. You can create templates or custom budgets.', FALSE, TRUE),
-('help_guide', 'budget_templates', 2, 'templates/budget.php', '.template-section', 'Budget Templates', 'Choose from popular budget templates like 50/30/20 rule, envelope method, or zero-based budgeting.', FALSE, TRUE),
-('help_guide', 'budget_categories', 3, 'templates/budget.php', '.budget-categories', 'Budget Categories', 'View and manage your spending categories. Set limits for each category to stay within your budget.', FALSE, TRUE),
+('help_guide', 'budget_overview', 1, '/budgets', '.page-header', 'Budget Management', 'This is where you manage your budget categories and allocations. You can create templates or custom budgets.', FALSE, TRUE),
+('help_guide', 'budget_templates', 2, '/budgets', '.template-section', 'Budget Templates', 'Choose from popular budget templates like 50/30/20 rule, envelope method, or zero-based budgeting.', FALSE, TRUE),
+('help_guide', 'budget_categories', 3, '/budgets', '.budget-categories', 'Budget Categories', 'View and manage your spending categories. Set limits for each category to stay within your budget.', FALSE, TRUE),
 
 -- Salary page tour
-('help_guide', 'salary_overview', 1, 'templates/salary.php', '.page-header', 'Income Management', 'Set up and manage your income sources here. This is essential for accurate budget planning.', FALSE, TRUE),
-('help_guide', 'salary_setup', 2, 'templates/salary.php', '#salaryActionBtn', 'Set Up Salary', 'Click here to configure your primary salary. Include your monthly amount and pay frequency.', FALSE, TRUE),
-('help_guide', 'salary_schedule', 3, 'templates/salary.php', '.salary-overview', 'Payment Schedule', 'View your upcoming payments and manage additional income sources if you have multiple income streams.', FALSE, TRUE),
+('help_guide', 'salary_overview', 1, '/salary', '.page-header', 'Income Management', 'Set up and manage your income sources here. This is essential for accurate budget planning.', FALSE, TRUE),
+('help_guide', 'salary_setup', 2, '/salary', '#salaryActionBtn', 'Set Up Salary', 'Click here to configure your primary salary. Include your monthly amount and pay frequency.', FALSE, TRUE),
+('help_guide', 'salary_schedule', 3, '/salary', '.salary-overview', 'Payment Schedule', 'View your upcoming payments and manage additional income sources if you have multiple income streams.', FALSE, TRUE),
 
 -- Expenses page tour
-('help_guide', 'expenses_overview', 1, 'templates/personal-expense.php', '.page-header', 'Expense Tracking', 'Track your daily expenses here. Categorize spending to see where your money goes.', FALSE, TRUE),
-('help_guide', 'expenses_add', 2, 'templates/personal-expense.php', '.page-actions', 'Add Expense', 'Click to add a new expense. Choose the category and amount to keep your budget on track.', FALSE, TRUE),
-('help_guide', 'expenses_categories', 3, 'templates/personal-expense.php', '.main-content', 'Expense Categories', 'View your expenses organized by categories to understand your spending patterns.', FALSE, TRUE),
+('help_guide', 'expenses_overview', 1, '/personal-expense', '.page-header', 'Expense Tracking', 'Track your daily expenses here. Categorize spending to see where your money goes.', FALSE, TRUE),
+('help_guide', 'expenses_add', 2, '/personal-expense', '.page-actions', 'Add Expense', 'Click to add a new expense. Choose the category and amount to keep your budget on track.', FALSE, TRUE),
+('help_guide', 'expenses_categories', 3, '/personal-expense', '.main-content', 'Expense Categories', 'View your expenses organized by categories to understand your spending patterns.', FALSE, TRUE),
 
 -- Savings page tour
-('help_guide', 'savings_overview', 1, 'templates/savings.php', '.page-header', 'Savings Goals', 'Set and track progress towards your financial goals. Whether it\'s an emergency fund, vacation, or major purchase.', FALSE, TRUE),
-('help_guide', 'savings_create', 2, 'templates/savings.php', '.page-actions', 'Create Goal', 'Click to create a new savings goal. Set your target amount and deadline.', FALSE, TRUE),
-('help_guide', 'savings_autosave', 3, 'templates/savings.php', '.auto-save-section', 'Auto-Save System', 'Configure automatic savings to reach your goals faster with smart allocation rules.', FALSE, TRUE),
+('help_guide', 'savings_overview', 1, '/savings', '.page-header', 'Savings Goals', 'Set and track progress towards your financial goals. Whether it\'s an emergency fund, vacation, or major purchase.', FALSE, TRUE),
+('help_guide', 'savings_create', 2, '/savings', '.page-actions', 'Create Goal', 'Click to create a new savings goal. Set your target amount and deadline.', FALSE, TRUE),
+('help_guide', 'savings_autosave', 3, '/savings', '.auto-save-section', 'Auto-Save System', 'Configure automatic savings to reach your goals faster with smart allocation rules.', FALSE, TRUE),
 
 -- Reports page tour
-('help_guide', 'reports_overview', 1, 'templates/report.php', '.page-header', 'Financial Reports', 'View detailed reports and analytics about your spending patterns and financial health.', FALSE, TRUE),
-('help_guide', 'reports_insights', 2, 'templates/report.php', '.main-content', 'Financial Insights', 'Get personalized insights and recommendations to improve your financial habits.', FALSE, TRUE);
+('help_guide', 'reports_overview', 1, '/report', '.page-header', 'Financial Reports', 'View detailed reports and analytics about your spending patterns and financial health.', FALSE, TRUE),
+('help_guide', 'reports_insights', 2, '/report', '.main-content', 'Financial Insights', 'Get personalized insights and recommendations to improve your financial habits.', FALSE, TRUE);
 
 -- ============================================================================
 -- 11. USER FEEDBACK SYSTEM

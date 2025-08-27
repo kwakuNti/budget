@@ -62,7 +62,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <nav class="header-nav" id="headerNav">
                 <a href="personal-dashboard" class="nav-item">Dashboard</a>
                 <a href="salary" class="nav-item">Salary Setup</a>
-                <a href="budget" class="nav-item">Budget</a>
+                <a href="budgets" class="nav-item">Budget</a>
                 <a href="personal-expense" class="nav-item">Expenses</a>
                 <a href="savings" class="nav-item active">Savings</a>
                 <!-- <a href="insights" class="nav-item">Insights</a> -->
