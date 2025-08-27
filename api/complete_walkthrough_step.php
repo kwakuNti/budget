@@ -147,10 +147,13 @@ try {
     }
     
     $completed_at = $is_completed ? date('Y-m-d H:i:s') : null;
-    $stmt->bind_param("ssisis", 
+    $is_completed_int = $is_completed ? 1 : 0;
+    $steps_completed_json = json_encode($steps_completed);
+    
+    $stmt->bind_param("ssisss", 
         $current_step,
-        json_encode($steps_completed),
-        $is_completed ? 1 : 0,
+        $steps_completed_json,
+        $is_completed_int,
         $completed_at,
         $user_id,
         $walkthrough_type
