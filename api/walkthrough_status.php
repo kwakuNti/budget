@@ -1,4 +1,9 @@
 <?php
+// Suppress any PHP warnings/notices that might corrupt JSON output
+error_reporting(0);
+ini_set('display_errors', 0);
+
+session_start();
 require_once '../config/connection.php';
 
 header('Content-Type: application/json');
@@ -12,7 +17,53 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 try {
-    // Check user's walkthrough status
+    // Handle POST requests for help guide
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $walkthrough_type = $input['walkthrough_type'] ?? 'initial_setup';
+        $page_url = $input['page_url'] ?? '';
+        
+        if ($walkthrough_type === 'help_guide' && $page_url) {
+            // Get first help step for this page
+            $stmt = $conn->prepare("
+                SELECT 
+                    step_name,
+                    step_order,
+                    page_url,
+                    target_element,
+                    title,
+                    content,
+                    action_required,
+                    can_skip
+                FROM walkthrough_steps 
+                WHERE walkthrough_type = 'help_guide' 
+                AND page_url LIKE ?
+                AND is_active = 1
+                ORDER BY step_order ASC
+                LIMIT 1
+            ");
+            $page_pattern = '%' . basename($page_url) . '%';
+            $stmt->bind_param("s", $page_pattern);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $step = $result->fetch_assoc();
+            
+            if ($step) {
+                echo json_encode([
+                    'success' => true,
+                    'step' => $step
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'No help available for this page'
+                ]);
+            }
+            exit;
+        }
+    }
+    
+    // Default GET request - check initial setup status
     $stmt = $conn->prepare("
         SELECT 
             current_step,
