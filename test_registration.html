@@ -1,0 +1,111 @@
+<?php
+// Test registration API call
+header('Content-Type: text/html; charset=utf-8');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        .test-form { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .response { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 10px 0; white-space: pre-wrap; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Registration API Test</h1>
+    
+    <div class="test-form">
+        <h2>Test Registration</h2>
+        <form id="testForm">
+            <div style="margin: 10px 0;">
+                <label>Username:</label><br>
+                <input type="text" name="username" value="TestUser<?php echo rand(1000, 9999); ?>" required>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Email:</label><br>
+                <input type="email" name="email" value="cliffco24@gmail.com" required>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Password:</label><br>
+                <input type="password" name="password" value="TestPassword123!" required>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Confirm Password:</label><br>
+                <input type="password" name="confirmPassword" value="TestPassword123!" required>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>First Name:</label><br>
+                <input type="text" name="firstName" value="Test" required>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Last Name:</label><br>
+                <input type="text" name="lastName" value="User" required>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Phone:</label><br>
+                <input type="text" name="phoneNumber" value="+1234567890">
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Date of Birth:</label><br>
+                <input type="date" name="dateOfBirth" value="1990-01-01">
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Account Type:</label><br>
+                <select name="accountType">
+                    <option value="personal">Personal</option>
+                    <option value="family">Family</option>
+                </select>
+            </div>
+            <div style="margin: 10px 0;">
+                <label>Monthly Contribution (for family):</label><br>
+                <input type="number" name="monthlyContribution" value="100" step="0.01">
+            </div>
+            <button type="submit">Test Registration</button>
+        </form>
+    </div>
+
+    <div id="response" class="response" style="display: none;"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Sending registration request...';
+            responseDiv.className = 'response';
+            
+            try {
+                const formData = new FormData(this);
+                
+                const response = await fetch('/budget/actions/register.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                try {
+                    const jsonResponse = JSON.parse(responseText);
+                    responseDiv.textContent = JSON.stringify(jsonResponse, null, 2);
+                    responseDiv.className = 'response ' + (jsonResponse.success ? 'success' : 'error');
+                } catch (parseError) {
+                    responseDiv.textContent = 'Response parsing failed:\n\n' + responseText;
+                    responseDiv.className = 'response error';
+                }
+                
+            } catch (error) {
+                responseDiv.textContent = 'Network error: ' + error.message;
+                responseDiv.className = 'response error';
+            }
+        });
+    </script>
+</body>
+</html>

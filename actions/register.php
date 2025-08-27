@@ -2,12 +2,12 @@
 // Enhanced register.php with email verification integration
 session_start();
 
-// Enable comprehensive error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable error display for clean JSON responses
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
-// Log all errors to a file
+// Log all errors to a file instead of displaying them
 ini_set('log_errors', 1);
 ini_set('error_log', '../logs/php_errors.log');
 
@@ -59,14 +59,14 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 // Include database connection and email service
-$connection_file = '../config/connection.php';
+$connection_file = __DIR__ . '/../config/connection.php';
 if (!file_exists($connection_file)) {
     debugLog("Connection file not found: $connection_file");
     sendResponse(false, "Database configuration file not found.");
 }
 
 include $connection_file;
-require_once '../config/email_config.php';
+require_once __DIR__ . '/../config/email_config.php';
 
 // Check if connection exists
 if (!isset($conn) || !$conn) {
