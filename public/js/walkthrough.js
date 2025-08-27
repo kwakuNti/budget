@@ -54,7 +54,6 @@ class BudgetWalkthrough {
                 const hasSalary = data.total_income && 
                                  parseFloat(data.total_income) > 0;
                 
-                console.log('💰 Salary status check:', hasSalary, 'Total income:', data.total_income);
                 return hasSalary;
             }
         } catch (error) {
@@ -70,7 +69,6 @@ class BudgetWalkthrough {
                                 !salaryDisplayText.includes('₵0') &&
                                 salaryDisplayText !== '₵0.00' &&
                                 salaryDisplayText !== '₵0';
-            console.log('💰 Fallback salary check:', hasSalarySet, salaryDisplayText);
             return hasSalarySet;
         }
         
@@ -78,16 +76,13 @@ class BudgetWalkthrough {
     }
 
     setupNavigationProtection() {
-        console.log('🔒 Setting up navigation protection');
         
         // Don't protect navigation if walkthrough is completed
         if (!this.walkthroughData || this.walkthroughData.is_completed) {
-            console.log('✅ Walkthrough completed, no navigation protection needed');
             return;
         }
         
         const currentStep = this.walkthroughData.current_step;
-        console.log('🔒 Current step:', currentStep);
         
         // Only protect navigation if user is on salary setup step
         if (currentStep === 'configure_salary') {
@@ -107,7 +102,6 @@ class BudgetWalkthrough {
     }
 
     blockNavigationForSalarySetup() {
-        console.log('🚫 Blocking navigation for salary setup');
         
         // Get all navigation links
         const navLinks = document.querySelectorAll('.header-nav .nav-item, .nav-link');
@@ -247,7 +241,6 @@ class BudgetWalkthrough {
     }
 
     showSalaryRequiredMessage() {
-        console.log('⚠️ Showing salary required message');
         
         // Remove any existing message
         const existingMessage = document.querySelector('.salary-required-message');
@@ -280,7 +273,6 @@ class BudgetWalkthrough {
     }
 
     restoreNavigation() {
-        console.log('🔓 Restoring navigation');
         
         // Remove blocked styling and restore functionality
         const blockedElements = document.querySelectorAll('.nav-blocked');
@@ -377,11 +369,10 @@ class BudgetWalkthrough {
 
     // Start page-specific help tour
     async startPageHelp() {
-        console.log('🎯 Starting page-specific help tour');
         
         try {
             const currentPageUrl = window.location.pathname;
-            const response = await fetch('../public/walkthrough/status.php', {
+            const response = await fetch('/budget/public/walkthrough/status.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -410,7 +401,7 @@ class BudgetWalkthrough {
     async checkWalkthroughStatus() {
         try {
             // Use public walkthrough path that's allowed by .htaccess
-            const response = await fetch('../public/walkthrough/status.php', {
+            const response = await fetch('/budget/public/walkthrough/status.php', {
                 credentials: 'same-origin' // Ensure cookies/session are sent
             });
             
@@ -499,7 +490,7 @@ class BudgetWalkthrough {
         }
 
         try {
-            const response = await fetch('../public/walkthrough/get_step.php', {
+            const response = await fetch('/budget/public/walkthrough/get_step.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1267,7 +1258,7 @@ class BudgetWalkthrough {
         
         try {
             console.log('📡 Sending request to complete_step.php...');
-            const response = await fetch('../public/walkthrough/complete_step.php', {
+            const response = await fetch('/budget/public/walkthrough/complete_step.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1376,7 +1367,7 @@ class BudgetWalkthrough {
 
     async skipWalkthrough() {
         try {
-            const response = await fetch('../public/walkthrough/skip.php', {
+            const response = await fetch('/budget/public/walkthrough/skip.php', {
                 method: 'POST',
                 credentials: 'same-origin'
             });
