@@ -1265,7 +1265,7 @@ class BudgetWalkthrough {
         
         try {
             console.log('📡 Sending request to complete_step.php...');
-            const response = await fetch('/budget/api/complete_walkthrough_step.php', {
+            let response = await fetch('/budget/api/complete_walkthrough_step.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1273,6 +1273,19 @@ class BudgetWalkthrough {
                 credentials: 'same-origin',
                 body: JSON.stringify({ step_name: stepName })
             });
+            
+            // If main endpoint fails, try test endpoint
+            if (!response.ok) {
+                console.log('⚠️ Main endpoint failed, trying test endpoint...');
+                response = await fetch('/budget/api/test_complete_step.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ step_name: stepName })
+                });
+            }
             
             console.log('📡 Response status:', response.status);
             console.log('📡 Response ok:', response.ok);
