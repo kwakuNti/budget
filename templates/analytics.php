@@ -6,14 +6,14 @@ session_start();
 require_once '../includes/session_timeout_middleware.php';
 $session_check = checkSessionTimeout();
 if (!$session_check['valid']) {
-    header('Location: ../login.php?timeout=1');
+    header('Location: /login?timeout=1');
     exit;
 }
 
 require_once '../config/connection.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['family_id'])) {
-    header("Location: login.php");
+    header("Location: /login");
     exit;
 }
 
@@ -964,11 +964,11 @@ function initializeSidebar() {
                         }
                     })
                     .then(() => {
-                        window.location.href = 'login.php';
+                        window.location.href = 'login';
                     })
                     .catch(() => {
                         // Fallback - redirect anyway
-                        window.location.href = 'login.php';
+                        window.location.href = 'login';
                     });
             }
         }
@@ -977,7 +977,7 @@ function initializeSidebar() {
         function changeYear(year) {
             document.getElementById('loadingOverlay').style.display = 'flex';
             setTimeout(() => {
-                window.location.href = `analytics.php?year=${year}`;
+                window.location.href = `analytics?year=${year}`;
             }, 500);
         }
 

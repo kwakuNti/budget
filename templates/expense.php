@@ -4,7 +4,7 @@ require_once '../config/connection.php';
 require_once '../includes/expense_functions.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['family_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 

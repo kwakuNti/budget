@@ -4,7 +4,7 @@ require_once '../config/connection.php';
 require_once '../includes/member_functions.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['family_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 
@@ -51,7 +51,7 @@ $growthMessage = $growthRate > 0
 
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="dashboard.php" class="nav-link">
+                <a href="dashboard" class="nav-link">
                     <span class="nav-icon">🏠</span>
                     <span>Dashboard</span>
                 </a>

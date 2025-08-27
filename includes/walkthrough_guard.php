@@ -93,7 +93,7 @@ function redirectToSalarySetup() {
     // Remove /templates from path if present
     $base_path = str_replace('/templates', '', $base_path);
     
-    $redirect_url = $protocol . '://' . $host . $base_path . '/templates/salary.php';
+    $redirect_url = $protocol . '://' . $host . $base_path . '/salary.php';
     
     // Use JavaScript redirect with message to avoid header issues
     echo '<script type="text/javascript">

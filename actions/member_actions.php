@@ -164,7 +164,7 @@ function addMember($conn, $family_id, $user_id) {
         $conn->commit();
         
         // Return success response with redirect flag for page reload
-        header('Location: ../templates/members.php?success=' . urlencode("$firstName $lastName has been added successfully!"));
+        header('Location: ../members?success=' . urlencode("$firstName $lastName has been added successfully!"));
         exit;
         
     } catch (Exception $e) {
@@ -290,7 +290,7 @@ function editMember($conn, $family_id, $user_id) {
         $conn->commit();
         
         // Redirect with success message
-        header('Location: ../templates/members.php?success=' . urlencode("$firstName $lastName has been updated successfully!"));
+        header('Location: ../members?success=' . urlencode("$firstName $lastName has been updated successfully!"));
         exit;
         
     } catch (Exception $e) {
@@ -373,7 +373,7 @@ function deleteMember($conn, $family_id, $user_id) {
         $conn->commit();
         
         // Redirect with success message
-        header('Location: ../templates/members.php?success=' . urlencode($member['full_name'] . " has been removed from your family."));
+        header('Location: ../members?success=' . urlencode($member['full_name'] . " has been removed from your family."));
         exit;
         
     } catch (Exception $e) {

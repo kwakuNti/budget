@@ -4,7 +4,7 @@ require_once '../includes/member_summary_functions.php';
 require_once '../includes/contribution_functions.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['family_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 

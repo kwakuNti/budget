@@ -5,13 +5,13 @@ session_start();
 require_once '../includes/session_timeout_middleware.php';
 $session_check = checkSessionTimeout();
 if (!$session_check['valid']) {
-    header('Location: ../login.php?timeout=1');
+    header('Location: /login?timeout=1');
     exit;
 }
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: /login');
     exit;
 }
 
@@ -25,7 +25,7 @@ $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user || $user['user_type'] !== 'personal') {
     // Redirect family users to family dashboard
-    header('Location: ../index.php');
+    header('Location: /');
     exit;
 }
 
@@ -1292,15 +1292,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </button>
             
             <nav class="header-nav" id="headerNav">
-                <a href="personal-dashboard.php" class="nav-item active">Dashboard</a>
-                <a href="salary.php" class="nav-item">Salary Setup</a>
-                <a href="budget.php" class="nav-item">Budget</a>
-                <a href="personal-expense.php" class="nav-item">Expenses</a>
-                <a href="savings.php" class="nav-item">Savings</a>
-                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
+                <a href="personal-dashboard" class="nav-item active">Dashboard</a>
+                <a href="salary" class="nav-item">Salary Setup</a>
+                <a href="budget" class="nav-item">Budget</a>
+                <a href="personal-expense" class="nav-item">Expenses</a>
+                <a href="savings" class="nav-item">Savings</a>
+                <!-- <a href="insights" class="nav-item">Insights</a> -->
 
-                <a href="report.php" class="nav-item">Reports</a>
-                <a href="feedback.php" class="nav-item">Feedback</a>
+                <a href="report" class="nav-item">Reports</a>
+                <a href="feedback" class="nav-item">Feedback</a>
 
             </nav>
 
@@ -1370,11 +1370,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
                 ?></div>
                 <div class="user-dropdown" id="userDropdown">
-                    <!-- <a href="profile.php">Profile Settings</a> -->
-                    <!-- <a href="income-sources.php">Income Sources</a> -->
-                    <!-- <a href="categories.php">Categories</a> -->
+                    <!-- <a href="profile">Profile Settings</a> -->
+                    <!-- <a href="income-sources">Income Sources</a> -->
+                    <!-- <a href="categories">Categories</a> -->
                     <!-- <hr> -->
-                    <!-- <a href="family-dashboard.php">Switch to Family</a> -->
+                    <!-- <a href="family-dashboard">Switch to Family</a> -->
                     <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
@@ -1413,7 +1413,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="salary-info-hero">
                     <div class="salary-display">
                         <div class="salary-amount-hero" id="monthlySalaryHero">Monthly Income: ₵0.00</div>
-                        <button class="setup-salary-btn-hero" onclick="window.location.href='salary.php'"><i class="fas fa-cog"></i> Setup Income</button>
+                        <button class="setup-salary-btn-hero" onclick="window.location.href='salary'"><i class="fas fa-cog"></i> Setup Income</button>
                         <button class="setup-salary-btn-hero" onclick="showSalaryPaidModal()"><i class="fas fa-check-circle"></i> I've Been Paid</button>
                     </div>
                 </div>
@@ -1493,7 +1493,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             <section class="insights-section">
                 <div class="section-header">
                     <h3><i class="fas fa-lightbulb"></i> Smart Financial Insights</h3>
-                    <a href="report.php" class="view-all">View All Insights</a>
+                    <a href="report" class="view-all">View All Insights</a>
                 </div>
                 <div class="insights-grid" id="insightsGrid">
                     <!-- Dynamic insights will be populated here -->
@@ -1513,7 +1513,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <div class="dashboard-section">
                     <div class="section-header">
                         <h3>Savings Goals</h3>
-                        <a href="savings.php" class="view-all">Manage</a>
+                        <a href="savings" class="view-all">Manage</a>
                     </div>
                     <div class="savings-goals" id="savingsGoals">
                         <div class="goal-item">
@@ -1789,7 +1789,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </div>
             <div class="modal-actions" style="display:flex; gap:8px; justify-content:flex-end; padding: 0 16px 16px 16px;">
-                <button type="button" class="btn-secondary" onclick="window.location.href='budget.php'">Open Budget Page</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='budget'">Open Budget Page</button>
                 <button type="button" class="btn-primary" onclick="closeModal('budgetTemplateViewModal')">Close</button>
             </div>
         </div>
@@ -1998,7 +1998,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                         <div class="insight-content">
                             <h4>More Insights Available</h4>
                             <p>Discover ${insights.length - 4} additional insights to optimize your finances.</p>
-                            <button class="insight-action" onclick="window.location.href='insights.php'">View All Insights</button>
+                            <button class="insight-action" onclick="window.location.href='insights'">View All Insights</button>
                         </div>
                     </div>
                 `;
@@ -2018,7 +2018,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="insight-content">
                         <h4>Track Your Progress</h4>
                         <p>Start tracking your expenses to get personalized financial insights.</p>
-                        <button class="insight-action" onclick="window.location.href='personal-expense.php'">Add Expenses</button>
+                        <button class="insight-action" onclick="window.location.href='personal-expense'">Add Expenses</button>
                     </div>
                 </div>
                 <div class="insight-card info">
@@ -2026,7 +2026,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="insight-content">
                         <h4>Set Financial Goals</h4>
                         <p>Create savings goals to stay motivated and track your progress.</p>
-                        <button class="insight-action" onclick="window.location.href='savings.php'">Create Goals</button>
+                        <button class="insight-action" onclick="window.location.href='savings'">Create Goals</button>
                     </div>
                 </div>
                 <div class="insight-card success">
@@ -2034,7 +2034,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <div class="insight-content">
                         <h4>Smart Insights Available</h4>
                         <p>Get AI-powered insights and predictions based on your financial data.</p>
-                        <button class="insight-action" onclick="window.location.href='insights.php'">View Insights</button>
+                        <button class="insight-action" onclick="window.location.href='insights'">View Insights</button>
                     </div>
                 </div>
             `;
@@ -2414,31 +2414,31 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
         function addToGoal(goalId) {
             // Redirect to savings page for goal management
-            window.location.href = `savings.php?goal=${goalId}`;
+            window.location.href = `savings?goal=${goalId}`;
         }
 
         function editGoal(goalId) {
             // Redirect to savings page for goal editing
-            window.location.href = `savings.php?edit=${goalId}`;
+            window.location.href = `savings?edit=${goalId}`;
         }
 
         function viewGoalDetails(goalId) {
             // Navigate to savings page to view detailed goal information
-            window.location.href = `savings.php?view=${goalId}`;
+            window.location.href = `savings?view=${goalId}`;
         }
 
         function showCreateGoalModal() {
             // Navigate to savings page to create a new goal
-            window.location.href = 'savings.php';
+            window.location.href = 'savings';
         }
 
         // Navigation functions for insight actions
         function navigateToSavings() {
-            window.location.href = 'savings.php';
+            window.location.href = 'savings';
         }
 
         function navigateToBudget() {
-            window.location.href = 'budget.php';
+            window.location.href = 'budget';
         }
 
         function updatePaydayCountdownData(data) {
@@ -2761,7 +2761,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         function navigateToSalarySetup() {
-            window.location.href = 'budget.php';
+            window.location.href = 'budget';
         }
 
         // Budget Template View (Dashboard)

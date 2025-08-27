@@ -9,12 +9,12 @@ require_once __DIR__ . '/../config/connection.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['family_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 
@@ -40,7 +40,7 @@ try {
     }
 } catch (Exception $e) {
     error_log("Dashboard Error: " . $e->getMessage());
-    header('Location: login.php?error=system_error');
+    header('Location: login?error=system_error');
     exit;
 }
 ?>
@@ -624,25 +624,25 @@ try {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="members.php" class="nav-link">
+                <a href="members" class="nav-link">
                     <span class="nav-icon">👥</span>
                     <span>Members</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="contribution.php" class="nav-link">
+                <a href="contribution" class="nav-link">
                     <span class="nav-icon">💰</span>
                     <span>Contributions</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="expense.php" class="nav-link">
+                <a href="expense" class="nav-link">
                     <span class="nav-icon">💸</span>
                     <span>Expenses</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="momo.php" class="nav-link">
+                <a href="momo" class="nav-link">
                     <span class="nav-icon">🏦</span>
                     <span>MoMo Account</span>
                 </a>

@@ -10,7 +10,7 @@ $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user || $user['user_type'] !== 'personal') {
     // Redirect family users to family dashboard
-    header('Location: ../index.php');
+    header('Location: ../login');
     exit;
 }
 
@@ -52,7 +52,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <button class="nav-btn" id="themeToggle"><i class="fas fa-palette"></i></button>
                 <button class="nav-btn" id="exportReport"><i class="fas fa-download"></i> Export</button>
                 <button class="nav-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-                <a href="personal-dashboard.php" class="nav-btn">← Dashboard</a>
+                <a href="personal-dashboard" class="nav-btn">← Dashboard</a>
             </div>
         </div>
     </nav>

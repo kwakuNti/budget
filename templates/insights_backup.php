@@ -834,13 +834,13 @@
             </div>
             
             <nav class="header-nav">
-                <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
-                <a href="salary.php" class="nav-item">Salary Setup</a>
-                <a href="budget.php" class="nav-item">Budget</a>
-                <a href="personal-expense.php" class="nav-item">Expenses</a>
-                <a href="savings.php" class="nav-item">Savings</a>
+                <a href="personal-dashboard" class="nav-item">Dashboard</a>
+                <a href="salary" class="nav-item">Salary Setup</a>
+                <a href="budget" class="nav-item">Budget</a>
+                <a href="personal-expense" class="nav-item">Expenses</a>
+                <a href="savings" class="nav-item">Savings</a>
                 <!-- <a href="insights.php" class="nav-item active">Insights</a> -->
-                <a href="report.php" class="nav-item">Reports</a>
+                <a href="report" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">

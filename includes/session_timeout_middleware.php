@@ -76,7 +76,7 @@ function checkSessionTimeout() {
  * Call this function at the top of protected pages
  * @param string $redirect_url URL to redirect to if session is invalid
  */
-function enforceSessionTimeout($redirect_url = 'templates/login.php') {
+function enforceSessionTimeout($redirect_url = '/login.php') {
     $session_check = checkSessionTimeout();
     
     if (!$session_check['valid']) {

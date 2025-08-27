@@ -3,7 +3,7 @@ session_start();
 
 // Check if user is logged in and is admin (you can adjust this check based on your admin system)
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -117,8 +117,8 @@ $stats = $stats_result->fetch_assoc();
             </div>
             
             <nav class="header-nav">
-                <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
-                <a href="feedback-admin.php" class="nav-item active">Feedback</a>
+                <a href="personal-dashboard" class="nav-item">Dashboard</a>
+                <a href="feedback-admin" class="nav-item active">Feedback</a>
             </nav>
             
             <a href="../actions/signout.php" class="signout-btn">
@@ -227,7 +227,7 @@ $stats = $stats_result->fetch_assoc();
                         <i class="fas fa-filter"></i> Filter
                     </button>
                     
-                    <a href="feedback-admin.php" class="btn btn-secondary">
+                    <a href="feedback-admin" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Clear
                     </a>
                 </form>

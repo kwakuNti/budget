@@ -1345,7 +1345,7 @@
                         
                         // Redirect based on server response or default to login
                         setTimeout(() => {
-                            window.location.href = data.redirect || 'login.php';
+                            window.location.href = data.redirect || 'login';
                         }, 2000);
                     } else {
                         // Show error message

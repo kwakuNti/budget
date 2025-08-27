@@ -441,7 +441,7 @@ function getPrivacySession($conn, $user_id) {
 function sendPinResetEmail($email, $name, $token) {
     // Enhanced email implementation
     $subject = "PIN Reset Request - Budget Manager";
-    $reset_link = "http://" . $_SERVER['HTTP_HOST'] . "/budget/templates/pin-reset.php?token=" . $token;
+    $reset_link = "http://" . $_SERVER['HTTP_HOST'] . "/pin-reset.php?token=" . $token;
     
     $message = "
     <html>

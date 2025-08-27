@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $identifier = trim($_POST["resetEmail"]); // Can be email or username
 
     if (empty($identifier)) {
-        header("Location: ../templates/login?status=error&message=Email or username is required!");
+        header("Location: /login?status=error&message=Email or username is required!");
         exit();
     }
 
@@ -51,14 +51,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // In production, you would send this via email
         $stmt->close();
         $conn->close();
-        header("Location: ../templates/reset-password?token=" . $resetToken . "&status=success&message=Reset link generated. Use the link to reset your password.");
+        header("Location: /reset-password?token=" . $resetToken . "&status=success&message=Reset link generated. Use the link to reset your password.");
         exit();
         
     } else {
         $stmt->close();
         $conn->close();
         // Still show success message for security (don't reveal if user exists)
-        header("Location: ../templates/login?status=success&message=If an account with that email/username exists, a password reset link has been generated.");
+        header("Location: /login?status=success&message=If an account with that email/username exists, a password reset link has been generated.");
         exit();
     }
 }

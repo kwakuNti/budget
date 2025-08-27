@@ -531,7 +531,7 @@ try {
         debugLog("Session variables set");
 
         // Determine redirect URL
-        $redirectUrl = ($accountType === 'family') ? '../templates/dashboard' : '../templates/login';
+        $redirectUrl = ($accountType === 'family') ? '/dashboard' : '/login';
 
         // Send success response
         sendResponse(true, "Account created successfully! Redirecting to login...", [

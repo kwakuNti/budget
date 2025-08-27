@@ -69,14 +69,14 @@ debugLog("Request method: " . $_SERVER['REQUEST_METHOD']);
 // Only process POST requests
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     debugLog("Invalid request method");
-    redirectWithMessage("../templates/login", "error", "Invalid request method.");
+    redirectWithMessage("/login", "error", "Invalid request method.");
 }
 
 // Include database connection
 $connection_file = '../config/connection.php';
 if (!file_exists($connection_file)) {
     debugLog("Connection file not found: $connection_file");
-    redirectWithMessage("../templates/login", "error", "Database configuration error.");
+    redirectWithMessage("/login", "error", "Database configuration error.");
 }
 
 include $connection_file;
@@ -84,12 +84,12 @@ include $connection_file;
 // Check database connection
 if (!isset($conn) || !$conn) {
     debugLog("Database connection failed");
-    redirectWithMessage("../templates/login", "error", "Database connection error.");
+    redirectWithMessage("/login", "error", "Database connection error.");
 }
 
 if ($conn->connect_error) {
     debugLog("Database connection error: " . $conn->connect_error);
-    redirectWithMessage("../templates/login", "error", "Database connection failed.");
+    redirectWithMessage("/login", "error", "Database connection failed.");
 }
 
 debugLog("Database connection successful");
@@ -110,7 +110,7 @@ try {
     // Basic validation
     if (empty($username) || empty($password)) {
         debugLog("Empty credentials provided");
-        redirectWithMessage("../templates/login", "error", "Username and password are required!");
+        redirectWithMessage("/login", "error", "Username and password are required!");
     }
 
     // Check if input is email or username
@@ -134,7 +134,7 @@ try {
 
     if (!$stmt) {
         debugLog("Statement preparation failed: " . $conn->error);
-        redirectWithMessage("../templates/login", "error", "Database error occurred.");
+        redirectWithMessage("/login", "error", "Database error occurred.");
     }
 
     $stmt->bind_param("s", $username);
@@ -145,7 +145,7 @@ try {
         debugLog("User not found: $username");
         $stmt->close();
         $conn->close();
-        redirectWithMessage("../templates/login", "error", "Invalid username or password!");
+        redirectWithMessage("../login", "error", "Invalid username or password!");
     }
 
     $user = $result->fetch_assoc();
@@ -175,7 +175,7 @@ try {
         }
         
         $conn->close();
-        redirectWithMessage("../templates/login", "error", "Invalid username or password!");
+        redirectWithMessage("../login", "error", "Invalid username or password!");
     }
 
     debugLog("Password verified successfully");
@@ -345,10 +345,10 @@ try {
         // Updated routing logic based on user type (not hardcoded email)
         if ($user['user_type'] === 'family') {
             debugLog("Redirecting family user to family dashboard");
-            redirectWithMessage("../templates/dashboard", "success", $welcomeMessage);
+            redirectWithMessage("/dashboard", "success", $welcomeMessage);
         } else {
             debugLog("Redirecting personal user to personal dashboard");
-            redirectWithMessage("../templates/personal-dashboard", "success", $welcomeMessage);
+            redirectWithMessage("/personal-dashboard", "success", $welcomeMessage);
         }
 
     } catch (Exception $e) {
@@ -365,7 +365,7 @@ try {
         $conn->close();
     }
     
-    redirectWithMessage("../templates/login", "error", "An error occurred during login. Please try again.");
+    redirectWithMessage("/login", "error", "An error occurred during login. Please try again.");
 }
 
 debugLog("Login script completed unexpectedly");

@@ -3,7 +3,7 @@ session_start();
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -17,7 +17,7 @@ $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user || $user['user_type'] !== 'personal') {
     // Redirect family users to family dashboard
-    header('Location: ../index.php');
+    header('Location: ../index');
     exit;
 }
 
@@ -1638,13 +1638,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </div>
             
             <nav class="header-nav">
-                <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
-                <a href="salary.php" class="nav-item">Salary Setup</a>
-                <a href="budget.php" class="nav-item">Budget</a>
-                <a href="personal-expense.php" class="nav-item">Expenses</a>
-                <a href="savings.php" class="nav-item">Savings</a>
-                <!-- <a href="insights.php" class="nav-item active">Insights</a> -->
-                <a href="report.php" class="nav-item">Reports</a>
+                <a href="personal-dashboard" class="nav-item">Dashboard</a>
+                <a href="salary" class="nav-item">Salary Setup</a>
+                <a href="budget" class="nav-item">Budget</a>
+                <a href="personal-expense" class="nav-item">Expenses</a>
+                <a href="savings" class="nav-item">Savings</a>
+                <!-- <a href="insights" class="nav-item active">Insights</a> -->
+                <a href="report" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">

@@ -5,13 +5,13 @@ session_start();
 require_once '../includes/session_timeout_middleware.php';
 $session_check = checkSessionTimeout();
 if (!$session_check['valid']) {
-    header('Location: ../login.php?timeout=1');
+    header('Location: ../login?timeout=1');
     exit;
 }
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -60,13 +60,13 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             </button>
             
             <nav class="header-nav" id="headerNav">
-                <a href="personal-dashboard.php" class="nav-item">Dashboard</a>
-                <a href="salary.php" class="nav-item">Salary Setup</a>
-                <a href="budget.php" class="nav-item">Budget</a>
-                <a href="personal-expense.php" class="nav-item">Expenses</a>
-                <a href="savings.php" class="nav-item active">Savings</a>
-                <!-- <a href="insights.php" class="nav-item">Insights</a> -->
-                <a href="report.php" class="nav-item">Reports</a>
+                <a href="personal-dashboard" class="nav-item">Dashboard</a>
+                <a href="salary" class="nav-item">Salary Setup</a>
+                <a href="budget" class="nav-item">Budget</a>
+                <a href="personal-expense" class="nav-item">Expenses</a>
+                <a href="savings" class="nav-item active">Savings</a>
+                <!-- <a href="insights" class="nav-item">Insights</a> -->
+                <a href="report" class="nav-item">Reports</a>
             </nav>
 
             <div class="theme-selector">

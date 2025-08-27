@@ -9,17 +9,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validation
     if (empty($identifier) || empty($newPassword) || empty($confirmPassword)) {
-        header("Location: ../templates/login?status=error&message=All fields are required.");
+        header("Location: /login?status=error&message=All fields are required.");
         exit();
     }
 
     if ($newPassword !== $confirmPassword) {
-        header("Location: ../templates/login?status=error&message=Passwords do not match.");
+        header("Location: /login?status=error&message=Passwords do not match.");
         exit();
     }
 
     if (strlen($newPassword) < 6) {
-        header("Location: ../templates/login?status=error&message=Password must be at least 6 characters long.");
+        header("Location: /login?status=error&message=Password must be at least 6 characters long.");
         exit();
     }
 
@@ -67,13 +67,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $updateStmt->close();
             $conn->close();
             
-            header("Location: ../templates/login?status=success&message=Password reset successfully. You can now log in with your new password.");
+            header("Location: /login?status=success&message=Password reset successfully. You can now log in with your new password.");
             exit();
         } else {
             $updateStmt->close();
             $conn->close();
             
-            header("Location: ../templates/login?status=error&message=Failed to update password. Please try again.");
+            header("Location: /login?status=error&message=Failed to update password. Please try again.");
             exit();
         }
     } else {
@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conn->close();
         
         // User not found - but don't reveal this for security
-        header("Location: ../templates/login?status=success&message=If the account exists, the password has been reset.");
+        header("Location: /login?status=success&message=If the account exists, the password has been reset.");
         exit();
     }
 }
