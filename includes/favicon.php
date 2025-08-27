@@ -5,15 +5,8 @@
  * Usage: <?php include '../includes/favicon.php'; ?>
  */
 
-// Determine the correct path to public folder based on current file location
-$favicon_path = '../public/';
-
-// If we're already in the public folder or root, adjust path
-if (strpos($_SERVER['REQUEST_URI'], '/public/') !== false) {
-    $favicon_path = './';
-} elseif (strpos($_SERVER['REQUEST_URI'], '/templates/') === false && strpos($_SERVER['REQUEST_URI'], '/actions/') === false && strpos($_SERVER['REQUEST_URI'], '/api/') === false) {
-    $favicon_path = './public/';
-}
+// For clean URLs with .htaccess in web root, use public/ path
+$favicon_path = 'public/';
 ?>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?php echo $favicon_path; ?>favicon.ico">
