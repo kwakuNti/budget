@@ -1,6 +1,10 @@
 <?php
 // Enhanced register.php with email verification integration
-session_start();
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Disable error display for clean JSON responses
 ini_set('display_errors', 0);
@@ -15,7 +19,7 @@ ini_set('error_log', '../logs/php_errors.log');
 header('Content-Type: application/json');
 
 // Debug mode - set to false in production
-$debug_mode = true;
+$debug_mode = false;
 
 // Debug logging function
 function debugLog($message, $data = null) {

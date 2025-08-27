@@ -31,6 +31,13 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/budget/$1.php -f
 RewriteRule ^([^/]+)/?$ budget/$1.php [L]
 
+# Allow specific API endpoints
+RewriteCond %{REQUEST_URI} ^/budget/actions/register\.php$
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_URI} ^/budget/actions/login\.php$
+RewriteRule ^ - [L]
+
 # Allow specific directories and files to be accessed directly
 RewriteCond %{REQUEST_URI} ^/budget/public/
 RewriteRule ^ - [L]
@@ -38,7 +45,11 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/budget/api/
 RewriteRule ^ - [L]
 
-# Block direct access to sensitive directories
-RewriteRule ^budget/(config|db|includes|actions|ajax|cron|logs)/?$ budget/templates/login.php [R=302,L]
+# Block direct access to other sensitive directories
+RewriteRule ^budget/(config|db|includes|ajax|cron|logs)/?$ budget/templates/login.php [R=302,L]
+
+# Block direct access to sensitive actions (except register and login)
+RewriteCond %{REQUEST_URI} !^/budget/actions/(register|login)\.php$
+RewriteRule ^budget/actions/?.*$ budget/templates/login.php [R=302,L]
 
 
