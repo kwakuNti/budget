@@ -17,6 +17,13 @@ class BudgetWalkthrough {
     }
 
     async init() {
+        // Emergency disable switch - check for URL parameter to disable walkthrough
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('disable_walkthrough') === '1') {
+            console.log('🚨 Walkthrough disabled via URL parameter');
+            return;
+        }
+        
         // Check if user needs walkthrough
         await this.checkWalkthroughStatus();
         
@@ -256,7 +263,7 @@ class BudgetWalkthrough {
                 <h5>⚠️ Salary Setup Required</h5>
                 <p>You need to complete your salary setup before accessing other pages. This is essential for budget planning and goal tracking.</p>
                 <div class="message-actions">
-                    <button class="btn btn-primary btn-sm" onclick="window.location.href='salary.php'">Complete Salary Setup</button>
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='/salary'">Complete Salary Setup</button>
                     <button class="btn btn-outline-secondary btn-sm" onclick="this.closest('.salary-required-message').remove()">Close</button>
                 </div>
             </div>
@@ -440,27 +447,27 @@ class BudgetWalkthrough {
         
         // If user has setup_income step, start it on any page (dashboard)
         if (this.currentStep === 'setup_income') {
-            if (currentPage.includes('personal-dashboard.php')) {
+            if (currentPage.includes('personal-dashboard')) {
                 return 'setup_income';
             } else {
                 // Redirect to dashboard to start walkthrough
                 console.log('🚀 Redirecting to dashboard to start walkthrough');
-                window.location.href = '../personal-dashboard';
+                window.location.href = '/personal-dashboard';
                 return null;
             }
         }
         
         // Configure salary step - should be on salary page
         if (this.currentStep === 'configure_salary') {
-            if (currentPage.includes('salary.php')) {
+            if (currentPage.includes('salary')) {
                 return 'configure_salary';
             } else {
                 // User is on wrong page, but this is expected - salary modal opens from dashboard
                 // Just start the walkthrough where they are if it's dashboard
-                if (currentPage.includes('personal-dashboard.php')) {
+                if (currentPage.includes('personal-dashboard')) {
                     // Redirect to salary page for salary step
                     console.log('🚀 Redirecting to salary page for salary configuration');
-                    window.location.href = '../salary';
+                    window.location.href = '/salary';
                     return null;
                 }
             }
@@ -468,12 +475,12 @@ class BudgetWalkthrough {
         
         // Setup budget step - should be on budget page  
         if (this.currentStep === 'setup_budget') {
-            if (currentPage.includes('budget.php')) {
+            if (currentPage.includes('budget')) {
                 return 'setup_budget';
             } else {
                 // Redirect to budget page
                 console.log('🚀 Redirecting to budget page for budget setup');
-                window.location.href = '../budget';
+                window.location.href = '/budgets';
                 return null;
             }
         }

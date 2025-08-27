@@ -3383,7 +3383,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <!-- Privacy System Script -->
     <script src="../public/js/privacy.js"></script>
     <!-- Walkthrough System Scripts -->
-    <script src="../public/js/walkthrough.js"></script>
+    <script src="../public/js/walkthrough.js?v=<?php echo time(); ?>"></script>
     <!-- Mobile Navigation Script -->
     <script src="../public/js/mobile-nav.js"></script>
     
