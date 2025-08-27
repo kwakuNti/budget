@@ -1,5 +1,5 @@
 <?php
-// Enhanced register.php with better error handling and debugging
+// Enhanced register.php with email verification integration
 session_start();
 
 // Enable comprehensive error reporting for debugging
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     sendResponse(false, "Invalid request method.");
 }
 
-// Include database connection
+// Include database connection and email service
 $connection_file = '../config/connection.php';
 if (!file_exists($connection_file)) {
     debugLog("Connection file not found: $connection_file");
@@ -66,6 +66,7 @@ if (!file_exists($connection_file)) {
 }
 
 include $connection_file;
+require_once '../config/email_config.php';
 
 // Check if connection exists
 if (!isset($conn) || !$conn) {
@@ -337,12 +338,19 @@ try {
 
         debugLog("Password hashed successfully");
 
-        // Insert user into users table
+        // Generate email verification token
+        $verification_token = bin2hex(random_bytes(32));
+        $token_expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        debugLog("Verification token generated");
+
+        // Insert user into users table with email verification fields
         $insertUserStmt = $conn->prepare("
             INSERT INTO users (
                 username, email, password_hash, first_name, last_name, 
-                phone_number, date_of_birth, user_type, is_active, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
+                phone_number, date_of_birth, user_type, is_active, 
+                email_verified, verification_token, token_expires_at, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?, ?, NOW())
         ");
 
         if (!$insertUserStmt) {
@@ -350,7 +358,7 @@ try {
         }
 
         $insertUserStmt->bind_param(
-            "ssssssss",
+            "ssssssssss",
             $username,
             $email,
             $passwordHash,
@@ -358,7 +366,9 @@ try {
             $lastName,
             $cleanPhoneNumber,
             $dateOfBirth,
-            $accountType
+            $accountType,
+            $verification_token,
+            $token_expiry
         );
 
         if (!$insertUserStmt->execute()) {
@@ -522,24 +532,36 @@ try {
         
         debugLog("Transaction committed successfully");
 
-        // Set session variables for auto-login
-        $_SESSION['user_id'] = $userId;
-        $_SESSION['username'] = $username;
-        $_SESSION['user_type'] = $accountType;
-        $_SESSION['login_time'] = time();
+        // Send verification email
+        debugLog("Sending verification email to: $email");
+        $emailResult = sendVerificationEmail($email, $firstName, $verification_token);
+        
+        if (!$emailResult['success']) {
+            debugLog("Failed to send verification email: " . $emailResult['error']);
+            // Still allow registration to complete, but inform user about email issue
+            sendResponse(true, "Account created successfully! However, we couldn't send the verification email. Please contact support.", [
+                'user_id' => $userId,
+                'username' => $username,
+                'account_type' => $accountType,
+                'email_sent' => false,
+                'verification_required' => true
+            ], '/verify-email');
+        }
 
-        debugLog("Session variables set");
+        debugLog("Verification email sent successfully");
 
-        // Determine redirect URL
-        $redirectUrl = ($accountType === 'family') ? '/dashboard' : '/login';
-
-        // Send success response
-        sendResponse(true, "Account created successfully! Redirecting to login...", [
+        // Don't set session variables - user must verify email first
+        
+        // Send success response with verification requirement
+        sendResponse(true, "Account created successfully! Please check your email for verification instructions.", [
             'user_id' => $userId,
             'username' => $username,
             'account_type' => $accountType,
+            'email_sent' => true,
+            'verification_required' => true,
+            'verification_code' => strtoupper(substr($verification_token, 0, 8)), // Show first 8 chars as backup
             'family_code' => ($accountType === 'family') ? $familyCode : null
-        ], $redirectUrl);
+        ], '/verify-email');
 
     } catch (Exception $e) {
         // Rollback transaction on error

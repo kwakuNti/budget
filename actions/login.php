@@ -120,13 +120,13 @@ try {
     // Prepare query based on input type
     if ($isEmail) {
         $stmt = $conn->prepare("
-            SELECT id, first_name, last_name, username, email, password_hash, user_type, is_active 
+            SELECT id, first_name, last_name, username, email, password_hash, user_type, is_active, email_verified 
             FROM users 
             WHERE email = ? AND is_active = 1
         ");
     } else {
         $stmt = $conn->prepare("
-            SELECT id, first_name, last_name, username, email, password_hash, user_type, is_active 
+            SELECT id, first_name, last_name, username, email, password_hash, user_type, is_active, email_verified 
             FROM users 
             WHERE username = ? AND is_active = 1
         ");
@@ -179,6 +179,29 @@ try {
     }
 
     debugLog("Password verified successfully");
+
+    // Check if email is verified
+    if (!$user['email_verified']) {
+        debugLog("Email not verified for user: " . $user['username']);
+        
+        // Log failed login attempt
+        $logStmt = $conn->prepare("
+            INSERT INTO activity_logs (user_id, action_type, description, ip_address, user_agent, created_at) 
+            VALUES (?, 'login_failed', 'Login attempt with unverified email', ?, ?, NOW())
+        ");
+        if ($logStmt) {
+            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $logStmt->bind_param("iss", $user['id'], $ipAddress, $userAgent);
+            $logStmt->execute();
+            $logStmt->close();
+        }
+        
+        $conn->close();
+        redirectWithMessage("/verify-email", "error", "Please verify your email address before logging in. Check your inbox for the verification link.");
+    }
+
+    debugLog("Email verification check passed");
 
     // Begin transaction for login process
     $conn->begin_transaction();

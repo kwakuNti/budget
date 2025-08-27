@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification System - Production Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        input[type="email"], input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px; margin: 5px; }
+        .response { background: #e9ecef; padding: 10px; border-radius: 4px; margin: 10px 0; white-space: pre-wrap; }
+        .status-indicator { display: inline-block; width: 20px; height: 20px; border-radius: 50%; margin-right: 10px; }
+        .status-ok { background: #28a745; }
+        .status-warning { background: #ffc107; }
+        .status-error { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Email Verification System - Production Test</h1>
+    <p><em>Test your email verification system in a browser environment</em></p>
+
+    <div class="test-section">
+        <h2>📧 1. Test Email Sending</h2>
+        <p>Send a verification email to test the email delivery system:</p>
+        <input type="email" id="testEmail" placeholder="Enter test email" value="cliffco24@gmail.com">
+        <button onclick="sendTestEmail()">Send Test Email</button>
+        <div id="emailResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 2. Test Email Verification</h2>
+        <p>Test the verification endpoint with a token:</p>
+        <input type="text" id="testToken" placeholder="Enter verification token">
+        <button onclick="verifyToken()">Verify Token</button>
+        <div id="verifyResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 3. Test Resend Verification</h2>
+        <p>Test the resend verification functionality:</p>
+        <input type="email" id="resendEmail" placeholder="Enter email for resend" value="cliffco24@gmail.com">
+        <button onclick="resendVerification()">Resend Verification</button>
+        <div id="resendResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 4. System Status</h2>
+        <div id="systemStatus">
+            <p><span class="status-indicator status-warning"></span>Checking system status...</p>
+        </div>
+        <button onclick="checkSystemStatus()">Refresh Status</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 5. Production Notes</h2>
+        <div style="background: #fff3cd; padding: 15px; border: 1px solid #ffeaa7; border-radius: 5px;">
+            <h3>⚠️ Important for Production:</h3>
+            <ul>
+                <li><strong>HTTPS:</strong> Ensure all verification links use HTTPS</li>
+                <li><strong>Domain:</strong> Update base URL to use budgetly.online</li>
+                <li><strong>Rate Limiting:</strong> Implement rate limiting for email endpoints</li>
+                <li><strong>Error Handling:</strong> Proper error logging and user feedback</li>
+                <li><strong>DNS Records:</strong> Configure SPF, DKIM for better email delivery</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function sendTestEmail() {
+            const email = document.getElementById('testEmail').value;
+            const responseDiv = document.getElementById('emailResponse');
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Sending email...';
+            
+            try {
+                const response = await fetch('/budget/api/resend_verification.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const result = await response.json();
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                
+            } catch (error) {
+                responseDiv.textContent = 'Error: ' + error.message;
+                responseDiv.className = 'response error';
+            }
+        }
+        
+        async function verifyToken() {
+            const token = document.getElementById('testToken').value;
+            const responseDiv = document.getElementById('verifyResponse');
+            
+            if (!token) {
+                alert('Please enter a verification token');
+                return;
+            }
+            
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Verifying token...';
+            
+            try {
+                const response = await fetch('/budget/api/verify_email.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: token })
+                });
+                
+                const result = await response.json();
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                
+            } catch (error) {
+                responseDiv.textContent = 'Error: ' + error.message;
+                responseDiv.className = 'response error';
+            }
+        }
+        
+        async function resendVerification() {
+            const email = document.getElementById('resendEmail').value;
+            const responseDiv = document.getElementById('resendResponse');
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Resending verification...';
+            
+            try {
+                const response = await fetch('/budget/api/resend_verification.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const result = await response.json();
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+                responseDiv.className = 'response ' + (result.success ? 'success' : 'error');
+                
+            } catch (error) {
+                responseDiv.textContent = 'Error: ' + error.message;
+                responseDiv.className = 'response error';
+            }
+        }
+        
+        async function checkSystemStatus() {
+            const statusDiv = document.getElementById('systemStatus');
+            statusDiv.innerHTML = '<p><span class="status-indicator status-warning"></span>Checking system status...</p>';
+            
+            try {
+                const response = await fetch('/budget/production_check.php');
+                const html = await response.text();
+                
+                // Extract key information from the response
+                const successCount = (html.match(/✅/g) || []).length;
+                const errorCount = (html.match(/❌/g) || []).length;
+                const totalChecks = successCount + errorCount;
+                const percentage = totalChecks > 0 ? Math.round((successCount / totalChecks) * 100) : 0;
+                
+                let statusClass = 'status-ok';
+                let statusText = 'All systems operational';
+                
+                if (percentage < 80) {
+                    statusClass = 'status-warning';
+                    statusText = 'Some issues detected';
+                }
+                if (percentage < 60) {
+                    statusClass = 'status-error';
+                    statusText = 'Critical issues detected';
+                }
+                
+                statusDiv.innerHTML = `
+                    <p><span class="status-indicator ${statusClass}"></span>${statusText}</p>
+                    <p>System Health: ${percentage}% (${successCount}/${totalChecks} checks passed)</p>
+                    <small><a href="/budget/production_check.php" target="_blank">View detailed report</a></small>
+                `;
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<p><span class="status-indicator status-error"></span>Failed to check system status: ' + error.message + '</p>';
+            }
+        }
+        
+        // Check system status on page load
+        window.addEventListener('load', checkSystemStatus);
+    </script>
+</body>
+</html>

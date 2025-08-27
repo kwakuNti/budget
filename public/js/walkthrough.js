@@ -185,41 +185,56 @@ class BudgetWalkthrough {
     }
 
     interceptWindowLocationChanges() {
-        // Store original location methods
-        const originalAssign = window.location.assign;
-        const originalReplace = window.location.replace;
+        // Instead of overriding location methods (which are read-only), 
+        // we'll use a different approach with event delegation and interception
         
-        // Override location.assign
-        window.location.assign = (url) => {
-            if (this.shouldBlockNavigation(url)) {
-                this.showSalaryRequiredMessage();
-                return;
-            }
-            originalAssign.call(window.location, url);
-        };
+        // Store reference to this for use in event handlers
+        const self = this;
         
-        // Override location.replace
-        window.location.replace = (url) => {
-            if (this.shouldBlockNavigation(url)) {
-                this.showSalaryRequiredMessage();
-                return;
-            }
-            originalReplace.call(window.location, url);
-        };
-        
-        // Override direct location.href assignments
-        let currentHref = window.location.href;
-        Object.defineProperty(window.location, 'href', {
-            get: () => currentHref,
-            set: (url) => {
-                if (this.shouldBlockNavigation(url)) {
-                    this.showSalaryRequiredMessage();
-                    return;
+        // Intercept all click events to check for navigation
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('a, button[onclick], [data-href]');
+            if (!target) return;
+            
+            let url = null;
+            
+            // Check for various navigation patterns
+            if (target.tagName === 'A' && target.href) {
+                url = target.href;
+            } else if (target.onclick) {
+                const onclickStr = target.onclick.toString();
+                // Look for location assignments in onclick
+                const locationMatch = onclickStr.match(/(?:window\.)?location(?:\.href)?\s*=\s*['"`]([^'"`]+)['"`]/);
+                if (locationMatch) {
+                    url = locationMatch[1];
                 }
-                currentHref = url;
-                originalAssign.call(window.location, url);
+            } else if (target.dataset.href) {
+                url = target.dataset.href;
             }
-        });
+            
+            if (url && self.shouldBlockNavigation(url)) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.showSalaryRequiredMessage();
+                return false;
+            }
+        }, true); // Use capture phase to catch events early
+        
+        // Store original window.location.href for monitoring
+        this.originalHref = window.location.href;
+        
+        // Periodically check for programmatic navigation attempts
+        this.navigationCheckInterval = setInterval(() => {
+            if (window.location.href !== self.originalHref) {
+                const newUrl = window.location.href;
+                if (self.shouldBlockNavigation(newUrl)) {
+                    // If navigation was blocked, try to go back
+                    history.back();
+                    self.showSalaryRequiredMessage();
+                }
+                self.originalHref = newUrl;
+            }
+        }, 100);
     }
 
     shouldBlockNavigation(url) {
@@ -306,6 +321,12 @@ class BudgetWalkthrough {
                 indicator.remove();
             }
         });
+        
+        // Clean up navigation check interval
+        if (this.navigationCheckInterval) {
+            clearInterval(this.navigationCheckInterval);
+            this.navigationCheckInterval = null;
+        }
         
         // Restore window.location methods (this is complex, so we'll just reload the page)
         // The navigation will be restored on page reload when walkthrough status is checked

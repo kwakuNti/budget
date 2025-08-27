@@ -550,3 +550,8 @@ SELECT
     'Available Balance = Income - Expenses - Savings (correctly calculated)' as NOTE,
     'User Feedback System has been added!' as FEEDBACK_STATUS,
     NOW() as COMPLETED_AT;
+
+
+ALTER TABLE users ADD COLUMN email_verified TINYINT(1) DEFAULT 0;
+ALTER TABLE users ADD COLUMN verification_token VARCHAR(255);
+ALTER TABLE users ADD COLUMN token_expires_at DATETIME;

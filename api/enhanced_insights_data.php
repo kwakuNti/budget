@@ -161,7 +161,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Excellent Financial Health!',
             'message' => "Your financial health score is {$health_data['health_score']}/100. You're managing money like a pro!",
             'action' => 'View Full Report',
-            'link' => 'insights.php'
+            'link' => 'insights'
         ];
     } elseif ($health_data['health_score'] >= 70) {
         $insights[] = [
@@ -170,7 +170,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Good Financial Standing',
             'message' => "Score: {$health_data['health_score']}/100. A few optimizations could boost your financial health.",
             'action' => 'See Recommendations',
-            'link' => 'insights.php'
+            'link' => 'insights'
         ];
     } else {
         $insights[] = [
@@ -179,7 +179,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Financial Health Needs Attention',
             'message' => "Score: {$health_data['health_score']}/100. Let's work on improving your financial habits.",
             'action' => 'Get Help',
-            'link' => 'insights.php'
+            'link' => 'insights'
         ];
     }
     
@@ -229,7 +229,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Savings Opportunity Detected',
             'message' => "You could save ₵{$spending_data['potential_savings']} by optimizing your spending patterns.",
             'action' => 'See How',
-            'link' => 'insights.php'
+            'link' => 'insights'
         ];
     }
     
