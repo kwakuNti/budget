@@ -19,75 +19,88 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
+            padding: 20px;
+            margin: 0;
         }
         
         .verification-container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
-            max-width: 750px;
+            max-width: 900px;
             width: 100%;
             overflow: hidden;
-            min-height: 600px;
+            display: flex;
+            flex-direction: row;
+            min-height: 85vh;
+            max-height: 90vh;
         }
         
         .verification-header {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            padding: 60px 60px 50px;
+            padding: 40px 50px;
             text-align: center;
             color: white;
+            flex: 0 0 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         .brand-logo {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 22px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 30px;
+            margin-bottom: 25px;
             backdrop-filter: blur(10px);
         }
         
         .brand-logo i {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: white;
         }
         
         .header-title {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         
         .header-subtitle {
-            font-size: 1.1rem;
+            font-size: 1rem;
             opacity: 0.9;
             line-height: 1.6;
-            max-width: 500px;
-            margin: 0 auto;
+            max-width: 280px;
         }
         
         .verification-body {
-            padding: 60px;
+            padding: 40px 50px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
         }
         
         .status-section {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 35px;
         }
         
         .status-icon {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 30px;
-            font-size: 2.2rem;
+            margin: 0 auto 20px;
+            font-size: 2rem;
         }
         
         .status-icon.loading {
@@ -112,50 +125,45 @@
         }
         
         .status-title {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         
         .status-message {
             color: #6b7280;
             line-height: 1.6;
-            font-size: 1.1rem;
-            max-width: 450px;
-            margin: 0 auto;
+            font-size: 1rem;
         }
         
         .verification-form {
             background: #f8fafc;
             border-radius: 16px;
-            padding: 40px;
-            margin: 40px 0;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+            padding: 30px;
+            margin: 30px 0 25px;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         .form-label {
             display: block;
             font-weight: 600;
             color: #374151;
-            margin-bottom: 12px;
-            font-size: 1rem;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
         }
         
         .verification-input {
             width: 100%;
-            padding: 20px;
+            padding: 16px;
             border: 2px solid #e5e7eb;
-            border-radius: 14px;
-            font-size: 22px;
+            border-radius: 12px;
+            font-size: 20px;
             text-align: center;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -178,16 +186,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 16px 32px;
+            gap: 8px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 14px;
-            font-size: 1.1rem;
+            border-radius: 12px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            min-width: 160px;
+            min-width: 140px;
         }
         
         .btn-primary {
@@ -246,15 +254,12 @@
         }
         
         .alert {
-            padding: 20px;
-            border-radius: 14px;
-            margin: 25px 0;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 20px 0;
             display: flex;
             align-items: flex-start;
-            gap: 15px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+            gap: 12px;
         }
         
         .alert-success {
@@ -282,7 +287,7 @@
         
         .divider {
             border-top: 1px solid #e5e7eb;
-            margin: 40px 0;
+            margin: 25px 0;
             position: relative;
         }
         
@@ -300,23 +305,21 @@
         
         .resend-section {
             text-align: center;
-            max-width: 400px;
-            margin: 0 auto;
         }
         
         .resend-section p {
             color: #6b7280;
-            margin-bottom: 20px;
-            font-size: 1rem;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
         }
         
         .email-input {
             width: 100%;
-            padding: 16px 20px;
+            padding: 14px 16px;
             border: 2px solid #e5e7eb;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
         
@@ -328,55 +331,114 @@
         
         .action-buttons {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 40px;
+            margin-top: 25px;
         }
         
         @media (max-width: 768px) {
             .verification-container {
-                margin: 20px 10px;
-                max-width: 95%;
+                flex-direction: column;
+                margin: 10px;
+                min-height: auto;
+                max-height: none;
             }
             
-            .verification-header,
+            .verification-header {
+                flex: none;
+                padding: 40px 30px 30px;
+            }
+            
             .verification-body {
-                padding: 40px 30px;
+                padding: 30px;
             }
             
             .verification-form {
-                padding: 30px 25px;
+                padding: 25px;
+                margin: 25px 0 20px;
             }
             
             .action-buttons {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
             }
             
             .btn {
                 width: 100%;
             }
             
-            .verification-input {
-                font-size: 20px;
-                letter-spacing: 3px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .verification-header,
-            .verification-body {
-                padding: 30px 20px;
+            .brand-logo {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 20px;
             }
             
             .header-title {
                 font-size: 1.8rem;
             }
             
-            .brand-logo {
-                width: 70px;
-                height: 70px;
+            .status-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .verification-container {
+                margin: 5px;
+            }
+            
+            .verification-header,
+            .verification-body {
+                padding: 25px 20px;
+            }
+            
+            .verification-form {
+                padding: 20px;
+            }
+            
+            .header-title {
+                font-size: 1.6rem;
+            }
+            
+            .status-title {
+                font-size: 1.4rem;
+            }
+            
+            .verification-input {
+                font-size: 18px;
+                letter-spacing: 2px;
+                padding: 14px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-height: 700px) {
+            .verification-container {
+                min-height: 95vh;
+                max-height: 95vh;
+            }
+            
+            .verification-header {
+                padding: 30px 40px;
+            }
+            
+            .verification-body {
+                padding: 30px 40px;
+            }
+            
+            .status-section {
+                margin-bottom: 25px;
+            }
+            
+            .verification-form {
+                margin: 20px 0 15px;
+                padding: 25px;
             }
         }
     </style>
