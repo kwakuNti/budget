@@ -412,7 +412,9 @@
                 <button id="loginBtn" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i> Go to Login
                 </button>
-                
+                <button id="homeBtn" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Back to Home
+                </button>
             </div>
         </div>
     </div>
