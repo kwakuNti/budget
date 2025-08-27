@@ -3919,7 +3919,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     </script>
     
     <!-- Walkthrough System -->
-    <script src="../public/js/walkthrough.js"></script>
+    <script src="../public/js/walkthrough.js?v=<?php echo time(); ?>"></script>
     <script src="../public/js/mobile-nav.js"></script>
     <script src="../public/js/privacy.js"></script>
 
