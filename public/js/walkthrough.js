@@ -454,7 +454,7 @@ class BudgetWalkthrough {
             } else {
                 // Redirect to dashboard to start walkthrough
                 console.log('🚀 Redirecting to dashboard to start walkthrough');
-                window.location.href = '../templates/personal-dashboard.php';
+                window.location.href = '../personal-dashboard';
                 return null;
             }
         }
@@ -469,7 +469,7 @@ class BudgetWalkthrough {
                 if (currentPage.includes('personal-dashboard.php')) {
                     // Redirect to salary page for salary step
                     console.log('🚀 Redirecting to salary page for salary configuration');
-                    window.location.href = '../templates/salary.php';
+                    window.location.href = '../salary';
                     return null;
                 }
             }
@@ -482,7 +482,7 @@ class BudgetWalkthrough {
             } else {
                 // Redirect to budget page
                 console.log('🚀 Redirecting to budget page for budget setup');
-                window.location.href = '../templates/budget.php';
+                window.location.href = '../budget';
                 return null;
             }
         }

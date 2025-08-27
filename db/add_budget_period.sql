@@ -1,7 +1,6 @@
 -- Add budget_period column to budget_categories table
 -- This allows users to specify if their budget limit is set weekly or monthly
 
-USE budget;
 
 -- Add budget_period column to budget_categories table
 ALTER TABLE budget_categories 

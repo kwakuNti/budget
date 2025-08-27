@@ -907,7 +907,7 @@ function signOut() {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                window.location.href = '../templates/login.php';
+                window.location.href = '../login';
             } else {
                 showSnackbar('Failed to sign out. Please try again.', 'error');
             }

@@ -9,7 +9,7 @@ class SessionTimeoutMonitor {
             checkInterval: 60000, // Check every minute
             warningTime: 300, // Warn when 5 minutes left
             sessionUrl: '../includes/session_timeout_middleware.php',
-            loginUrl: '../templates/login.php',
+            loginUrl: '../login',
             ...options
         };
         
