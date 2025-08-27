@@ -1,10 +1,29 @@
 # Redirect IP access to domain ROOT only
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^18\.208\.215\.173$
-RewriteRule ^(.*)$ https://budgetly.online/budget/ [R=301,L]
+RewriteRule ^(.*)$ https://budgetly.online/ [R=301,L]
 
 # Disable directory browsing
 Options -Indexes
+
+# Clean URL Redirects - Remove /budget/templates/ and .php
+# Redirect old URLs to clean URLs
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/budget/templates/([^/\s?]+)\.php[\s?] [NC]
+RewriteRule ^ /%1? [R=301,L]
+
+# Handle clean URLs internally
+# Map clean URLs back to actual file locations
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/budget/templates/$1.php -f
+RewriteRule ^([^/]+)/?$ /budget/templates/$1.php [L]
+
+# Handle other pages that might be in different directories
+# For pages in the root budget directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/budget/$1.php -f
+RewriteRule ^([^/]+)/?$ /budget/$1.php [L]
 
 # Allow specific API endpoints that need to be accessible
 RewriteCond %{REQUEST_URI} !^/budget/api/(walkthrough_status|get_walkthrough_step|complete_walkthrough_step|skip_walkthrough|reset_walkthrough|personal_dashboard_data|enhanced_insights_data|debug_session)\.php$
@@ -12,12 +31,3 @@ RewriteCond %{REQUEST_URI} !^/budget/api/(walkthrough_status|get_walkthrough_ste
 RewriteCond %{REQUEST_URI} !^/budget/public/walkthrough/.*\.php$
 # Block directory access - redirect using smart redirect handler  
 RewriteRule ^(templates|config|db|includes|actions|ajax|api|cron|logs)/?$ redirect_to_login.php [R=302,L]
-
-# Remove .php extension from URLs
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^([^\.]+)$ $1.php [L]
-
-
-
-
