@@ -28,20 +28,44 @@ try {
     // Check if the token is valid and not expired
     // If email is provided, use both email and token for verification
     // If only token is provided, use token only (more common for email verification links)
+    // Handle both full tokens (64 chars) and short codes (8 chars)
+    
     if ($email) {
-        $stmt = $conn->prepare("
-            SELECT id, first_name, email, email_verified, token_expires_at 
-            FROM users 
-            WHERE email = ? AND verification_token = ? AND is_active = 1
-        ");
-        $stmt->bind_param("ss", $email, $token);
+        if (strlen($token) === 8) {
+            // Short code verification with email
+            $stmt = $conn->prepare("
+                SELECT id, first_name, email, email_verified, token_expires_at 
+                FROM users 
+                WHERE email = ? AND LEFT(verification_token, 8) = ? AND is_active = 1
+            ");
+            $stmt->bind_param("ss", $email, strtolower($token));
+        } else {
+            // Full token verification with email
+            $stmt = $conn->prepare("
+                SELECT id, first_name, email, email_verified, token_expires_at 
+                FROM users 
+                WHERE email = ? AND verification_token = ? AND is_active = 1
+            ");
+            $stmt->bind_param("ss", $email, $token);
+        }
     } else {
-        $stmt = $conn->prepare("
-            SELECT id, first_name, email, email_verified, token_expires_at 
-            FROM users 
-            WHERE verification_token = ? AND is_active = 1
-        ");
-        $stmt->bind_param("s", $token);
+        if (strlen($token) === 8) {
+            // Short code verification without email (less secure, but usable)
+            $stmt = $conn->prepare("
+                SELECT id, first_name, email, email_verified, token_expires_at 
+                FROM users 
+                WHERE LEFT(verification_token, 8) = ? AND is_active = 1
+            ");
+            $stmt->bind_param("s", strtolower($token));
+        } else {
+            // Full token verification without email
+            $stmt = $conn->prepare("
+                SELECT id, first_name, email, email_verified, token_expires_at 
+                FROM users 
+                WHERE verification_token = ? AND is_active = 1
+            ");
+            $stmt->bind_param("s", $token);
+        }
     }
     $stmt->execute();
     $result = $stmt->get_result();
