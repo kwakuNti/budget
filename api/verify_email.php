@@ -21,21 +21,28 @@ try {
     $email = filter_var(trim($input['email'] ?? ''), FILTER_VALIDATE_EMAIL);
     $token = trim($input['token'] ?? '');
     
-    if (!$email) {
-        throw new Exception('Valid email address is required');
-    }
-    
     if (!$token) {
         throw new Exception('Verification token is required');
     }
     
     // Check if the token is valid and not expired
-    $stmt = $conn->prepare("
-        SELECT id, first_name, email_verified, token_expires_at 
-        FROM users 
-        WHERE email = ? AND verification_token = ? AND is_active = 1
-    ");
-    $stmt->bind_param("ss", $email, $token);
+    // If email is provided, use both email and token for verification
+    // If only token is provided, use token only (more common for email verification links)
+    if ($email) {
+        $stmt = $conn->prepare("
+            SELECT id, first_name, email, email_verified, token_expires_at 
+            FROM users 
+            WHERE email = ? AND verification_token = ? AND is_active = 1
+        ");
+        $stmt->bind_param("ss", $email, $token);
+    } else {
+        $stmt = $conn->prepare("
+            SELECT id, first_name, email, email_verified, token_expires_at 
+            FROM users 
+            WHERE verification_token = ? AND is_active = 1
+        ");
+        $stmt->bind_param("s", $token);
+    }
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
