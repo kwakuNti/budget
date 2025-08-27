@@ -43,7 +43,7 @@ class BudgetWalkthrough {
     async checkSalaryCompletionStatus() {
         try {
             // Check if salary is actually set up by making a quick API call
-            const response = await fetch('../api/salary_data.php', {
+            const response = await fetch('/budget/api/salary_data.php', {
                 credentials: 'same-origin'
             });
             
@@ -372,7 +372,7 @@ class BudgetWalkthrough {
         
         try {
             const currentPageUrl = window.location.pathname;
-            const response = await fetch('public/walkthrough/status.php', {
+            const response = await fetch('/budget/public/walkthrough/status.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -400,8 +400,8 @@ class BudgetWalkthrough {
 
     async checkWalkthroughStatus() {
         try {
-            // Use public walkthrough path that's allowed by .htaccess
-            const response = await fetch('public/walkthrough/status.php', {
+            // Use absolute path to ensure correct resolution regardless of current URL
+            const response = await fetch('/budget/public/walkthrough/status.php', {
                 credentials: 'same-origin' // Ensure cookies/session are sent
             });
             
@@ -490,7 +490,7 @@ class BudgetWalkthrough {
         }
 
         try {
-            const response = await fetch('public/walkthrough/get_step.php', {
+            const response = await fetch('/budget/public/walkthrough/get_step.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1258,7 +1258,7 @@ class BudgetWalkthrough {
         
         try {
             console.log('📡 Sending request to complete_step.php...');
-            const response = await fetch('public/walkthrough/complete_step.php', {
+            const response = await fetch('/budget/public/walkthrough/complete_step.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1367,7 +1367,7 @@ class BudgetWalkthrough {
 
     async skipWalkthrough() {
         try {
-            const response = await fetch('public/walkthrough/skip.php', {
+            const response = await fetch('/budget/public/walkthrough/skip.php', {
                 method: 'POST',
                 credentials: 'same-origin'
             });
