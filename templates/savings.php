@@ -28,7 +28,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Savings - Nkansah Budget Manager</title>
+    <title>Savings - Budgetly</title>
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="../public/css/personal.css">
     <link rel="stylesheet" href="../public/css/mobile-nav.css">

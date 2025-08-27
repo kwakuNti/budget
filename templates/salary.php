@@ -24,7 +24,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salary Setup - Personal Budget Manager</title>
+    <title>Salary Setup - Budgetly</title>
     <?php include '../includes/favicon.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../public/css/personal.css">
