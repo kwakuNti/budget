@@ -20,8 +20,8 @@ class EmailService {
             $this->mailer->isSMTP();
             $this->mailer->Host = 'smtp.gmail.com';
             $this->mailer->SMTPAuth = true;
-            $this->mailer->Username = 'nkansahclifford@gmail.com';     // Your actual Gmail
-            $this->mailer->Password = 'oydy xmge amjc zgrp';  // Gmail App Password
+            $this->mailer->Username = 'noreplybudgetly@gmail.com';     // Your actual Gmail
+            $this->mailer->Password = 'icfp uwqk iynj cuga';  // Gmail App Password
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $this->mailer->Port = 587;
             
