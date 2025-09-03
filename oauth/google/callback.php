@@ -8,6 +8,11 @@ session_start();
 require_once '../../config/connection.php';
 require_once '../../config/google_oauth_config.php';
 
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Check for authorization code
 if (!isset($_GET['code'])) {
     $error = $_GET['error'] ?? 'unknown_error';

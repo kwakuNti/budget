@@ -8,6 +8,11 @@ session_start();
 require_once '../../config/connection.php';
 require_once '../../config/google_oauth_config.php';
 
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Check if OAuth is properly configured
 if (!isGoogleOAuthConfigured()) {
     error_log("Google OAuth Error: Configuration missing or invalid");

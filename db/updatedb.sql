@@ -555,3 +555,105 @@ SELECT
 ALTER TABLE users ADD COLUMN email_verified TINYINT(1) DEFAULT 0;
 ALTER TABLE users ADD COLUMN verification_token VARCHAR(255);
 ALTER TABLE users ADD COLUMN token_expires_at DATETIME;
+
+-- ============================================================================
+-- 13. GOOGLE OAUTH SYSTEM TABLES
+-- ============================================================================
+
+-- Add Google OAuth support to users table
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) NULL UNIQUE AFTER email;
+
+-- OAuth State Tokens (for CSRF protection)
+CREATE TABLE IF NOT EXISTS oauth_state_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    state_token VARCHAR(255) NOT NULL UNIQUE,
+    provider_name VARCHAR(50) NOT NULL DEFAULT 'google',
+    redirect_url VARCHAR(500) NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_oauth_state_token (state_token),
+    INDEX idx_oauth_state_expiry (expires_at),
+    INDEX idx_oauth_state_provider (provider_name)
+);
+
+-- User OAuth Accounts (linking table)
+CREATE TABLE IF NOT EXISTS user_oauth_accounts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    provider_name VARCHAR(50) NOT NULL,
+    provider_user_id VARCHAR(255) NOT NULL,
+    provider_email VARCHAR(255) NOT NULL,
+    provider_data JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_provider_account (provider_name, provider_user_id),
+    INDEX idx_oauth_accounts_user (user_id),
+    INDEX idx_oauth_accounts_provider (provider_name, provider_email)
+);
+
+-- OAuth Login Attempts (for security and audit)
+CREATE TABLE IF NOT EXISTS oauth_login_attempts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    provider_name VARCHAR(50) NOT NULL,
+    provider_user_id VARCHAR(255) NULL,
+    email VARCHAR(255) NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    user_agent TEXT NULL,
+    success BOOLEAN NOT NULL DEFAULT FALSE,
+    failure_reason VARCHAR(255) NULL,
+    user_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_oauth_attempts_provider (provider_name, created_at),
+    INDEX idx_oauth_attempts_ip (ip_address, created_at),
+    INDEX idx_oauth_attempts_email (email, created_at),
+    INDEX idx_oauth_attempts_success (success, created_at)
+);
+
+-- System Settings for OAuth Configuration
+INSERT INTO system_settings (setting_key, setting_value, description) VALUES
+('google_oauth_enabled', '1', 'Enable Google OAuth login system'),
+('oauth_auto_registration', '1', 'Allow automatic user registration via OAuth'),
+('oauth_account_linking', '1', 'Allow linking OAuth accounts to existing users'),
+('oauth_require_email_verification', '0', 'Require email verification for OAuth users'),
+('oauth_session_timeout', '7200', 'OAuth session timeout in seconds (2 hours)')
+ON DUPLICATE KEY UPDATE 
+    setting_value = VALUES(setting_value),
+    description = VALUES(description),
+    updated_at = CURRENT_TIMESTAMP;
+
+-- Create view for OAuth account information
+CREATE OR REPLACE VIEW v_user_oauth_accounts AS
+SELECT 
+    u.id as user_id,
+    u.email,
+    u.first_name,
+    u.last_name,
+    u.google_id,
+    u.profile_picture,
+    uoa.provider_name,
+    uoa.provider_user_id,
+    uoa.provider_email,
+    uoa.last_login_at as oauth_last_login,
+    uoa.created_at as oauth_linked_at,
+    CASE 
+        WHEN u.google_id IS NOT NULL THEN TRUE 
+        ELSE FALSE 
+    END as has_google_account
+FROM users u
+LEFT JOIN user_oauth_accounts uoa ON u.id = uoa.user_id
+WHERE u.email IS NOT NULL;
+
+SELECT 
+    'Google OAuth System Added!' as STATUS,
+    'OAuth tables created successfully' as MESSAGE,
+    'Users can now login with Google accounts' as FEATURE,
+    NOW() as COMPLETED_AT;
