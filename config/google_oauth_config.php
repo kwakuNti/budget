@@ -1,49 +1,43 @@
 <?php
 /**
- * Google OAuth Configuration using Google Client Library
+ * Google OAuth Configuration
  * Configure your Google OAuth settings here
  */
 
 // Load environment variables
 require_once __DIR__ . '/env_loader.php';
 
-// Load Google API Client
-require_once __DIR__ . '/../vendor/autoload.php';
-
 // Check if running in production or development
 $isProduction = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
 $domain = $isProduction ? 'https://budgetly.online' : 'http://localhost';
 
-/**
- * Get configured Google Client
- */
-function getGoogleClient() {
-    global $domain;
-    
-    $client = new Google_Client();
-    $client->setClientId(env('GOOGLE_CLIENT_ID', ''));
-    $client->setClientSecret(env('GOOGLE_CLIENT_SECRET', ''));
-    $client->setRedirectUri($domain . '/budget/oauth/google/callback.php');
-    $client->addScope('email');
-    $client->addScope('profile');
-    
-    return $client;
-}
+// Google OAuth Configuration - Using environment variables for security
+define('GOOGLE_OAUTH_CONFIG', [
+    'client_id' => env('GOOGLE_CLIENT_ID', ''), // Set in .env file
+    'client_secret' => env('GOOGLE_CLIENT_SECRET', ''), // Set in .env file
+    'redirect_uri' => $domain . '/budget/oauth/google/callback.php',
+    'scopes' => [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ],
+    'auth_url' => 'https://accounts.google.com/o/oauth2/v2/auth',
+    'token_url' => 'https://oauth2.googleapis.com/token',
+    'user_info_url' => 'https://www.googleapis.com/oauth2/v2/userinfo'
+]);
 
 /**
  * Check if Google OAuth is properly configured
  */
 function isGoogleOAuthConfigured() {
-    $clientId = env('GOOGLE_CLIENT_ID', '');
-    $clientSecret = env('GOOGLE_CLIENT_SECRET', '');
+    $config = GOOGLE_OAUTH_CONFIG;
     
-    if (empty($clientId) || empty($clientSecret)) {
+    if (empty($config['client_id']) || empty($config['client_secret'])) {
         error_log("Google OAuth Error: Client ID or Client Secret not configured. Check your .env file.");
         return false;
     }
     
-    if ($clientId === 'your_google_client_id_here' || 
-        $clientSecret === 'your_google_client_secret_here') {
+    if ($config['client_id'] === 'your_google_client_id_here' || 
+        $config['client_secret'] === 'your_google_client_secret_here') {
         error_log("Google OAuth Error: Using template values. Update your .env file with real credentials.");
         return false;
     }
