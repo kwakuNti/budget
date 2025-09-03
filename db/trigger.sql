@@ -1,7 +1,7 @@
 -- Database Update Script for Cycle Integration
 -- Run this on your existing database to add cycle functionality
 
-USE budget;
+
 
 -- Update triggers to handle cycle performance updates
 DROP TRIGGER IF EXISTS after_contribution_insert;

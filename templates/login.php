@@ -405,11 +405,14 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
             align-items: center;
             justify-content: center;
             gap: 12px;
+            text-decoration: none;
         }
 
         .social-btn:hover {
             background: #f9fafb;
             border-color: #d1d5db;
+            color: #374151;
+            text-decoration: none;
         }
 
         .social-icon {
@@ -888,7 +891,7 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                         <span>Or login with</span>
                     </div>
                     <div class="social-buttons">
-                        <button class="social-btn">
+                        <a href="../oauth/google/login.php" class="social-btn" id="googleLoginBtn">
                             <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -896,7 +899,7 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                             </svg>
                             Continue with Google
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -1185,9 +1188,63 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                 console.error('Login: LoadingScreen class not available');
             }
 
+            // Handle Google OAuth login button
+            const googleLoginBtn = document.getElementById('googleLoginBtn');
+            if (googleLoginBtn) {
+                googleLoginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading state
+                    if (window.budgetlyLoader) {
+                        const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
+                        if (loadingMessage) {
+                            loadingMessage.innerHTML = 'Connecting to Google<span class="loading-dots-text">...</span>';
+                        }
+                        window.budgetlyLoader.show();
+                    }
+                    
+                    // Add slight delay for better UX, then redirect
+                    setTimeout(() => {
+                        window.location.href = '../oauth/google/login.php';
+                    }, 500);
+                });
+            }
+
+            // Handle OAuth error messages from URL parameters
             const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
             const status = urlParams.get('status');
             const message = urlParams.get('message');
+
+            // Handle OAuth-specific errors
+            if (error) {
+                let errorMessage = '';
+                switch (error) {
+                    case 'oauth_disabled':
+                        errorMessage = 'Google login is currently disabled. Please use email/password login.';
+                        break;
+                    case 'oauth_not_configured':
+                        errorMessage = 'Google login is not properly configured. Please contact support.';
+                        break;
+                    case 'oauth_invalid_state':
+                        errorMessage = 'Security error during Google login. Please try again.';
+                        break;
+                    case 'oauth_callback_failed':
+                        errorMessage = 'Google login failed. Please try again or use email/password login.';
+                        break;
+                    case 'oauth_access_denied':
+                        errorMessage = 'Google login was cancelled. You can try again or use email/password login.';
+                        break;
+                    default:
+                        errorMessage = 'Login error occurred. Please try again.';
+                }
+                showSnackbar(errorMessage, 'error');
+                
+                // Clean URL
+                const url = new URL(window.location);
+                url.searchParams.delete('error');
+                window.history.replaceState({}, document.title, url);
+            }
 
             if (status && message) {
                 showSnackbar(decodeURIComponent(message), status);
