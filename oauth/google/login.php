@@ -1,6 +1,6 @@
 <?php
 /**
- * Initiate Google OAuth Login
+ * Initiate Google OAuth Login using Google Client Library
  * Redirects user to Google OAuth authorization page
  */
 
@@ -26,19 +26,9 @@ if (!isGoogleOAuthEnabled()) {
     exit;
 }
 
-// Generate state token for CSRF protection
-$state = generateOAuthState();
-$redirectUrl = $_GET['redirect'] ?? null;
-
-// Store state in database
-if (!storeOAuthState($state, 'google', $redirectUrl)) {
-    error_log("Failed to store OAuth state token");
-    header('Location: ../../login?error=oauth_error');
-    exit;
-}
-
-// Generate Google OAuth URL
-$authUrl = getGoogleAuthUrl($state);
+// Get Google Client and create auth URL
+$googleClient = getGoogleClient();
+$authUrl = $googleClient->createAuthUrl();
 
 // Redirect to Google
 header('Location: ' . $authUrl);
