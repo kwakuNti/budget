@@ -882,7 +882,7 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                         <span class="btn-loader" id="loginLoader"></span>
                     </button>
                 </form>
-
+<!-- 
                 <div class="social-login">
                     <div class="divider">
                         <span>Or login with</span>
@@ -898,7 +898,7 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                             Continue with Google
                         </button>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="form-footer">
                     <p class="signup-text">Don't have an account?
