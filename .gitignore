@@ -71,3 +71,9 @@ yarn-error.log
 *.key
 *.crt
 secrets.txt
+.env
+.env.local
+.env.production
+.env.development
+config/secrets.php
+oauth_secrets.php
