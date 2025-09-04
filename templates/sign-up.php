@@ -262,6 +262,43 @@
             color: #1f2937;
         }
 
+        /* Disabled State for Family Account */
+        .account-type-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .account-type-card.disabled:hover {
+            border-color: #e5e7eb;
+            box-shadow: none;
+            background: white;
+        }
+
+        .account-type-card.disabled .card-icon {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .account-type-card.disabled h4 {
+            color: #9ca3af;
+        }
+
+        .account-type-card.disabled::after {
+            content: 'Coming Soon';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #fbbf24;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* Form Elements */
         .form-row {
             display: grid;
@@ -552,6 +589,62 @@
             border: 1px solid #fecaca;
         }
 
+        /* Family Account Feedback */
+        .family-feedback {
+            background: #dbeafe;
+            border: 1px solid #60a5fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+            animation: slideInFromTop 0.3s ease-out;
+        }
+
+        .feedback-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feedback-icon {
+            background: #2563eb;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .feedback-text h5 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 6px;
+        }
+
+        .feedback-text p {
+            font-size: 0.85rem;
+            color: #1e40af;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Loading Overlay */
         .loading-overlay {
             position: fixed;
@@ -718,7 +811,7 @@
                     </div>
 
                     <div class="account-type-selection">
-                        <div class="account-type-card" data-type="family">
+                        <div class="account-type-card disabled" data-type="family">
                             <div class="card-icon">
                                 <i class="fas fa-users"></i>
                             </div>
@@ -730,6 +823,19 @@
                                 <i class="fas fa-user"></i>
                             </div>
                             <h4>Personal Account</h4>
+                        </div>
+                    </div>
+                    
+                    <!-- Family Account Feedback Message -->
+                    <div class="family-feedback" id="familyFeedback" style="display: none;">
+                        <div class="feedback-content">
+                            <div class="feedback-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="feedback-text">
+                                <h5>Family Accounts Coming Soon!</h5>
+                                <p>We're working hard to bring you family budget management features. For now, please create a personal account to get started with Budgetly.</p>
+                            </div>
                         </div>
                     </div>
                     
@@ -978,6 +1084,24 @@
         // Account type selection
         document.querySelectorAll('.account-type-card').forEach(card => {
             card.addEventListener('click', function() {
+                // Block family account selection
+                if (this.dataset.type === 'family') {
+                    // Show feedback message
+                    const familyFeedback = document.getElementById('familyFeedback');
+                    familyFeedback.style.display = 'block';
+                    
+                    // Hide error message if shown
+                    document.getElementById('accountTypeError').style.display = 'none';
+                    
+                    // Show snackbar notification
+                    showSnackbar('Family accounts are coming soon! Please select Personal Account for now.', 'info');
+                    
+                    return; // Prevent selection
+                }
+                
+                // Hide family feedback message
+                document.getElementById('familyFeedback').style.display = 'none';
+                
                 // Remove selection from all cards
                 document.querySelectorAll('.account-type-card').forEach(c => c.classList.remove('selected'));
                 
@@ -1475,6 +1599,15 @@
 
         // Initialize the form
         updateNavigationButtons();
+
+        // Auto-select personal account since family is not available
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-select personal account
+            const personalCard = document.querySelector('[data-type="personal"]');
+            if (personalCard && !document.getElementById('accountType').value) {
+                personalCard.click();
+            }
+        });
 
         // Initialize phone number fields with +233 prefix
         document.addEventListener('DOMContentLoaded', function() {
