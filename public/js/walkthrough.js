@@ -520,13 +520,27 @@ class BudgetWalkthrough {
         }
         
         // Setup budget step - should be on budget page  
-        if (this.currentStep === 'choose_template' || this.currentStep === 'select_template') {
+        if (this.currentStep === 'choose_template' || this.currentStep === 'select_template' || 
+            this.currentStep === 'create_categories' || this.currentStep === 'fill_category_form' || 
+            this.currentStep === 'set_category_budget' || this.currentStep === 'complete_category') {
             if (currentPage.includes('budget')) {
                 return this.currentStep;
             } else {
                 // Redirect to budget page
                 console.log('🚀 Redirecting to budget page for template selection');
                 window.location.href = '/budgets';
+                return null;
+            }
+        }
+        
+        // Setup complete step - should be on dashboard
+        if (this.currentStep === 'setup_complete') {
+            if (currentPage.includes('personal-dashboard') || currentPage.includes('dashboard')) {
+                return this.currentStep;
+            } else {
+                // Redirect to dashboard
+                console.log('🚀 Redirecting to dashboard for setup completion');
+                window.location.href = '/personal-dashboard';
                 return null;
             }
         }
@@ -873,7 +887,7 @@ class BudgetWalkthrough {
         // Different content for help guides vs initial setup
         const progressText = isHelpGuide ? 
             `Help Guide - ${step.page_url}` : 
-            `Step ${step.step_order} of 5`;
+            `Step ${step.step_order} of 9`;
             
         const actionContent = step.action_required && !isHelpGuide ? 
             '<p class="action-note"><i class="fas fa-info-circle"></i> Complete this action to continue</p>' : 
@@ -939,7 +953,13 @@ class BudgetWalkthrough {
         }
 
         // Listen for the required action only for non-help guide steps
-        if (step.action_required && !isHelpGuide && step.step_name !== 'configure_salary' && step.step_name !== 'setup_budget') {
+        if (step.action_required && !isHelpGuide && 
+            step.step_name !== 'configure_salary' && 
+            step.step_name !== 'setup_budget' &&
+            step.step_name !== 'create_categories' &&
+            step.step_name !== 'fill_category_form' &&
+            step.step_name !== 'set_category_budget' &&
+            step.step_name !== 'complete_category') {
             this.listenForAction(targetElement, step);
         }
     }
@@ -1125,6 +1145,31 @@ class BudgetWalkthrough {
                 // Don't prevent the modal from opening - let it open first
                 // The button click should open the modal, then we monitor for form submission
                 this.handleSalarySetupStep(step);
+                
+            } else if (step.step_name === 'create_categories') {
+                console.log('🔧 Handling create categories step - opening modal');
+                
+                // Allow the modal to open, then we'll guide through the form
+                this.handleCategoryCreationStep(step);
+                
+            } else if (step.step_name === 'fill_category_form') {
+                console.log('🔧 Handling fill category form step');
+                
+                // Auto-fill the Transportation category data
+                this.handleCategoryFormFill(step);
+                
+            } else if (step.step_name === 'set_category_budget') {
+                console.log('🔧 Handling set category budget step');
+                
+                // Guide user to set budget amount
+                // Don't auto-complete, let user interact
+                this.handleBudgetSetting(step);
+                
+            } else if (step.step_name === 'complete_category') {
+                console.log('🔧 Handling complete category step');
+                
+                // Allow form submission
+                this.handleCategoryCompletion(step);
                 
             } else {
                 console.log('🔥 Preventing default action to complete step first');
@@ -2106,6 +2151,160 @@ class BudgetWalkthrough {
         `;
         
         document.head.appendChild(styles);
+    }
+
+    // Category Creation Handlers
+    handleCategoryCreationStep(step) {
+        console.log('🏗️ Handling category creation step');
+        
+        // Allow the modal to open first, then proceed to next step
+        setTimeout(() => {
+            // Wait for modal to be visible
+            const modal = document.getElementById('addCategoryModal');
+            if (modal && modal.style.display === 'flex') {
+                console.log('✅ Category modal opened, proceeding to next step');
+                this.completeStep(step.step_name);
+            }
+        }, 500);
+    }
+
+    handleCategoryFormFill(step) {
+        console.log('📝 Handling category form fill step');
+        
+        // Auto-fill the Transportation category data
+        const nameInput = document.querySelector('#addCategoryModal input[name="name"]');
+        const typeSelect = document.querySelector('#addCategoryModal select[name="category_type"]');
+        
+        if (nameInput && typeSelect) {
+            nameInput.value = 'Transportation';
+            typeSelect.value = 'needs';
+            
+            // Trigger change events
+            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+            typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('✅ Auto-filled Transportation category data');
+            
+            // Auto-complete this step and move to budget setting
+            setTimeout(() => {
+                this.completeStep(step.step_name);
+            }, 1000);
+        } else {
+            console.warn('⚠️ Could not find form inputs');
+        }
+    }
+
+    handleBudgetSetting(step) {
+        console.log('💰 Handling budget setting step');
+        
+        // Suggest a budget amount but let user set it
+        const budgetInput = document.querySelector('#addCategoryModal input[name="budget_limit"]');
+        
+        if (budgetInput) {
+            // Suggest ₵300 as a reasonable transportation budget
+            budgetInput.placeholder = 'Suggested: ₵300';
+            budgetInput.focus();
+            
+            // Listen for when user sets a value
+            const handleBudgetSet = () => {
+                if (budgetInput.value && parseFloat(budgetInput.value) > 0) {
+                    console.log('✅ Budget amount set:', budgetInput.value);
+                    budgetInput.removeEventListener('input', handleBudgetSet);
+                    
+                    // Auto-complete this step
+                    setTimeout(() => {
+                        this.completeStep(step.step_name);
+                    }, 500);
+                }
+            };
+            
+            budgetInput.addEventListener('input', handleBudgetSet);
+        } else {
+            console.warn('⚠️ Could not find budget input');
+        }
+    }
+
+    handleCategoryCompletion(step) {
+        console.log('✅ Handling category completion step');
+        
+        // Listen for form submission
+        const form = document.getElementById('addCategoryForm');
+        const submitButton = document.querySelector('#addCategoryModal button[type="submit"]');
+        
+        if (form && submitButton) {
+            const handleSubmission = (event) => {
+                console.log('🚀 Category form submitted');
+                
+                // Allow the form to submit normally
+                // Monitor for success
+                setTimeout(() => {
+                    this.monitorCategoryCreationSuccess(step);
+                }, 1000);
+            };
+            
+            form.addEventListener('submit', handleSubmission, { once: true });
+        } else {
+            console.warn('⚠️ Could not find category form');
+        }
+    }
+
+    monitorCategoryCreationSuccess(step) {
+        console.log('🔍 Monitoring category creation success');
+        
+        const checkForSuccess = () => {
+            // Check if modal closed (success indicator)
+            const modal = document.getElementById('addCategoryModal');
+            if (!modal || modal.style.display === 'none') {
+                console.log('✅ Category modal closed - likely successful');
+                this.completeCategoryStep(step);
+                return;
+            }
+            
+            // Check for success snackbar
+            const snackbar = document.getElementById('snackbar');
+            if (snackbar && snackbar.classList.contains('show') && snackbar.classList.contains('success')) {
+                console.log('✅ Success snackbar detected');
+                this.completeCategoryStep(step);
+                return;
+            }
+            
+            // Continue monitoring for a reasonable time
+            setTimeout(checkForSuccess, 500);
+        };
+        
+        // Start monitoring after a brief delay
+        setTimeout(checkForSuccess, 1000);
+    }
+
+    completeCategoryStep(step) {
+        console.log('🎉 Completing category creation step');
+        
+        // Update the UI to show successful category creation
+        this.updateTooltipForCategorySuccess();
+        
+        // Complete the walkthrough step
+        setTimeout(() => {
+            this.completeStep(step.step_name);
+        }, 1000);
+    }
+
+    updateTooltipForCategorySuccess() {
+        if (this.tooltip) {
+            this.tooltip.innerHTML = `
+                <div class="tooltip-header">
+                    <h4>✅ Transportation Category Created!</h4>
+                    <div class="tooltip-progress">
+                        Step 8 of 9
+                    </div>
+                </div>
+                <div class="tooltip-content">
+                    <p>Perfect! You've created your first budget category. Now you can track transportation expenses and stay within your budget.</p>
+                </div>
+                <div class="tooltip-actions">
+                    <p class="action-note"><i class="fas fa-check-circle"></i> Moving to dashboard...</p>
+                </div>
+            `;
+        }
     }
 }
 

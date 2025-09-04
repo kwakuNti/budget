@@ -1409,35 +1409,54 @@ async function editCategory(categoryId, categoryData) {
 }
 
 async function deleteCategory(categoryId) {
-    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-        return false;
-    }
-    
-    try {
-        const response = await fetch('../api/budget_categories.php', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: categoryId
-            })
+    return new Promise((resolve) => {
+        // Show custom confirmation modal
+        showModal('deleteConfirmModal');
+        
+        // Set up the confirm button click handler
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        newConfirmBtn.addEventListener('click', async () => {
+            closeModal('deleteConfirmModal');
+            
+            try {
+                const response = await fetch('../api/budget_categories.php', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: categoryId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSnackbar(result.message || 'Category deleted successfully!', 'success');
+                    await loadBudgetData(); // Reload data
+                    resolve(true);
+                } else {
+                    throw new Error(result.message || 'Failed to delete category');
+                }
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showSnackbar('Error deleting category: ' + error.message, 'error');
+                resolve(false);
+            }
         });
         
-        const result = await response.json();
+        // Handle cancel or close
+        const handleCancel = () => {
+            resolve(false);
+        };
         
-        if (result.success) {
-            showSnackbar(result.message || 'Category deleted successfully!', 'success');
-            await loadBudgetData(); // Reload data
-            return true;
-        } else {
-            throw new Error(result.message || 'Failed to delete category');
-        }
-    } catch (error) {
-        console.error('Error deleting category:', error);
-        showSnackbar('Error deleting category: ' + error.message, 'error');
-        return false;
-    }
+        // Add event listeners for cancel actions
+        document.querySelector('#deleteConfirmModal .btn-secondary').addEventListener('click', handleCancel, { once: true });
+        document.querySelector('#deleteConfirmModal .budget-modal-close').addEventListener('click', handleCancel, { once: true });
+    });
 }
 
 // UI Update Functions
@@ -2185,6 +2204,7 @@ function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'flex';
+        modal.style.zIndex = '99999'; // Ensure modal is above walkthrough
     }
 }
 

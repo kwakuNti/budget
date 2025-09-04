@@ -423,14 +423,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>50/30/20 Rule</h5>
                             <p class="template-desc">Most popular balanced approach</p>
                             <div class="template-preview">
-                                <div class="preview-bar needs-bar" style="width: 50%">
-                                    <span>50% Needs</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">50% Needs</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar needs-bar" style="width: 50%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar wants-bar" style="width: 30%">
-                                    <span>30% Wants</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">30% Wants</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar wants-bar" style="width: 30%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar savings-bar" style="width: 20%">
-                                    <span>20% Savings</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">20% Savings</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar savings-bar" style="width: 20%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -439,14 +448,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>80/10/10 Minimalist</h5>
                             <p class="template-desc">Focus on essentials only</p>
                             <div class="template-preview">
-                                <div class="preview-bar needs-bar" style="width: 80%">
-                                    <span>80% Needs</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">80% Needs</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar needs-bar" style="width: 80%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar wants-bar" style="width: 10%">
-                                    <span>10% Wants</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">10% Wants</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar wants-bar" style="width: 10%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar savings-bar" style="width: 10%">
-                                    <span>10% Savings</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">10% Savings</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar savings-bar" style="width: 10%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -455,14 +473,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>60/20/20 Conservative</h5>
                             <p class="template-desc">Higher focus on necessities</p>
                             <div class="template-preview">
-                                <div class="preview-bar needs-bar" style="width: 60%">
-                                    <span>60% Needs</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">60% Needs</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar needs-bar" style="width: 60%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar wants-bar" style="width: 20%">
-                                    <span>20% Wants</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">20% Wants</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar wants-bar" style="width: 20%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar savings-bar" style="width: 20%">
-                                    <span>20% Savings</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">20% Savings</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar savings-bar" style="width: 20%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -471,14 +498,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>40/30/30 Aggressive</h5>
                             <p class="template-desc">Maximum savings focus</p>
                             <div class="template-preview">
-                                <div class="preview-bar needs-bar" style="width: 40%">
-                                    <span>40% Needs</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">40% Needs</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar needs-bar" style="width: 40%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar wants-bar" style="width: 30%">
-                                    <span>30% Wants</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">30% Wants</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar wants-bar" style="width: 30%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar savings-bar" style="width: 30%">
-                                    <span>30% Savings</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">30% Savings</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar savings-bar" style="width: 30%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -487,14 +523,23 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>70/20/10 Debt Focus</h5>
                             <p class="template-desc">Prioritize debt elimination</p>
                             <div class="template-preview">
-                                <div class="preview-bar needs-bar" style="width: 70%">
-                                    <span>70% Needs</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">70% Needs</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar needs-bar" style="width: 70%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar wants-bar" style="width: 20%">
-                                    <span>20% Wants</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">20% Wants</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar wants-bar" style="width: 20%"></div>
+                                    </div>
                                 </div>
-                                <div class="preview-bar savings-bar" style="width: 10%">
-                                    <span>10% Savings</span>
+                                <div class="preview-row">
+                                    <span class="preview-label">10% Savings</span>
+                                    <div class="preview-bar-container">
+                                        <div class="preview-bar savings-bar" style="width: 10%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1130,6 +1175,28 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
         });
     </script>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="budget-modal">
+        <div class="budget-modal-content">
+            <div class="budget-modal-header">
+                <h3>Confirm Delete</h3>
+                <span class="budget-modal-close" onclick="closeModal('deleteConfirmModal')">&times;</span>
+            </div>
+            <div class="budget-modal-body">
+                <div class="confirm-content">
+                    <div class="confirm-icon">⚠️</div>
+                    <h4>Delete Category?</h4>
+                    <p>Are you sure you want to delete this category? This action cannot be undone and will remove all associated data.</p>
+                </div>
+            </div>
+            <div class="budget-modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal('deleteConfirmModal')">Cancel</button>
+                <button type="button" class="btn-danger" id="confirmDeleteBtn">Delete Category</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../public/js/loading.js"></script>
     <script src="../public/js/budget.js"></script>
     <script src="../public/js/mobile-nav.js"></script>
