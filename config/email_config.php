@@ -112,29 +112,25 @@ class EmailService {
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🎯 Budget Manager</h1>
+                    <h1>&#127919; Budget Manager</h1>
                     <p>Welcome to Your Personal Finance Journey!</p>
                 </div>
                 <div class="content">
-                    <h2>Hi ' . htmlspecialchars($firstName) . '! 👋</h2>
+                    <h2>Hi ' . htmlspecialchars($firstName) . '! &#128075;</h2>
                     
                     <p>Thank you for registering with Budget Manager! We\'re excited to help you take control of your finances.</p>
                     
-                    <p>To complete your registration and start managing your budget, please verify your email address by clicking the button below:</p>
+                    <p>To complete your registration and start managing your budget, please verify your email address using the verification code below:</p>
                     
-                    <div style="text-align: center;">
-                        <a href="' . $verificationUrl . '" class="button">✅ Verify My Email</a>
-                    </div>
-                    
-                    <p><strong>Or use this verification code:</strong></p>
+                    <p><strong>Use this verification code:</strong></p>
                     <div class="code-box">' . strtoupper(substr($verificationCode, 0, 8)) . '</div>
                     
-                    <p>This verification link will expire in <strong>24 hours</strong> for security reasons.</p>
+                    <p>This verification code will expire in <strong>24 hours</strong> for security reasons.</p>
                     
                     <p>If you didn\'t create an account with Budget Manager, please ignore this email.</p>
                     
                     <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                        <h3>🚀 What\'s Next?</h3>
+                        <h3>&#128640; What\'s Next?</h3>
                         <p>Once verified, you can:</p>
                         <ul>
                             <li>Set up your income and salary information</li>
