@@ -504,6 +504,18 @@ class BudgetWalkthrough {
         }
         
         // Setup budget step - should be on budget page  
+        if (this.currentStep === 'choose_template' || this.currentStep === 'select_template') {
+            if (currentPage.includes('budget')) {
+                return this.currentStep;
+            } else {
+                // Redirect to budget page
+                console.log('🚀 Redirecting to budget page for template selection');
+                window.location.href = '/budgets';
+                return null;
+            }
+        }
+        
+        // Legacy support for old step name
         if (this.currentStep === 'setup_budget') {
             if (currentPage.includes('budget')) {
                 return 'setup_budget';
@@ -1399,8 +1411,8 @@ class BudgetWalkthrough {
                     // For initial setup, just cleanup without showing completion message or redirecting
                     console.log('✅ Initial setup complete - staying on current page');
                     return;
-                } else if (data.next_step && data.redirect_url && stepName !== 'setup_budget') {
-                    // Only redirect if it's not the budget step (we want to stay on budget page)
+                } else if (data.next_step && data.redirect_url && stepName !== 'setup_budget' && stepName !== 'choose_template' && stepName !== 'select_template') {
+                    // Only redirect if it's not a budget-related step (we want to stay on budget page for template selection)
                     console.log('🔄 Redirecting to:', data.redirect_url);
                     setTimeout(() => {
                         window.location.href = data.redirect_url;

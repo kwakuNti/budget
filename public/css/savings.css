@@ -2135,29 +2135,26 @@ input[type="checkbox"]:checked + .toggle-switch::after {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-    color: white;
     padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(241, 245, 249, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-radius: 16px 16px 0 0;
     position: relative;
-    overflow: hidden;
 }
 
-.modal-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-    opacity: 0.1;
-}
+/* Removed background pattern for cleaner modal header */
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     position: relative;
     z-index: 1;
 }
@@ -2166,9 +2163,9 @@ input[type="checkbox"]:checked + .toggle-switch::after {
     position: absolute;
     top: 1.5rem;
     right: 2rem;
-    color: white;
-    font-size: 1.5rem;
-    font-weight: bold;
+    color: #6b7280;
+    font-size: 1.2rem;
+    font-weight: 400;
     cursor: pointer;
     z-index: 2;
     width: 32px;
@@ -2177,13 +2174,13 @@ input[type="checkbox"]:checked + .toggle-switch::after {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
+    background: rgba(107, 114, 128, 0.1);
+    transition: all 0.2s ease;
 }
 
 .modal-header .close:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
+    background: rgba(107, 114, 128, 0.2);
+    color: #374151;
 }
 
 .modal-body {

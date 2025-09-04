@@ -481,6 +481,41 @@ INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url
 -- Step 4: Complete Template Selection (Inside Modal) - REQUIRED
 ('initial_setup', 'select_template', 4, '/budgets', '.template-card', 'Select Your Template', 'Choose one of these popular budget templates. The 50/30/20 rule is great for beginners - 50% needs, 30% wants, 20% savings. Click on a template to select it.', 1, 0, 1);
 
+-- Dashboard Help Guide - Specific Elements Only
+INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
+('help_guide', 'dashboard_income_card', 1, '/personal-dashboard', '.income-card', 'Monthly Income', 'This card shows your total monthly income. Click "Set Up Income" if you need to add or modify your salary and other income sources.', 0, 1, 1),
+('help_guide', 'dashboard_expenses_card', 2, '/personal-dashboard', '.expenses-card', 'Monthly Expenses', 'View your total monthly expenses here. This updates automatically as you add expenses throughout the month.', 0, 1, 1),
+('help_guide', 'dashboard_balance_card', 3, '/personal-dashboard', '.balance-card', 'Available Balance', 'This shows how much money you have left after expenses and savings. Keep this positive to stay on budget!', 0, 1, 1),
+('help_guide', 'dashboard_quick_actions', 4, '/personal-dashboard', '.quick-actions', 'Quick Actions', 'Use these buttons to quickly add expenses, record income, or create savings goals without navigating to other pages.', 0, 1, 1),
+
+-- Budget Page Help Guide - Specific Elements
+('help_guide', 'budget_template_btn', 1, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Budget Templates', 'Click here to use pre-built budget templates. Great for getting started quickly with proven budgeting strategies.', 0, 1, 1),
+('help_guide', 'budget_categories_list', 2, '/budgets', '.budget-categories-container', 'Your Budget Categories', 'These are your spending categories with monthly limits. Green means on track, yellow is a warning, red means over budget.', 0, 1, 1),
+('help_guide', 'budget_add_category', 3, '/budgets', '.add-category-btn', 'Add New Category', 'Create custom budget categories for your specific needs. Set spending limits to control your expenses.', 0, 1, 1),
+('help_guide', 'budget_allocation_summary', 4, '/budgets', '.allocation-summary', 'Budget Summary', 'See how your total budget is allocated across Needs, Wants, and Savings. Aim for a balanced approach.', 0, 1, 1),
+
+-- Salary Page Help Guide - Specific Elements
+('help_guide', 'salary_setup_btn', 1, '/salary', '#salaryActionBtn', 'Set Up Primary Salary', 'Click here to configure your main salary. Enter your monthly amount, pay frequency, and any deductions.', 0, 1, 1),
+('help_guide', 'salary_overview_card', 2, '/salary', '.salary-overview', 'Salary Overview', 'View your current salary settings and payment schedule. This affects your budget calculations.', 0, 1, 1),
+('help_guide', 'salary_additional_income', 3, '/salary', '.additional-income-section', 'Additional Income', 'Add other income sources like freelance work, side jobs, or investments for a complete financial picture.', 0, 1, 1),
+
+-- Expenses Page Help Guide - Specific Elements  
+('help_guide', 'expenses_add_btn', 1, '/personal-expense', '.add-expense-btn', 'Add New Expense', 'Click to record a new expense. Choose the right category to track where your money goes.', 0, 1, 1),
+('help_guide', 'expenses_recent_list', 2, '/personal-expense', '.recent-expenses', 'Recent Expenses', 'View and manage your recent expenses. You can edit or delete entries if needed.', 0, 1, 1),
+('help_guide', 'expenses_category_filter', 3, '/personal-expense', '.category-filters', 'Filter by Category', 'Use these filters to view expenses by specific categories and analyze spending patterns.', 0, 1, 1),
+('help_guide', 'expenses_monthly_summary', 4, '/personal-expense', '.monthly-summary', 'Monthly Summary', 'See your total expenses for the current month and compare against your budget.', 0, 1, 1),
+
+-- Savings Page Help Guide - Specific Elements
+('help_guide', 'savings_create_goal', 1, '/savings', '.create-goal-btn', 'Create Savings Goal', 'Start your savings journey by creating a specific goal. Set a target amount and deadline.', 0, 1, 1),
+('help_guide', 'savings_goals_list', 2, '/savings', '.goals-container', 'Your Savings Goals', 'Track progress toward all your goals. Each goal shows current amount and target.', 0, 1, 1),
+('help_guide', 'savings_contribute_btn', 3, '/savings', '.contribute-btn', 'Add Money to Goals', 'Make contributions to your savings goals. Every little bit helps you reach your targets!', 0, 1, 1),
+('help_guide', 'savings_progress_bars', 4, '/savings', '.goal-progress', 'Progress Tracking', 'Visual progress bars show how close you are to reaching each savings goal.', 0, 1, 1),
+
+-- Analytics Page Help Guide - Specific Elements
+('help_guide', 'analytics_spending_chart', 1, '/analytics', '.spending-chart', 'Spending Analysis', 'Charts show your spending patterns over time. Look for trends and areas to improve.', 0, 1, 1),
+('help_guide', 'analytics_category_breakdown', 2, '/analytics', '.category-breakdown', 'Category Breakdown', 'See what percentage of your budget goes to each category. Identify your biggest expenses.', 0, 1, 1),
+('help_guide', 'analytics_insights', 3, '/analytics', '.insights-panel', 'Financial Insights', 'Get personalized recommendations to improve your financial health and reach goals faster.', 0, 1, 1);
+
 -- Dashboard help tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
 ('help_guide', 'dashboard_welcome', 1, '/personal-dashboard', '.main-content', 'Welcome to Your Dashboard', 'This is your personal finance dashboard. Here you can see your financial overview, track goals, and manage your budget.', FALSE, TRUE),
