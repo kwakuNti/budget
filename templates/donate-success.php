@@ -331,7 +331,7 @@
                     <i class="fas fa-chart-line"></i>
                     Go to Dashboard
                 </a>
-                <a href="donate.php" class="btn btn-secondary">
+                <a href="donate" class="btn btn-secondary">
                     <i class="fas fa-heart"></i>
                     Donate Again
                 </a>

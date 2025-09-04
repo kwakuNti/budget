@@ -952,7 +952,7 @@
                     <p style="font-size: 13px; color: #9ca3af; text-align: center; margin-bottom: 8px;">
                         Enjoying Budgetly? Help us keep it free!
                     </p>
-                    <a href="donate.php" class="donate-btn-small">
+                    <a href="donate" class="donate-btn-small">
                         <i class="fas fa-heart" style="margin-right: 6px; color: #ef4444;"></i>
                         Support Us
                     </a>

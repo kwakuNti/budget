@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['reference'])) {
         exit;
     } else {
         // Payment failed
-        header('Location: donate.php?status=failed');
+        header('Location: donate?status=failed');
         exit;
     }
 }
@@ -196,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['reference'])) {
                 <strong>Note:</strong> Paystack supports MTN Mobile Money and Vodafone Cash in Ghana.
             </p>
         </div>
-        <a href="donate.php" class="back-btn">Back to Donations</a>
+        <a href="donate" class="back-btn">Back to Donations</a>
     </div>
 </body>
 </html>
