@@ -1285,7 +1285,7 @@ body {
 .budget-modal {
     display: none;
     position: fixed;
-    z-index: 9999;
+    z-index: 10002; /* Above walkthrough tooltips */
     left: 0;
     top: 0;
     width: 100%;
@@ -1578,52 +1578,69 @@ body {
 
 .template-preview {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    justify-content: center;
     margin-top: 16px;
+    gap: 16px;
 }
 
-.preview-row {
+.preview-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    position: relative;
+    background: conic-gradient(
+        var(--needs-color) 0deg,
+        var(--needs-color) var(--needs-deg, 180deg),
+        var(--wants-color) var(--needs-deg, 180deg),
+        var(--wants-color) var(--wants-end-deg, 288deg),
+        var(--savings-color) var(--wants-end-deg, 288deg),
+        var(--savings-color) 360deg
+    );
+}
+
+.preview-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
-.preview-label {
-    min-width: 80px;
-    font-size: 12px;
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.legend-color.needs {
+    background: var(--needs-color);
+}
+
+.legend-color.wants {
+    background: var(--wants-color);
+}
+
+.legend-color.savings {
+    background: var(--savings-color);
+}
+
+.legend-text {
     font-weight: 600;
     color: var(--text-secondary);
 }
 
-.preview-bar-container {
-    flex: 1;
-    height: 8px;
-    background: var(--hover-color);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
+/* Remove old preview styles */
+.preview-row,
+.preview-label,
+.preview-bar-container,
 .preview-bar {
-    height: 100%;
-    transition: all 0.3s ease;
-    min-width: 2px; /* Ensure visibility even for small percentages */
-}
-
-.preview-bar span {
-    display: none; /* Hide text inside bars */
-}
-
-.needs-bar {
-    background: var(--needs-color);
-}
-
-.wants-bar {
-    background: var(--wants-color);
-}
-
-.savings-bar {
-    background: var(--savings-color);
+    display: none;
 }
 
 /* Template Modal Styles */

@@ -423,22 +423,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>50/30/20 Rule</h5>
                             <p class="template-desc">Most popular balanced approach</p>
                             <div class="template-preview">
-                                <div class="preview-row">
-                                    <span class="preview-label">50% Needs</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar needs-bar" style="width: 50%"></div>
+                                <div class="preview-circle" style="--needs-deg: 180deg; --wants-end-deg: 288deg;"></div>
+                                <div class="preview-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color needs"></div>
+                                        <span class="legend-text">50% Needs</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">30% Wants</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar wants-bar" style="width: 30%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color wants"></div>
+                                        <span class="legend-text">30% Wants</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">20% Savings</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar savings-bar" style="width: 20%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color savings"></div>
+                                        <span class="legend-text">20% Savings</span>
                                     </div>
                                 </div>
                             </div>
@@ -448,22 +445,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>80/10/10 Minimalist</h5>
                             <p class="template-desc">Focus on essentials only</p>
                             <div class="template-preview">
-                                <div class="preview-row">
-                                    <span class="preview-label">80% Needs</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar needs-bar" style="width: 80%"></div>
+                                <div class="preview-circle" style="--needs-deg: 288deg; --wants-end-deg: 324deg;"></div>
+                                <div class="preview-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color needs"></div>
+                                        <span class="legend-text">80% Needs</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">10% Wants</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar wants-bar" style="width: 10%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color wants"></div>
+                                        <span class="legend-text">10% Wants</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">10% Savings</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar savings-bar" style="width: 10%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color savings"></div>
+                                        <span class="legend-text">10% Savings</span>
                                     </div>
                                 </div>
                             </div>
@@ -473,22 +467,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>60/20/20 Conservative</h5>
                             <p class="template-desc">Higher focus on necessities</p>
                             <div class="template-preview">
-                                <div class="preview-row">
-                                    <span class="preview-label">60% Needs</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar needs-bar" style="width: 60%"></div>
+                                <div class="preview-circle" style="--needs-deg: 216deg; --wants-end-deg: 288deg;"></div>
+                                <div class="preview-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color needs"></div>
+                                        <span class="legend-text">60% Needs</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">20% Wants</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar wants-bar" style="width: 20%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color wants"></div>
+                                        <span class="legend-text">20% Wants</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">20% Savings</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar savings-bar" style="width: 20%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color savings"></div>
+                                        <span class="legend-text">20% Savings</span>
                                     </div>
                                 </div>
                             </div>
@@ -498,22 +489,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>40/30/30 Aggressive</h5>
                             <p class="template-desc">Maximum savings focus</p>
                             <div class="template-preview">
-                                <div class="preview-row">
-                                    <span class="preview-label">40% Needs</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar needs-bar" style="width: 40%"></div>
+                                <div class="preview-circle" style="--needs-deg: 144deg; --wants-end-deg: 252deg;"></div>
+                                <div class="preview-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color needs"></div>
+                                        <span class="legend-text">40% Needs</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">30% Wants</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar wants-bar" style="width: 30%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color wants"></div>
+                                        <span class="legend-text">30% Wants</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">30% Savings</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar savings-bar" style="width: 30%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color savings"></div>
+                                        <span class="legend-text">30% Savings</span>
                                     </div>
                                 </div>
                             </div>
@@ -523,22 +511,19 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                             <h5>70/20/10 Debt Focus</h5>
                             <p class="template-desc">Prioritize debt elimination</p>
                             <div class="template-preview">
-                                <div class="preview-row">
-                                    <span class="preview-label">70% Needs</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar needs-bar" style="width: 70%"></div>
+                                <div class="preview-circle" style="--needs-deg: 252deg; --wants-end-deg: 324deg;"></div>
+                                <div class="preview-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color needs"></div>
+                                        <span class="legend-text">70% Needs</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">20% Wants</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar wants-bar" style="width: 20%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color wants"></div>
+                                        <span class="legend-text">20% Wants</span>
                                     </div>
-                                </div>
-                                <div class="preview-row">
-                                    <span class="preview-label">10% Savings</span>
-                                    <div class="preview-bar-container">
-                                        <div class="preview-bar savings-bar" style="width: 10%"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color savings"></div>
+                                        <span class="legend-text">10% Savings</span>
                                     </div>
                                 </div>
                             </div>

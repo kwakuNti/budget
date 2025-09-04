@@ -1146,11 +1146,91 @@ class BudgetWalkthrough {
                 // The button click should open the modal, then we monitor for form submission
                 this.handleSalarySetupStep(step);
                 
-            } else if (step.step_name === 'create_categories') {
-                console.log('🔧 Handling create categories step - opening modal');
+            } else if (step.step_name === 'choose_template') {
+                console.log('🔧 Handling choose template step - forcing modal open');
                 
-                // Allow the modal to open, then we'll guide through the form
-                this.handleCategoryCreationStep(step);
+                // Allow the click first, then check if modal opened
+                setTimeout(() => {
+                    const modal = document.getElementById('budgetTemplateModal');
+                    console.log('🔍 Checking modal state:', modal ? modal.style.display : 'modal not found');
+                    
+                    if (!modal || modal.style.display !== 'flex') {
+                        console.log('🔧 Modal not opened, attempting multiple fallbacks');
+                        
+                        // Try method 1: Call the function directly
+                        try {
+                            if (typeof window.showBudgetTemplateModal === 'function') {
+                                window.showBudgetTemplateModal();
+                                console.log('✅ Called showBudgetTemplateModal()');
+                            }
+                        } catch (e) {
+                            console.log('❌ showBudgetTemplateModal failed:', e);
+                        }
+                        
+                        // Try method 2: Call showModal directly  
+                        setTimeout(() => {
+                            const modal2 = document.getElementById('budgetTemplateModal');
+                            if (!modal2 || modal2.style.display !== 'flex') {
+                                try {
+                                    if (typeof window.showModal === 'function') {
+                                        window.showModal('budgetTemplateModal');
+                                        console.log('✅ Called showModal("budgetTemplateModal")');
+                                    }
+                                } catch (e) {
+                                    console.log('❌ showModal failed:', e);
+                                }
+                            }
+                        }, 50);
+                        
+                        // Try method 3: Direct DOM manipulation
+                        setTimeout(() => {
+                            const modal3 = document.getElementById('budgetTemplateModal');
+                            if (modal3 && modal3.style.display !== 'flex') {
+                                console.log('🔧 Using direct DOM manipulation');
+                                modal3.style.display = 'flex';
+                                modal3.style.zIndex = '99999';
+                            }
+                        }, 100);
+                    } else {
+                        console.log('✅ Modal is already open');
+                    }
+                }, 50);
+                
+            } else if (step.step_name === 'create_categories') {
+                console.log('🔧 Handling create categories step - monitoring for modal');
+                
+                // Allow the click, then monitor for modal opening
+                setTimeout(() => {
+                    const modal = document.getElementById('addCategoryModal');
+                    console.log('🔍 Checking add category modal state:', modal ? modal.style.display : 'modal not found');
+                    
+                    if (modal && modal.style.display === 'flex') {
+                        console.log('✅ Add category modal opened, advancing to next step');
+                        // Hide current walkthrough tooltip while modal is open
+                        this.cleanup();
+                        // Modal opened successfully, advance to next step
+                        this.completeStep('create_categories');
+                    } else {
+                        console.log('❌ Modal not opened, trying fallback');
+                        // Try to open the modal manually
+                        if (typeof window.showAddCategoryModal === 'function') {
+                            window.showAddCategoryModal();
+                        } else if (typeof window.showModal === 'function') {
+                            window.showModal('addCategoryModal');
+                        }
+                        
+                        // Check again after fallback
+                        setTimeout(() => {
+                            const modal2 = document.getElementById('addCategoryModal');
+                            if (modal2 && modal2.style.display === 'flex') {
+                                console.log('✅ Fallback worked, advancing to next step');
+                                // Hide current walkthrough tooltip while modal is open
+                                this.cleanup();
+                                this.completeStep('create_categories');
+                            }
+                        }, 100);
+                    }
+                }, 100);
                 
             } else if (step.step_name === 'fill_category_form') {
                 console.log('🔧 Handling fill category form step');
