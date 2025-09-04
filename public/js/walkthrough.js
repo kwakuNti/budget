@@ -384,6 +384,16 @@ class BudgetWalkthrough {
                 .help-icon-btn i {
                     font-size: 16px;
                 }
+                @media (max-width: 768px) {
+                    .help-icon-container {
+                        bottom: 15px;
+                        right: 15px;
+                    }
+                    .help-icon-btn {
+                        padding: 10px 14px;
+                        font-size: 13px;
+                    }
+                }
             </style>
         `;
         
@@ -393,6 +403,8 @@ class BudgetWalkthrough {
         });
         
         document.body.appendChild(helpIcon);
+        
+        console.log('✅ Page help icon added');
     }
 
     // Start page-specific help tour
@@ -550,40 +562,65 @@ class BudgetWalkthrough {
         // Create overlay
         this.createOverlay();
         
-        // Find target element
-        const targetElement = document.querySelector(step.target_element);
+        // Try multiple fallback selectors for better element finding
+        const targetSelectors = [
+            step.target_element,
+            // Common fallbacks for different page elements
+            '.page-header', '.main-content', '.container', 'main', 'body'
+        ];
+        
+        let targetElement = null;
+        
+        // Try each selector until we find an element
+        for (const selector of targetSelectors) {
+            try {
+                targetElement = document.querySelector(selector);
+                if (targetElement) {
+                    console.log('✅ Found target with selector:', selector);
+                    break;
+                }
+            } catch (e) {
+                console.log('❌ Invalid selector:', selector);
+                continue;
+            }
+        }
         
         if (!targetElement) {
-            console.log('❌ Target element not found:', step.target_element);
-            console.log('Available elements on page:', document.querySelectorAll('*').length);
-            
-            // For help guides, show a general help message instead of failing
+            console.log('❌ No suitable target element found, using fallback');
+            // Use a very generic fallback
+            targetElement = document.body;
+        }
+
+        console.log('✅ Using target element:', targetElement);
+
+        // For help guides with missing elements, show general help
+        if (!targetElement || targetElement === document.body) {
             if (step.walkthrough_type === 'help_guide') {
                 this.showGeneralHelpMessage(step);
-                return;
-            } else {
-                console.error('Target element not found for required step:', step.target_element);
                 return;
             }
         }
 
-        console.log('✅ Target element found:', targetElement);
-
         // Highlight target element
         this.highlightElement(targetElement);
         
-        // Show floating instruction
-        this.showFloatingInstruction(targetElement, step);
+        // Show floating instruction only for action-required steps
+        if (step.action_required && step.walkthrough_type !== 'help_guide') {
+            this.showFloatingInstruction(targetElement, step);
+        }
         
         // Show tooltip
         this.showTooltip(targetElement, step);
         
-        // Handle salary step specially - don't add interfering click listeners
+        // Handle different step types
         if (step.step_name === 'configure_salary') {
             console.log('🔧 Setting up salary step monitoring');
             this.setupSalaryButtonMonitoring(targetElement, step);
+        } else if (step.step_name === 'setup_budget') {
+            console.log('💰 Setting up budget step monitoring');
+            this.setupBudgetStepMonitoring(targetElement, step);
         } else if (step.action_required && step.walkthrough_type !== 'help_guide') {
-            // For other steps, disable other interactions normally (but not for help guides)
+            // For other action-required steps, but not help guides
             this.disableOtherElements(targetElement);
         }
     }
@@ -805,24 +842,33 @@ class BudgetWalkthrough {
         this.tooltip = document.createElement('div');
         this.tooltip.className = 'walkthrough-tooltip';
         
-        const canSkip = step.can_skip && !step.action_required;
+        const canSkip = step.can_skip || step.walkthrough_type === 'help_guide';
+        const isHelpGuide = step.walkthrough_type === 'help_guide';
+        
+        // Different content for help guides vs initial setup
+        const progressText = isHelpGuide ? 
+            `Help Guide - ${step.page_url}` : 
+            `Step ${step.step_order} of 5`;
+            
+        const actionContent = step.action_required && !isHelpGuide ? 
+            '<p class="action-note"><i class="fas fa-info-circle"></i> Complete this action to continue</p>' : 
+            isHelpGuide ?
+                '<button class="btn btn-primary btn-sm tooltip-next">Next Tip</button>' :
+                '<button class="btn btn-primary btn-sm tooltip-next">Next</button>';
         
         this.tooltip.innerHTML = `
             <div class="tooltip-header">
                 <h4>${step.title}</h4>
                 <div class="tooltip-progress">
-                    Step ${step.step_order} of 5
+                    ${progressText}
                 </div>
             </div>
             <div class="tooltip-content">
                 <p>${step.content}</p>
             </div>
             <div class="tooltip-actions">
-                ${step.action_required ? 
-                    '<p class="action-note"><i class="fas fa-info-circle"></i> Complete this action to continue</p>' : 
-                    `<button class="btn btn-primary btn-sm tooltip-next">Next</button>`
-                }
-                ${canSkip ? '<button class="btn btn-outline-secondary btn-sm tooltip-skip">Skip Tour</button>' : ''}
+                ${actionContent}
+                ${canSkip ? '<button class="btn btn-outline-secondary btn-sm tooltip-skip">Close Help</button>' : ''}
             </div>
         `;
 
@@ -840,26 +886,37 @@ class BudgetWalkthrough {
         }, 10);
         
         // Add event listeners
-        if (!step.action_required) {
+        if (!step.action_required || isHelpGuide) {
             const nextBtn = this.tooltip.querySelector('.tooltip-next');
             if (nextBtn) {
-                nextBtn.addEventListener('click', () => this.nextStep());
+                nextBtn.addEventListener('click', () => {
+                    if (isHelpGuide) {
+                        // For help guides, just close the current tip
+                        this.cleanup();
+                    } else {
+                        this.nextStep();
+                    }
+                });
             }
         }
         
         if (canSkip) {
             const skipBtn = this.tooltip.querySelector('.tooltip-skip');
             if (skipBtn) {
-                skipBtn.addEventListener('click', () => this.skipWalkthrough());
+                skipBtn.addEventListener('click', () => {
+                    if (isHelpGuide) {
+                        this.cleanup();
+                    } else {
+                        this.skipWalkthrough();
+                    }
+                });
             }
         }
 
-        // Listen for the required action
-        if (step.action_required && step.step_name !== 'configure_salary' && step.step_name !== 'setup_budget') {
-            // For non-salary and non-budget steps, use normal action listening
+        // Listen for the required action only for non-help guide steps
+        if (step.action_required && !isHelpGuide && step.step_name !== 'configure_salary' && step.step_name !== 'setup_budget') {
             this.listenForAction(targetElement, step);
         }
-        // Salary and budget steps are handled by their respective monitoring methods
     }
 
     positionTooltip(targetElement) {

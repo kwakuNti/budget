@@ -1039,10 +1039,10 @@
                     <button type="button" class="nav-btn prev-btn" onclick="previousStep()" style="display: none;">
                         <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>Previous
                     </button>
-                    <button type="button" class="nav-btn next-btn" onclick="nextStep()">
+                    <button type="button" class="nav-btn next-btn" onclick="nextStep()" style="margin-left: auto;">
                         Next<i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
                     </button>
-                    <button type="submit" class="submit-btn" style="display: none;">
+                    <button type="submit" class="submit-btn" style="display: none; margin-left: auto;">
                         <span class="btn-text">Create Account</span>
                         <span class="btn-loader" id="signupLoader"></span>
                     </button>
