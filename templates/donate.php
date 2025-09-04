@@ -27,18 +27,17 @@
             border-radius: 24px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            max-width: 1100px;
+            max-width: 1200px;
             width: 100%;
             display: flex;
-            height: 85vh;
-            max-height: 600px;
+            min-height: 700px;
         }
 
         /* Left Side - Hero */
         .donate-hero {
             flex: 1.2;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            padding: 40px 30px;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -147,7 +146,7 @@
         /* Right Side - Donation Form */
         .donate-form-section {
             flex: 1;
-            padding: 40px 30px;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -156,7 +155,7 @@
 
         .form-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .form-title {
@@ -178,26 +177,26 @@
 
         /* Amount Selection */
         .amount-selection {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .amount-label {
             display: block;
             font-weight: 700;
             color: #374151;
-            margin-bottom: 12px;
-            font-size: 1rem;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
         }
 
         .amount-options {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 16px;
+            margin-bottom: 20px;
         }
 
         .amount-option {
-            padding: 12px;
+            padding: 16px;
             border: 2px solid #e5e7eb;
             border-radius: 16px;
             text-align: center;
@@ -206,7 +205,7 @@
             background: white;
             font-weight: 700;
             color: #374151;
-            font-size: 1rem;
+            font-size: 1.1rem;
             position: relative;
             overflow: hidden;
         }
@@ -276,13 +275,13 @@
 
         /* Payment Methods */
         .payment-methods {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .payment-method {
             border: 2px solid #e5e7eb;
             border-radius: 16px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             overflow: hidden;
             transition: all 0.3s ease;
             background: white;
@@ -301,7 +300,7 @@
         }
 
         .payment-header {
-            padding: 16px;
+            padding: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -355,7 +354,7 @@
         }
 
         .payment-content {
-            padding: 0 16px 16px;
+            padding: 0 20px 20px;
             display: none;
             background: rgba(249, 250, 251, 0.5);
         }
