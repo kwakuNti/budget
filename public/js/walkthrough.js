@@ -1212,10 +1212,6 @@ class BudgetWalkthrough {
                 
                 // This will show the normal tooltip for "Add Category" button
                 // When user clicks, the action handler will hide tooltip and monitor modal
-                // Set up monitoring for when modal opens after user clicks
-                setTimeout(() => {
-                    this.monitorForCategoryModal();
-                }, 100);
                 
             } else if (step.step_name === 'create_categories') {
                 console.log('🔧 Handling create categories step - allowing click and hiding tooltip');
@@ -1224,8 +1220,10 @@ class BudgetWalkthrough {
                 // Hide the tooltip immediately when user clicks
                 this.cleanup();
                 
-                // The monitoring is already set up, it will detect when modal opens
-                // and advance to the next step
+                // Wait a moment, then monitor for modal opening
+                setTimeout(() => {
+                    this.monitorForCategoryModal();
+                }, 200);
                 
             } else if (step.step_name === 'fill_category_form') {
                 console.log('🔧 Handling fill category form step');
@@ -2423,15 +2421,17 @@ class BudgetWalkthrough {
             const modal = document.getElementById('addCategoryModal');
             if (modal && modal.style.display === 'flex') {
                 console.log('✅ Category modal opened, advancing to fill_category_form step');
-                // Hide any existing tooltips
-                this.cleanup();
-                // Complete the create_categories step
-                this.completeStep('create_categories');
+                
+                // Complete the create_categories step and advance to form filling
+                this.completeStep('create_categories').then(() => {
+                    console.log('✅ Advanced to fill_category_form step, modal is ready for guidance');
+                    // The next step (fill_category_form) will automatically be shown
+                });
                 return;
             }
             
-            // Continue checking every 500ms
-            setTimeout(checkForModal, 500);
+            // Continue checking every 300ms for faster response
+            setTimeout(checkForModal, 300);
         };
         
         // Start monitoring
