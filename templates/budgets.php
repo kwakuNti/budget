@@ -93,7 +93,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     <p>Plan, track, and optimize your monthly budget across all categories</p>
                 </div>
                 <div class="quick-actions">
-                    <button class="quick-btn" onclick="showAddCategoryModal()">
+                    <button class="quick-btn add-category-btn" onclick="showAddCategoryModal()">
                         <span class="btn-icon">➕</span>
                         Add Category
                     </button>
