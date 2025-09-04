@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $servername = "localhost";
 $username   = "root";
-$password   = "root"; // if using MAMP default, keep it empty
+$password   = "Killshot@23"; // if using MAMP default, keep it empty
 $database   = "budget";
 
 $conn = new mysqli($servername, $username, $password, $database);
