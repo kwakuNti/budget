@@ -439,6 +439,37 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
             text-decoration: underline;
         }
 
+        /* Donate Button */
+        .donate-btn-small {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            background: #f8fafc;
+            color: #6b7280;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            display: flex;
+            width: fit-content;
+        }
+
+        .donate-btn-small:hover {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .donate-btn-small:active {
+            transform: translateY(0);
+        }
+
         /* Demo Section */
         .demo-section {
             margin-top: 24px;
@@ -905,6 +936,16 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                         <a href="sign-up" class="signup-link">Sign up now</a>
                     </p>
 
+                    <!-- Donate Button -->
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f3f4f6;">
+                        <p style="font-size: 13px; color: #9ca3af; text-align: center; margin-bottom: 8px;">
+                            Enjoying Budgetly? Help us keep it free!
+                        </p>
+                        <a href="donate.php" class="donate-btn-small">
+                            <i class="fas fa-heart" style="margin-right: 6px; color: #ef4444;"></i>
+                            Support Us
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
