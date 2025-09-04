@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tooltip Modal Interaction</title>
+    <style>
+        /* Simulate budget modal styles */
+        .budget-modal {
+            display: none;
+            position: fixed;
+            z-index: 10010;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .budget-modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Basic button styling */
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        /* Test area styling */
+        .test-area {
+            padding: 50px;
+            text-align: center;
+            min-height: 500px;
+        }
+
+        .status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-area">
+        <h1>Test Tooltip Modal Interaction</h1>
+        <div class="status" id="status">Status: Initializing...</div>
+        
+        <button class="btn" id="testBtn" onclick="showModal()">Open Test Modal</button>
+        <button class="btn" onclick="simulateWalkthrough()">Start Test Walkthrough</button>
+        <button class="btn" onclick="closeModal()">Close Modal</button>
+        
+        <div id="console-log" style="background: #000; color: #0f0; padding: 10px; margin: 20px 0; min-height: 200px; font-family: monospace; font-size: 12px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- Test Modal -->
+    <div id="testModal" class="budget-modal">
+        <div class="budget-modal-content">
+            <h3>Test Modal</h3>
+            <p>This is a test modal to check if the walkthrough tooltip hides properly.</p>
+            <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Include the walkthrough script -->
+    <script src="/budget/public/js/walkthrough.js"></script>
+    
+    <script>
+        // Override console.log to show in page
+        const originalConsoleLog = console.log;
+        const consoleDiv = document.getElementById('console-log');
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+            consoleDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        };
+
+        // Modal functions
+        function showModal() {
+            const modal = document.getElementById('testModal');
+            modal.style.display = 'flex';
+            updateStatus('Modal opened');
+            console.log('🎭 Test modal opened');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('testModal');
+            modal.style.display = 'none';
+            updateStatus('Modal closed');
+            console.log('🎭 Test modal closed');
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = 'Status: ' + message;
+        }
+
+        function simulateWalkthrough() {
+            // Create a simple walkthrough for testing
+            if (window.budgetWalkthrough) {
+                console.log('✅ Walkthrough instance found');
+                
+                // Manually create a test tooltip
+                createTestTooltip();
+            } else {
+                console.log('❌ No walkthrough instance found');
+                updateStatus('No walkthrough instance found');
+            }
+        }
+
+        function createTestTooltip() {
+            // Create a test tooltip similar to the walkthrough
+            const testBtn = document.getElementById('testBtn');
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'walkthrough-tooltip';
+            tooltip.innerHTML = `
+                <div class="tooltip-header">
+                    <h4>Test Tooltip</h4>
+                    <div class="tooltip-progress">Test Step 1 of 1</div>
+                </div>
+                <div class="tooltip-content">
+                    <p>This is a test tooltip. Click the "Open Test Modal" button to see if this tooltip disappears.</p>
+                </div>
+                <div class="tooltip-actions">
+                    <button class="btn btn-sm tooltip-next">Next</button>
+                </div>
+            `;
+            
+            // Style and position the tooltip
+            tooltip.style.cssText = `
+                position: absolute;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                max-width: 350px;
+                z-index: 10003;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                top: 200px;
+                left: 50%;
+                transform: translateX(-50%);
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            // Store reference for cleanup
+            window.testTooltip = tooltip;
+            
+            updateStatus('Test tooltip created');
+            console.log('✅ Test tooltip created');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', function() {
+            console.log('📄 Page loaded');
+            updateStatus('Page loaded, walkthrough initializing...');
+            
+            // Check if walkthrough loaded
+            setTimeout(() => {
+                if (window.budgetWalkthrough) {
+                    console.log('✅ Walkthrough loaded successfully');
+                    updateStatus('Walkthrough loaded');
+                } else {
+                    console.log('❌ Walkthrough failed to load');
+                    updateStatus('Walkthrough failed to load');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

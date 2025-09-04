@@ -13,6 +13,8 @@ class BudgetWalkthrough {
         this.isActive = false;
         this.completedSteps = [];
         this.isTemporarilyHidden = false;
+        this.isModalHidden = false;
+        this.modalCheckInterval = null;
         this.init();
     }
 
@@ -761,61 +763,126 @@ class BudgetWalkthrough {
         
         // Listen for modal events
         this.setupModalListeners();
+        
+        // Also do an immediate check for any open modals
+        this.checkForOpenModals();
+    }
+
+    checkForOpenModals() {
+        // Check for any currently open modals and hide walkthrough if found
+        const openModals = document.querySelectorAll('.modal[style*="display: flex"], .budget-modal[style*="display: flex"], .modal.show, .budget-modal.show');
+        
+        if (openModals.length > 0) {
+            console.log('🎭 Found open modal on startup, hiding walkthrough');
+            this.hideWalkthroughForModal();
+        }
     }
     
     setupModalListeners() {
+        // Store reference to this for use in listeners
+        const self = this;
+        
         // Observer to detect when modals are shown/hidden
         const observer = new MutationObserver((mutations) => {
             // Skip if we're handling salary setup manually
-            if (this.isHandlingSalarySetup) return;
+            if (self.isHandlingSalarySetup) return;
             
             mutations.forEach((mutation) => {
                 if (mutation.type === 'attributes') {
                     const target = mutation.target;
-                    if (target.classList.contains('modal')) {
+                    // Check for both regular modals and budget modals
+                    if (target.classList.contains('modal') || target.classList.contains('budget-modal')) {
                         const isVisible = target.style.display === 'flex' || 
                                         target.classList.contains('show') ||
                                         getComputedStyle(target).display === 'flex';
-                        if (this.overlay) {
-                            if (isVisible) {
-                                console.log('🎭 Modal detected, hiding walkthrough overlay');
-                                this.overlay.classList.add('modal-open');
-                            } else {
-                                console.log('🎭 Modal closed, showing walkthrough overlay');
-                                this.overlay.classList.remove('modal-open');
-                            }
+                        
+                        if (isVisible) {
+                            console.log('🎭 Modal detected, hiding walkthrough elements');
+                            self.hideWalkthroughForModal();
+                        } else {
+                            console.log('🎭 Modal closed, showing walkthrough elements');
+                            self.showWalkthroughAfterModal();
                         }
                     }
                 }
             });
         });
         
-        // Watch all modals
-        const modals = document.querySelectorAll('.modal');
+        // Watch all modals (both regular and budget modals)
+        const modals = document.querySelectorAll('.modal, .budget-modal');
         modals.forEach(modal => {
             observer.observe(modal, { attributes: true, attributeFilter: ['style', 'class'] });
         });
         
+        // Additional robust modal detection using periodic checking
+        this.modalCheckInterval = setInterval(() => {
+            if (self.isHandlingSalarySetup) return;
+            
+            const openModals = document.querySelectorAll('.modal[style*="display: flex"], .modal[style*="display:flex"], .budget-modal[style*="display: flex"], .budget-modal[style*="display:flex"], .modal.show, .budget-modal.show');
+            
+            if (openModals.length > 0 && !self.isModalHidden) {
+                console.log('🎭 Periodic check: Found open modal, hiding walkthrough');
+                self.hideWalkthroughForModal();
+                self.isModalHidden = true;
+            } else if (openModals.length === 0 && self.isModalHidden) {
+                console.log('🎭 Periodic check: No open modals, showing walkthrough');
+                self.showWalkthroughAfterModal();
+                self.isModalHidden = false;
+            }
+        }, 250); // Check every 250ms
+        
         // Also listen for direct modal show/hide events
         document.addEventListener('modalShow', () => {
             // Skip if we're handling salary setup manually
-            if (this.isHandlingSalarySetup) return;
+            if (self.isHandlingSalarySetup) return;
             
-            if (this.overlay) {
-                console.log('🎭 Modal show event, hiding walkthrough overlay');
-                this.overlay.classList.add('modal-open');
-            }
+            console.log('🎭 Modal show event, hiding walkthrough elements');
+            self.hideWalkthroughForModal();
+            self.isModalHidden = true;
         });
         
         document.addEventListener('modalHide', () => {
             // Skip if we're handling salary setup manually
-            if (this.isHandlingSalarySetup) return;
+            if (self.isHandlingSalarySetup) return;
             
-            if (this.overlay) {
-                console.log('🎭 Modal hide event, showing walkthrough overlay');
-                this.overlay.classList.remove('modal-open');
-            }
+            console.log('🎭 Modal hide event, showing walkthrough elements');
+            self.showWalkthroughAfterModal();
+            self.isModalHidden = false;
         });
+    }
+
+    hideWalkthroughForModal() {
+        // Hide the overlay
+        if (this.overlay) {
+            this.overlay.classList.add('modal-open');
+        }
+        
+        // Hide the tooltip completely
+        if (this.tooltip) {
+            this.tooltip.style.display = 'none';
+        }
+        
+        // Hide the instruction
+        if (this.instruction) {
+            this.instruction.style.display = 'none';
+        }
+    }
+
+    showWalkthroughAfterModal() {
+        // Show the overlay
+        if (this.overlay) {
+            this.overlay.classList.remove('modal-open');
+        }
+        
+        // Show the tooltip
+        if (this.tooltip) {
+            this.tooltip.style.display = 'block';
+        }
+        
+        // Show the instruction
+        if (this.instruction) {
+            this.instruction.style.display = 'block';
+        }
     }
 
     highlightElement(element) {
@@ -1725,6 +1792,18 @@ class BudgetWalkthrough {
     cleanup() {
         this.isActive = false;
         
+        // Clear modal check interval
+        if (this.modalCheckInterval) {
+            clearInterval(this.modalCheckInterval);
+            this.modalCheckInterval = null;
+        }
+        
+        // Clear navigation check interval
+        if (this.navigationCheckInterval) {
+            clearInterval(this.navigationCheckInterval);
+            this.navigationCheckInterval = null;
+        }
+        
         // Remove overlay
         if (this.overlay) {
             this.overlay.remove();
@@ -1912,7 +1991,7 @@ class BudgetWalkthrough {
             .walkthrough-overlay.modal-open {
                 z-index: 1;
                 background: rgba(0, 0, 0, 0.1);
-                display: none;
+                display: none !important;
             }
             
             .walkthrough-highlight {
