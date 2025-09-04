@@ -160,7 +160,23 @@ class BudgetWalkthrough {
         
         navigationButtons.forEach(button => {
             const onclick = button.getAttribute('onclick');
-            if (onclick && !onclick.includes('salary.php') && !onclick.includes('personal-dashboard.php')) {
+            
+            // Allow template modal, salary, dashboard, and other modal functions
+            const allowedFunctions = [
+                'salary.php', 
+                'personal-dashboard.php', 
+                'showBudgetTemplateModal', 
+                'showTemplateModal',
+                'showModal',
+                'showAddCategoryModal',
+                'addCategory',
+                'editCategory',
+                'deleteCategory'
+            ];
+            
+            const isAllowed = allowedFunctions.some(func => onclick && onclick.includes(func));
+            
+            if (onclick && !isAllowed) {
                 // Store original onclick
                 button.setAttribute('data-original-onclick', onclick);
                 
@@ -900,8 +916,8 @@ class BudgetWalkthrough {
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
                     if (isHelpGuide) {
-                        // For help guides, just close the current tip
-                        this.cleanup();
+                        // For help guides, advance to next help guide step if there is one
+                        this.nextHelpGuideStep();
                     } else {
                         this.nextStep();
                     }
@@ -1469,6 +1485,41 @@ class BudgetWalkthrough {
     async nextStep() {
         if (this.currentStep) {
             await this.completeStep(this.currentStep.step_name);
+        }
+    }
+
+    async nextHelpGuideStep() {
+        // For help guides, we need to find the next help guide step on the same page
+        const currentPageUrl = window.location.pathname;
+        const currentStepOrder = this.currentStep ? this.currentStep.step_order : 0;
+        
+        // Clean up the current tooltip
+        this.cleanup();
+        
+        // Find the next help guide step on this page
+        try {
+            const response = await fetch(`/budget/api/get_help_guide_steps.php?page=${encodeURIComponent(currentPageUrl)}&after_order=${currentStepOrder}`);
+            const data = await response.json();
+            
+            if (data.success && data.step) {
+                // Show the next help guide step
+                const targetElement = document.querySelector(data.step.target_selector);
+                if (targetElement) {
+                    this.currentStep = data.step;
+                    this.showTooltip(targetElement, data.step);
+                } else {
+                    console.warn('Target element not found for next help guide step:', data.step.target_selector);
+                    // If no more steps or element not found, just close
+                    this.cleanup();
+                }
+            } else {
+                // No more help guide steps on this page
+                console.log('No more help guide steps on this page');
+                this.cleanup();
+            }
+        } catch (error) {
+            console.error('Failed to get next help guide step:', error);
+            this.cleanup();
         }
     }
 
