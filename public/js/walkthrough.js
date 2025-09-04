@@ -1220,9 +1220,19 @@ class BudgetWalkthrough {
                 // Hide the tooltip immediately when user clicks
                 this.cleanup();
                 
+                // Mark that we're transitioning to avoid duplicate tooltips
+                this.isTransitioning = true;
+                
                 // Wait a moment, then monitor for modal opening
                 setTimeout(() => {
-                    this.monitorForCategoryModal();
+                    // Only start monitoring if we're not already transitioning
+                    if (!this.modalAlreadyOpen()) {
+                        this.monitorForCategoryModal();
+                    } else {
+                        // Modal is already open, directly advance
+                        console.log('✅ Modal already open, advancing immediately');
+                        this.completeStep('create_categories');
+                    }
                 }, 200);
                 
             } else if (step.step_name === 'fill_category_form') {
@@ -2414,28 +2424,45 @@ class BudgetWalkthrough {
         });
     }
 
+    modalAlreadyOpen() {
+        const modal = document.getElementById('addCategoryModal');
+        return modal && modal.style.display === 'flex';
+    }
+
     monitorForCategoryModal() {
         console.log('👀 Monitoring for category modal opening...');
         
         const checkForModal = () => {
             const modal = document.getElementById('addCategoryModal');
             if (modal && modal.style.display === 'flex') {
-                console.log('✅ Category modal opened, advancing to fill_category_form step');
+                console.log('✅ Category modal opened, cleaning up tooltip and advancing step');
+                
+                // Set transitioning flag to prevent duplicate actions
+                this.isTransitioning = true;
+                
+                // Force cleanup of any existing tooltips immediately
+                this.cleanup();
                 
                 // Complete the create_categories step and advance to form filling
-                this.completeStep('create_categories').then(() => {
-                    console.log('✅ Advanced to fill_category_form step, modal is ready for guidance');
-                    // The next step (fill_category_form) will automatically be shown
-                });
+                setTimeout(() => {
+                    this.completeStep('create_categories').then(() => {
+                        console.log('✅ Advanced to fill_category_form step, modal is ready for guidance');
+                        this.isTransitioning = false; // Reset flag
+                        // Give more time for the modal to be fully rendered before showing next step
+                        setTimeout(() => {
+                            this.loadCurrentStep();
+                        }, 500);
+                    });
+                }, 100);
                 return;
             }
             
-            // Continue checking every 300ms for faster response
-            setTimeout(checkForModal, 300);
+            // Continue checking every 200ms for faster response
+            setTimeout(checkForModal, 200);
         };
         
-        // Start monitoring
-        setTimeout(checkForModal, 100);
+        // Start monitoring immediately
+        checkForModal();
     }
 }
 
