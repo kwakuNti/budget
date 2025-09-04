@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Budgetly - Donate</title>
-    <?php include '../includes/favicon.php'; ?>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -15,7 +14,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -25,150 +24,220 @@
 
         .donate-container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            max-width: 800px;
+            max-width: 1200px;
             width: 100%;
             display: flex;
-            min-height: 600px;
+            min-height: 700px;
         }
 
         /* Left Side - Hero */
         .donate-hero {
-            flex: 1;
+            flex: 1.2;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            padding: 40px;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             color: white;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .donate-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
         }
 
         .hero-icon {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 24px;
+            margin: 0 auto 32px;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .hero-icon i {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .hero-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 16px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
             line-height: 1.2;
+            background: linear-gradient(45deg, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin-bottom: 40px;
             line-height: 1.6;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-features {
             text-align: left;
-            margin-top: 20px;
+            margin-top: 30px;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-features li {
             display: flex;
             align-items: center;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            opacity: 0.9;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            opacity: 0.95;
+            padding: 8px 0;
         }
 
         .hero-features li i {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.25);
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12px;
-            font-size: 0.7rem;
+            margin-right: 16px;
+            font-size: 0.8rem;
+            animation: none;
         }
 
         /* Right Side - Donation Form */
         .donate-form-section {
             flex: 1;
-            padding: 40px;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
         }
 
         .form-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .form-title {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2.2rem;
+            font-weight: 800;
             color: #1f2937;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            background: linear-gradient(45deg, #1f2937, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .form-subtitle {
             color: #6b7280;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
+            font-weight: 500;
         }
 
         /* Amount Selection */
         .amount-selection {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .amount-label {
             display: block;
-            font-weight: 600;
+            font-weight: 700;
             color: #374151;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
         }
 
         .amount-options {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 16px;
+            margin-bottom: 20px;
         }
 
         .amount-option {
-            padding: 12px;
+            padding: 16px;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            border-radius: 16px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             background: white;
-            font-weight: 600;
+            font-weight: 700;
             color: #374151;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .amount-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .amount-option:hover::before {
+            left: 100%;
         }
 
         .amount-option:hover {
             border-color: #2563eb;
             background: #eff6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
         }
 
         .amount-option.selected {
             border-color: #2563eb;
-            background: #2563eb;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
         }
 
         .custom-amount {
@@ -177,53 +246,61 @@
 
         .currency-symbol {
             position: absolute;
-            left: 12px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: #6b7280;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1rem;
+            z-index: 2;
         }
 
         .custom-amount input {
             width: 100%;
-            padding: 12px 12px 12px 30px;
+            padding: 16px 16px 16px 40px;
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 0.95rem;
+            border-radius: 16px;
+            font-size: 1rem;
             font-weight: 600;
             transition: all 0.3s ease;
+            background: white;
         }
 
         .custom-amount input:focus {
             outline: none;
             border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
         }
 
         /* Payment Methods */
         .payment-methods {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
 
         .payment-method {
             border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            margin-bottom: 12px;
+            border-radius: 16px;
+            margin-bottom: 16px;
             overflow: hidden;
             transition: all 0.3s ease;
+            background: white;
         }
 
         .payment-method:hover {
             border-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
         }
 
         .payment-method.selected {
             border-color: #2563eb;
             background: #eff6ff;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
         }
 
         .payment-header {
-            padding: 16px;
+            padding: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -233,165 +310,127 @@
         .payment-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .payment-icon {
-            width: 40px;
-            height: 40px;
-            background: #f3f4f6;
-            border-radius: 10px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #2563eb;
+            font-size: 1.2rem;
+        }
+
+        .payment-method.selected .payment-icon {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
         }
 
         .payment-details h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             color: #1f2937;
+            margin-bottom: 4px;
         }
 
         .payment-details p {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #6b7280;
+            font-weight: 500;
+        }
+
+        .chevron-icon {
+            color: #9ca3af;
+            transition: transform 0.3s ease;
+        }
+
+        .payment-method.selected .chevron-icon {
+            transform: rotate(180deg);
+            color: #2563eb;
         }
 
         .payment-content {
-            padding: 0 16px 16px;
+            padding: 0 20px 20px;
             display: none;
-            background: #f9fafb;
+            background: rgba(249, 250, 251, 0.5);
         }
 
         .payment-method.selected .payment-content {
             display: block;
+            animation: slideDown 0.3s ease;
         }
 
-        .bank-details {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .bank-detail {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .bank-detail:last-child {
-            border-bottom: none;
-        }
-
-        .bank-detail .label {
-            font-weight: 500;
-            color: #6b7280;
-        }
-
-        .bank-detail .value {
-            font-weight: 600;
-            color: #1f2937;
-            font-family: 'Courier New', monospace;
-        }
-
-        .copy-btn {
-            background: #f3f4f6;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            color: #6b7280;
-            transition: all 0.2s ease;
-        }
-
-        .copy-btn:hover {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        /* Mobile Money Section */
-        .momo-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .momo-option {
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .momo-option:hover {
-            border-color: #2563eb;
-        }
-
-        .momo-option.selected {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-
-        .momo-option img {
-            width: 30px;
-            height: 30px;
-            margin-bottom: 8px;
-        }
-
-        .momo-option .name {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #374151;
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Buttons */
         .donate-btn {
             width: 100%;
-            padding: 16px;
-            background: #2563eb;
+            padding: 20px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .donate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .donate-btn:hover::before {
+            left: 100%;
         }
 
         .donate-btn:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
         }
 
         .donate-btn:disabled {
             background: #9ca3af;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+        }
+
+        .donate-btn:disabled::before {
+            display: none;
         }
 
         .back-btn {
             width: 100%;
-            padding: 12px;
+            padding: 16px;
             background: transparent;
             color: #6b7280;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 500;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -399,14 +438,194 @@
         .back-btn:hover {
             background: #f9fafb;
             border-color: #d1d5db;
+            color: #374151;
+            transform: translateY(-1px);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: scale(0.8) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 30px 30px 0;
+            text-align: center;
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            padding: 0 30px 30px;
+        }
+
+        .bank-details {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .bank-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .bank-detail:last-child {
+            border-bottom: none;
+        }
+
+        .bank-detail .label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .bank-detail .value-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bank-detail .value {
+            font-weight: 700;
+            color: #1f2937;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .copy-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: #059669;
+        }
+
+        .modal-instructions {
+            background: #fef3cd;
+            border: 1px solid #fbbf24;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .modal-instructions .instruction-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-instructions ol {
+            color: #92400e;
+            padding-left: 20px;
+        }
+
+        .modal-instructions li {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .modal-close {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .modal-close:hover {
+            background: #4b5563;
         }
 
         /* Loading State */
         .btn-loader {
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top: 2px solid white;
+            width: 24px;
+            height: 24px;
+            border: 3px solid transparent;
+            border-top: 3px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             display: none;
@@ -433,18 +652,18 @@
             transform: translateX(-50%);
             background: #323232;
             color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
+            padding: 18px 28px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             gap: 12px;
             font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 10000;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            z-index: 10001;
             transition: all 0.3s ease;
             max-width: 400px;
-            min-width: 300px;
+            min-width: 320px;
         }
 
         .snackbar.show {
@@ -452,43 +671,60 @@
         }
 
         .snackbar.success {
-            background: #059669;
+            background: linear-gradient(135deg, #059669, #047857);
         }
 
         .snackbar.error {
-            background: #dc2626;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
         .snackbar.info {
-            background: #2563eb;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
         }
 
         /* Responsive */
+        @media (max-width: 1024px) {
+            .donate-container {
+                max-width: 900px;
+            }
+            
+            .donate-hero {
+                padding: 40px 30px;
+            }
+            
+            .donate-form-section {
+                padding: 40px 30px;
+            }
+        }
+
         @media (max-width: 768px) {
             .donate-container {
                 flex-direction: column;
                 margin: 10px;
-                border-radius: 16px;
+                border-radius: 20px;
+                max-width: none;
             }
 
             .donate-hero {
-                padding: 30px 20px;
+                padding: 40px 30px;
+                flex: none;
             }
 
             .hero-title {
-                font-size: 1.5rem;
+                font-size: 2rem;
             }
 
             .donate-form-section {
-                padding: 30px 20px;
+                padding: 40px 30px;
+                flex: none;
+            }
+
+            .form-title {
+                font-size: 1.8rem;
             }
 
             .amount-options {
                 grid-template-columns: 1fr 1fr;
-            }
-
-            .momo-options {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -499,19 +735,38 @@
 
             .donate-container {
                 margin: 0;
-                border-radius: 12px;
+                border-radius: 16px;
             }
 
             .donate-hero {
-                padding: 20px 15px;
+                padding: 30px 20px;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
             }
 
             .donate-form-section {
-                padding: 20px 15px;
+                padding: 30px 20px;
+            }
+
+            .form-title {
+                font-size: 1.6rem;
             }
 
             .amount-options {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .modal {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 20px;
             }
         }
     </style>
@@ -520,18 +775,20 @@
     <div class="donate-container">
         <!-- Left Side - Hero -->
         <div class="donate-hero">
-            <div class="hero-icon">
-                <i class="fas fa-heart"></i>
+            <div class="hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h1 class="hero-title">Support Budgetly</h1>
+                <p class="hero-subtitle">Help us keep this free budgeting tool running and continuously improving for everyone.</p>
+                
+                <ul class="hero-features">
+                    <li><i class="fas fa-check"></i>Keep the app free for all users</li>
+                    <li><i class="fas fa-check"></i>Add new features and improvements</li>
+                    <li><i class="fas fa-check"></i>Maintain secure and reliable servers</li>
+                    <li><i class="fas fa-check"></i>Provide ongoing support</li>
+                </ul>
             </div>
-            <h1 class="hero-title">Support Budgetly</h1>
-            <p class="hero-subtitle">Help us keep this free budgeting tool running and continuously improving for everyone.</p>
-            
-            <ul class="hero-features">
-                <li><i class="fas fa-check"></i>Keep the app free for all users</li>
-                <li><i class="fas fa-check"></i>Add new features and improvements</li>
-                <li><i class="fas fa-check"></i>Maintain secure and reliable servers</li>
-                <li><i class="fas fa-check"></i>Provide ongoing support</li>
-            </ul>
         </div>
 
         <!-- Right Side - Donation Form -->
@@ -571,35 +828,12 @@
                                 <p>Direct bank transfer (recommended)</p>
                             </div>
                         </div>
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-down chevron-icon"></i>
                     </div>
                     <div class="payment-content">
-                        <div class="bank-details">
-                            <div class="bank-detail">
-                                <span class="label">Bank:</span>
-                                <div>
-                                    <span class="value">MTN Mobile Money</span>
-                                    <button class="copy-btn" onclick="copyToClipboard('MTN Mobile Money')">Copy</button>
-                                </div>
-                            </div>
-                            <div class="bank-detail">
-                                <span class="label">Account Name:</span>
-                                <div>
-                                    <span class="value">Clifford Ntinkansah</span>
-                                    <button class="copy-btn" onclick="copyToClipboard('Clifford Ntinkansah')">Copy</button>
-                                </div>
-                            </div>
-                            <div class="bank-detail">
-                                <span class="label">Mobile Money Number:</span>
-                                <div>
-                                    <span class="value">+233 24 123 4567</span>
-                                    <button class="copy-btn" onclick="copyToClipboard('+233241234567')">Copy</button>
-                                </div>
-                            </div>
-                            <div style="margin-top: 12px; padding: 12px; background: #fef3cd; border-radius: 6px; font-size: 0.85rem; color: #92400e;">
-                                <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
-                                Please include your email in the transaction reference for confirmation.
-                            </div>
+                        <div style="padding: 12px; background: #dbeafe; border-radius: 8px; font-size: 0.9rem; color: #1e40af;">
+                            <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
+                            Click "Donate Now" to view complete bank transfer details in a secure popup.
                         </div>
                     </div>
                 </div>
@@ -613,25 +847,15 @@
                             </div>
                             <div class="payment-details">
                                 <h4>Mobile Money</h4>
-                                <p>Pay with MoMo (via Paystack)</p>
+                                <p>MTN MoMo direct transfer</p>
                             </div>
                         </div>
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-down chevron-icon"></i>
                     </div>
                     <div class="payment-content">
-                        <div class="momo-options">
-                            <div class="momo-option" data-network="mtn">
-                                <div style="color: #ffcc00; font-size: 24px;">📱</div>
-                                <div class="name">MTN MoMo</div>
-                            </div>
-                            <div class="momo-option" data-network="vodafone">
-                                <div style="color: #e60000; font-size: 24px;">📱</div>
-                                <div class="name">Vodafone Cash</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 12px; padding: 12px; background: #dbeafe; border-radius: 6px; font-size: 0.85rem; color: #1e40af;">
+                        <div style="padding: 12px; background: #fef3cd; border-radius: 8px; font-size: 0.9rem; color: #92400e;">
                             <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
-                            You'll be redirected to Paystack for secure payment processing.
+                            Transfer directly to our MTN MoMo number. Details will be shown after clicking "Donate Now".
                         </div>
                     </div>
                 </div>
@@ -648,10 +872,10 @@
                                 <p>International donations</p>
                             </div>
                         </div>
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-down chevron-icon"></i>
                     </div>
                     <div class="payment-content">
-                        <div style="padding: 12px; background: #f0f9ff; border-radius: 6px; font-size: 0.85rem; color: #0369a1;">
+                        <div style="padding: 12px; background: #f0f9ff; border-radius: 8px; font-size: 0.9rem; color: #0369a1;">
                             <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
                             PayPal integration coming soon. For now, please use bank transfer or mobile money.
                         </div>
@@ -676,6 +900,146 @@
         </div>
     </div>
 
+    <!-- Bank Transfer Modal -->
+    <div id="bankModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h3 class="modal-title">Bank Transfer Details</h3>
+                <p class="modal-subtitle">Complete your donation of <span id="modalAmount">₵0</span></p>
+            </div>
+            <div class="modal-body">
+                <div class="bank-details">
+                    <div class="bank-detail">
+                        <span class="label">Bank:</span>
+                        <div class="value-container">
+                            <span class="value">MTN Mobile Money</span>
+                            <button class="copy-btn" onclick="copyToClipboard('MTN Mobile Money', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="label">Account Name:</span>
+                        <div class="value-container">
+                            <span class="value">Clifford Ntinkansah</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Clifford Ntinkansah', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="label">Mobile Money:</span>
+                        <div class="value-container">
+                            <span class="value">0558579224</span>
+                            <button class="copy-btn" onclick="copyToClipboard('0558579224', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="label">Account Number:</span>
+                        <div class="value-container">
+                            <span class="value">1441002596723</span>
+                            <button class="copy-btn" onclick="copyToClipboard('1441002596723', this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-instructions">
+                    <div class="instruction-title">
+                        <i class="fas fa-info-circle"></i>
+                        Transfer Instructions:
+                    </div>
+                    <ol>
+                        <li>Open your mobile money app or dial *170#</li>
+                        <li>Select "Send Money" or "Transfer"</li>
+                        <li>Enter the mobile money number: <strong>0558579224</strong></li>
+                        <li>Enter amount: <strong>₵<span class="modal-amount-text">0</span></strong></li>
+                        <li>Add reference: <strong>"Budgetly Donation"</strong></li>
+                        <li>Complete the transaction</li>
+                        <li>Send screenshot to: <strong>support@budgetly.com</strong></li>
+                    </ol>
+                </div>
+                
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-check"></i>
+                    Got it, Thanks!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Money Modal -->
+    <div id="momoModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="modal-title">Mobile Money Transfer</h3>
+                <p class="modal-subtitle">Send <span id="momoModalAmount">₵0</span> via MTN Mobile Money</p>
+            </div>
+            <div class="modal-body">
+                <div class="bank-details">
+                    <div class="bank-detail">
+                        <span class="label">Network:</span>
+                        <div class="value-container">
+                            <span class="value">MTN Mobile Money</span>
+                            <button class="copy-btn" onclick="copyToClipboard('MTN Mobile Money', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="label">Recipient Name:</span>
+                        <div class="value-container">
+                            <span class="value">Clifford Ntinkansah</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Clifford Ntinkansah', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="label">Phone Number:</span>
+                        <div class="value-container">
+                            <span class="value">0558579224</span>
+                            <button class="copy-btn" onclick="copyToClipboard('0558579224', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="label">Amount:</span>
+                        <div class="value-container">
+                            <span class="value">₵<span class="momo-amount-text">0</span></span>
+                            <button class="copy-btn" onclick="copyToClipboard(document.querySelector('.momo-amount-text').textContent, this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-instructions">
+                    <div class="instruction-title">
+                        <i class="fas fa-mobile-alt"></i>
+                        How to Send:
+                    </div>
+                    <ol>
+                        <li>Dial <strong>*170#</strong> from your MTN line</li>
+                        <li>Select <strong>"Send Money"</strong></li>
+                        <li>Select <strong>"To Mobile Money User"</strong></li>
+                        <li>Enter recipient number: <strong>0558579224</strong></li>
+                        <li>Enter amount: <strong>₵<span class="momo-amount-text">0</span></strong></li>
+                        <li>Enter reference: <strong>"Budgetly Support"</strong></li>
+                        <li>Confirm with your Mobile Money PIN</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #dcfce7; border: 1px solid #16a34a; border-radius: 12px; padding: 16px; margin: 16px 0; color: #15803d;">
+                    <div style="font-weight: 700; margin-bottom: 8px;">
+                        <i class="fas fa-shield-alt"></i>
+                        Safe & Secure
+                    </div>
+                    <p style="font-size: 0.9rem; margin: 0;">Your donation goes directly to our official MTN Mobile Money account. No third-party payment processors involved.</p>
+                </div>
+                
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-check"></i>
+                    Transfer Complete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Snackbar -->
     <div id="snackbar" class="snackbar">
         <span class="snackbar-icon"></span>
@@ -685,7 +1049,6 @@
     <script>
         let selectedAmount = 0;
         let selectedPaymentMethod = '';
-        let selectedNetwork = '';
 
         // Amount selection
         document.querySelectorAll('.amount-option').forEach(option => {
@@ -738,20 +1101,6 @@
             });
         });
 
-        // Mobile money network selection
-        document.querySelectorAll('.momo-option').forEach(option => {
-            option.addEventListener('click', function() {
-                // Remove selection from all networks
-                document.querySelectorAll('.momo-option').forEach(opt => opt.classList.remove('selected'));
-                
-                // Add selection to clicked network
-                this.classList.add('selected');
-                
-                // Set network
-                selectedNetwork = this.dataset.network;
-            });
-        });
-
         function updateDonateButton() {
             const donateBtn = document.getElementById('donateBtn');
             const btnText = donateBtn.querySelector('.btn-text');
@@ -779,119 +1128,100 @@
             const donateBtn = document.getElementById('donateBtn');
             donateBtn.classList.add('loading');
 
-            switch (selectedPaymentMethod) {
-                case 'bank':
-                    handleBankTransfer();
-                    break;
-                case 'momo':
-                    handleMobileMoneyPayment();
-                    break;
-                case 'paypal':
-                    handlePayPalPayment();
-                    break;
-                default:
-                    showSnackbar('Payment method not available yet', 'error');
-                    donateBtn.classList.remove('loading');
-            }
-        }
-
-        function handleBankTransfer() {
-            // Simulate processing
+            // Simulate processing time
             setTimeout(() => {
-                document.getElementById('donateBtn').classList.remove('loading');
-                showSnackbar('Bank transfer details displayed. Please complete the transfer manually.', 'info');
+                donateBtn.classList.remove('loading');
                 
-                // You could also open a modal with detailed instructions
-                showBankTransferInstructions();
-            }, 1000);
+                switch (selectedPaymentMethod) {
+                    case 'bank':
+                        showBankTransferModal();
+                        break;
+                    case 'momo':
+                        showMobileMoneyModal();
+                        break;
+                    case 'paypal':
+                        handlePayPalPayment();
+                        break;
+                    default:
+                        showSnackbar('Payment method not available yet', 'error');
+                }
+            }, 1500);
         }
 
-        function handleMobileMoneyPayment() {
-            if (!selectedNetwork) {
-                document.getElementById('donateBtn').classList.remove('loading');
-                showSnackbar('Please select your mobile money network', 'error');
-                return;
-            }
+        function showBankTransferModal() {
+            document.getElementById('modalAmount').textContent = `₵${selectedAmount.toFixed(2)}`;
+            document.querySelector('.modal-amount-text').textContent = selectedAmount.toFixed(2);
+            document.getElementById('bankModal').classList.add('show');
+        }
 
-            // Collect user email for payment processing
-            const email = prompt('Please enter your email address for payment confirmation:');
-            if (!email || !email.includes('@')) {
-                document.getElementById('donateBtn').classList.remove('loading');
-                showSnackbar('Valid email address is required', 'error');
-                return;
-            }
-
-            // Create payment data
-            const paymentData = {
-                email: email,
-                amount: selectedAmount,
-                payment_method: selectedPaymentMethod,
-                network: selectedNetwork
-            };
-
-            // Send to payment processor (you can integrate with Paystack here)
-            fetch('paystack-integration.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(paymentData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('donateBtn').classList.remove('loading');
-                
-                if (data.success) {
-                    // In a real implementation, redirect to Paystack checkout
-                    showSnackbar('Redirecting to payment gateway...', 'success');
-                    
-                    // For demo purposes, simulate success after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'donate-success.php?amount=' + selectedAmount;
-                    }, 2000);
-                } else {
-                    showSnackbar(data.message || 'Payment initialization failed', 'error');
-                }
-            })
-            .catch(error => {
-                document.getElementById('donateBtn').classList.remove('loading');
-                showSnackbar('Network error. Please try again.', 'error');
-                console.error('Payment error:', error);
+        function showMobileMoneyModal() {
+            document.getElementById('momoModalAmount').textContent = `₵${selectedAmount.toFixed(2)}`;
+            document.querySelectorAll('.momo-amount-text').forEach(el => {
+                el.textContent = selectedAmount.toFixed(2);
             });
+            document.getElementById('momoModal').classList.add('show');
         }
 
         function handlePayPalPayment() {
+            showSnackbar('PayPal integration coming soon! Please use bank transfer or mobile money for now.', 'info');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('show');
+            });
+            
+            // Show success message
+            showSnackbar('Thank you for your support! 🎉', 'success');
+            
+            // Reset form after modal closes
             setTimeout(() => {
-                document.getElementById('donateBtn').classList.remove('loading');
-                showSnackbar('PayPal integration coming soon! Please use bank transfer for now.', 'info');
+                resetForm();
             }, 1000);
         }
 
-        function showBankTransferInstructions() {
-            // Create a modal or alert with detailed instructions
-            const instructions = `
-Bank Transfer Instructions:
-
-1. Use your bank app or visit a branch
-2. Transfer ₵${selectedAmount.toFixed(2)} to:
-   Account Name: Clifford Nti Nkansah
-   Mobile Money: +233 XX XXX XXXX (MTN)
-
-3. Include your email in the reference/description
-4. Send us a screenshot at support@budgetly.com
-
-Thank you for your support!
-            `;
+        function resetForm() {
+            selectedAmount = 0;
+            selectedPaymentMethod = '';
             
-            alert(instructions);
+            // Clear selections
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.payment-method').forEach(method => method.classList.remove('selected'));
+            document.getElementById('customAmount').value = '';
+            
+            // Select defaults
+            document.querySelector('[data-amount="25"]').click();
+            document.querySelector('[data-method="bank"]').click();
         }
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, button) {
             navigator.clipboard.writeText(text).then(() => {
-                showSnackbar('Copied to clipboard!', 'success');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+                
+                showSnackbar(`Copied: ${text}`, 'success');
             }).catch(err => {
                 console.error('Failed to copy: ', err);
                 showSnackbar('Failed to copy to clipboard', 'error');
+                
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showSnackbar(`Copied: ${text}`, 'success');
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                }
+                document.body.removeChild(textArea);
             });
         }
 
@@ -904,16 +1234,33 @@ Thank you for your support!
             }
         }
 
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
         // Snackbar functionality
         function showSnackbar(message, type = 'info') {
             // Remove existing snackbar if any
-            const existingSnackbar = document.querySelector('.snackbar');
+            const existingSnackbar = document.querySelector('.snackbar.show');
             if (existingSnackbar) {
-                existingSnackbar.remove();
+                existingSnackbar.classList.remove('show');
+                setTimeout(() => existingSnackbar.remove(), 300);
             }
 
             // Create new snackbar
-            const snackbar = document.createElement('div');
+            const snackbar = document.getElementById('snackbar');
             snackbar.className = `snackbar ${type}`;
             
             const icons = {
@@ -922,12 +1269,8 @@ Thank you for your support!
                 info: '<i class="fas fa-info-circle"></i>'
             };
             
-            snackbar.innerHTML = `
-                <span class="snackbar-icon">${icons[type] || icons.info}</span>
-                <span class="snackbar-message">${message}</span>
-            `;
-            
-            document.body.appendChild(snackbar);
+            snackbar.querySelector('.snackbar-icon').innerHTML = icons[type] || icons.info;
+            snackbar.querySelector('.snackbar-message').textContent = message;
             
             // Show snackbar
             setTimeout(() => snackbar.classList.add('show'), 100);
@@ -935,7 +1278,6 @@ Thank you for your support!
             // Hide snackbar after 4 seconds
             setTimeout(() => {
                 snackbar.classList.remove('show');
-                setTimeout(() => snackbar.remove(), 300);
             }, 4000);
         }
 
