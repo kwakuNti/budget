@@ -1390,7 +1390,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 <p>Stay motivated and track your financial progress</p>
                 
                 <div class="countdown-main-display">
-                    <div class="countdown-number-large" id="daysUntilPayLarge">12</div>
+                    <div class="countdown-number-large" id="daysUntilPayLarge"></div>
                     <div class="countdown-details">
                         <div class="countdown-label-large">Days Until Payday</div>
                         <div class="pay-date-display" id="payDateTextLarge">January 28, 2025</div>
