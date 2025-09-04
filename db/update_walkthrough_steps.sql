@@ -13,7 +13,7 @@ INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url
 ('initial_setup', 'configure_salary', 2, '/salary', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. Fill in your income information to help us calculate your available budget and auto-save for your goals.', 1, 0, 1),
 
 -- Step 3: Setup Budget (Budget Page)
-('initial_setup', 'setup_budget', 3, '/budget', '.budget-actions', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can use our templates or create custom categories. This will help you track your spending and stay on target.', 0, 1, 1);
+('initial_setup', 'setup_budget', 3, '/budgets', '.budget-actions', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can use our templates or create custom categories. This will help you track your spending and stay on target.', 0, 1, 1);
 
 -- Insert comprehensive help guide steps for each page
 
@@ -26,10 +26,10 @@ INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url
 
 -- Budget Page Help Guide
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
-('help_guide', 'budget_templates', 1, '/budget', 'button[onclick="showBudgetTemplateModal()"]', 'Budget Templates', 'Use our pre-built budget templates to get started quickly. Templates include common categories like housing, food, transportation, and entertainment.', 0, 1, 1),
-('help_guide', 'budget_categories', 2, '/budget', '.category-section', 'Budget Categories', 'These are your spending categories. Each category has a monthly limit to help you control spending. You can create custom categories or modify existing ones.', 0, 1, 1),
-('help_guide', 'budget_creation', 3, '/budget', '#createCategoryBtn', 'Create Categories', 'Click here to create new budget categories. You can set spending limits, choose icons, and organize your expenses the way that works best for you.', 0, 1, 1),
-('help_guide', 'budget_monitoring', 4, '/budget', '.budget-progress', 'Budget Monitoring', 'This shows how much you\'ve spent in each category versus your budget. Green means you\'re on track, yellow is a warning, and red means you\'ve exceeded the limit.', 0, 1, 1);
+('help_guide', 'budget_templates', 1, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Budget Templates', 'Use our pre-built budget templates to get started quickly. Templates include common categories like housing, food, transportation, and entertainment.', 0, 1, 1),
+('help_guide', 'budget_categories', 2, '/budgets', '.category-section', 'Budget Categories', 'These are your spending categories. Each category has a monthly limit to help you control spending. You can create custom categories or modify existing ones.', 0, 1, 1),
+('help_guide', 'budget_creation', 3, '/budgets', '#createCategoryBtn', 'Create Categories', 'Click here to create new budget categories. You can set spending limits, choose icons, and organize your expenses the way that works best for you.', 0, 1, 1),
+('help_guide', 'budget_monitoring', 4, '/budgets', '.budget-progress', 'Budget Monitoring', 'This shows how much you\'ve spent in each category versus your budget. Green means you\'re on track, yellow is a warning, and red means you\'ve exceeded the limit.', 0, 1, 1);
 
 -- Salary Page Help Guide  
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
