@@ -27,17 +27,18 @@
             border-radius: 24px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            max-width: 1200px;
+            max-width: 1100px;
             width: 100%;
             display: flex;
-            min-height: 700px;
+            height: 85vh;
+            max-height: 600px;
         }
 
         /* Left Side - Hero */
         .donate-hero {
             flex: 1.2;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            padding: 60px 50px;
+            padding: 40px 30px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -146,7 +147,7 @@
         /* Right Side - Donation Form */
         .donate-form-section {
             flex: 1;
-            padding: 60px 50px;
+            padding: 40px 30px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -155,7 +156,7 @@
 
         .form-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .form-title {
@@ -177,26 +178,26 @@
 
         /* Amount Selection */
         .amount-selection {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .amount-label {
             display: block;
             font-weight: 700;
             color: #374151;
-            margin-bottom: 16px;
-            font-size: 1.1rem;
+            margin-bottom: 12px;
+            font-size: 1rem;
         }
 
         .amount-options {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .amount-option {
-            padding: 16px;
+            padding: 12px;
             border: 2px solid #e5e7eb;
             border-radius: 16px;
             text-align: center;
@@ -205,7 +206,7 @@
             background: white;
             font-weight: 700;
             color: #374151;
-            font-size: 1.1rem;
+            font-size: 1rem;
             position: relative;
             overflow: hidden;
         }
@@ -275,13 +276,13 @@
 
         /* Payment Methods */
         .payment-methods {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .payment-method {
             border: 2px solid #e5e7eb;
             border-radius: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
             background: white;
@@ -300,7 +301,7 @@
         }
 
         .payment-header {
-            padding: 20px;
+            padding: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -354,7 +355,7 @@
         }
 
         .payment-content {
-            padding: 0 20px 20px;
+            padding: 0 16px 16px;
             display: none;
             background: rgba(249, 250, 251, 0.5);
         }
@@ -802,9 +803,9 @@
             <div class="amount-selection">
                 <label class="amount-label">Select Amount (GHS)</label>
                 <div class="amount-options">
+                    <div class="amount-option" data-amount="1">₵1</div>
+                    <div class="amount-option" data-amount="5">₵5</div>
                     <div class="amount-option" data-amount="10">₵10</div>
-                    <div class="amount-option" data-amount="25">₵25</div>
-                    <div class="amount-option" data-amount="50">₵50</div>
                 </div>
                 <div class="custom-amount">
                     <span class="currency-symbol">₵</span>
@@ -954,7 +955,7 @@
                         <li>Enter amount: <strong>₵<span class="modal-amount-text">0</span></strong></li>
                         <li>Add reference: <strong>"Budgetly Donation"</strong></li>
                         <li>Complete the transaction</li>
-                        <li>Send screenshot to: <strong>support@budgetly.com</strong></li>
+                        <li><em>Optional:</em> Send confirmation to: <strong>noreplybudgetly@gmail.com</strong></li>
                     </ol>
                 </div>
                 
@@ -1190,7 +1191,7 @@
             document.getElementById('customAmount').value = '';
             
             // Select defaults
-            document.querySelector('[data-amount="25"]').click();
+            document.querySelector('[data-amount="5"]').click();
             document.querySelector('[data-method="bank"]').click();
         }
 
@@ -1284,7 +1285,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Select default amount
-            document.querySelector('[data-amount="25"]').click();
+            document.querySelector('[data-amount="5"]').click();
             
             // Select default payment method
             document.querySelector('[data-method="bank"]').click();
