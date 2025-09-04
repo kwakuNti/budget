@@ -334,9 +334,6 @@ class BudgetWalkthrough {
 
     // Initialize page-specific help icon
     initPageHelp() {
-        // Don't add help icon during initial setup
-        if (this.isActive) return;
-        
         // Check if help icon already exists
         if (document.getElementById('page-help-icon')) return;
         

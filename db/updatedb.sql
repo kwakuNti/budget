@@ -464,14 +464,22 @@ CREATE TABLE IF NOT EXISTS walkthrough_steps (
     INDEX idx_walkthrough_order (walkthrough_type, step_order, is_active)
 );
 
--- Insert initial setup walkthrough steps
-INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('initial_setup', 'setup_income', 1, '/personal-dashboard', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click "Set Up Income" to begin.', TRUE, FALSE),
-('initial_setup', 'configure_salary', 2, '/salary', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. This will help us calculate your available budget and auto-save for your goals.', TRUE, FALSE),
-('initial_setup', 'setup_budget', 3, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can click "Use Template" to choose from our popular templates, or skip this step to create a custom budget later.', FALSE, TRUE);
+-- Clear existing walkthrough steps and insert improved ones with template selection requirement
+DELETE FROM walkthrough_steps WHERE walkthrough_type IN ('initial_setup', 'help_guide');
 
--- Clear existing help guide steps and insert comprehensive new ones
-DELETE FROM walkthrough_steps WHERE walkthrough_type = 'help_guide';
+-- Insert improved initial setup walkthrough steps with TEMPLATE SELECTION requirement
+INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
+-- Step 1: Setup Income (Dashboard)
+('initial_setup', 'setup_income', 1, '/personal-dashboard', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome to Budgetly! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click the "Set Up Income" button to begin.', 1, 0, 1),
+
+-- Step 2: Configure Salary (Salary Page)  
+('initial_setup', 'configure_salary', 2, '/salary', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. Fill in your income information to help us calculate your available budget and auto-save for your goals.', 1, 0, 1),
+
+-- Step 3: Choose Budget Template (Budget Page) - REQUIRED
+('initial_setup', 'choose_template', 3, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Choose a Budget Template', 'Perfect! Now you MUST choose a budget template to get started. Templates help organize your finances with proven strategies. Click "Use Template" to see options.', 1, 0, 1),
+
+-- Step 4: Complete Template Selection (Inside Modal) - REQUIRED
+('initial_setup', 'select_template', 4, '/budgets', '.template-card', 'Select Your Template', 'Choose one of these popular budget templates. The 50/30/20 rule is great for beginners - 50% needs, 30% wants, 20% savings. Click on a template to select it.', 1, 0, 1);
 
 -- Dashboard help tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
