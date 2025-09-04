@@ -3838,5 +3838,6 @@ window.testLoadingScreen = function(duration = 3000) {
     </script>
     <script src="../public/js/loading.js"></script>
     <script src="../public/js/mobile-nav.js"></script>
+    <script src="../public/js/walkthrough.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
