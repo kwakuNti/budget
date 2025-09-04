@@ -887,7 +887,7 @@ class BudgetWalkthrough {
         // Different content for help guides vs initial setup
         const progressText = isHelpGuide ? 
             `Help Guide - ${step.page_url}` : 
-            `Step ${step.step_order} of 9`;
+            `Step ${step.step_order} of 8`;
             
         const actionContent = step.action_required && !isHelpGuide ? 
             '<p class="action-note"><i class="fas fa-info-circle"></i> Complete this action to continue</p>' : 
@@ -1193,80 +1193,39 @@ class BudgetWalkthrough {
                         }, 100);
                     }
                     
-                    // Hide walkthrough tooltip when modal opens
+                    // Hide walkthrough tooltip when modal opens and monitor for template selection
                     setTimeout(() => {
                         const modal4 = document.getElementById('budgetTemplateModal');
                         if (modal4 && modal4.style.display === 'flex') {
                             console.log('✅ Template modal opened, hiding walkthrough tooltip');
                             this.cleanup(); // Hide current tooltip
-                            // Complete the step to advance
-                            this.completeStep('choose_template');
+                            
+                            // Monitor for modal close (template selected)
+                            this.monitorTemplateSelection(modal4);
                         }
                     }, 200);
                     
                 }, 50);
                 
-            } else if (step.step_name === 'select_template') {
-                console.log('🔧 Handling select template step - monitoring for template selection');
+            } else if (step.step_name === 'create_categories') {
+                console.log('🔧 Handling create categories step - showing normal tooltip, monitoring for click');
                 
-                // Monitor for template card clicks
-                const templateCards = document.querySelectorAll('.template-card');
-                if (templateCards.length > 0) {
-                    console.log(`📋 Found ${templateCards.length} template cards`);
-                    
-                    // Add click listeners to all template cards
-                    templateCards.forEach(card => {
-                        card.addEventListener('click', () => {
-                            console.log('✅ Template card clicked, advancing walkthrough');
-                            // Give some time for the template to be processed
-                            setTimeout(() => {
-                                this.completeStep('select_template');
-                            }, 1000);
-                        }, { once: true });
-                    });
-                } else {
-                    console.warn('⚠️ No template cards found');
-                    // Auto-advance if no cards found
-                    setTimeout(() => {
-                        this.completeStep('select_template');
-                    }, 2000);
-                }
+                // This will show the normal tooltip for "Add Category" button
+                // When user clicks, the action handler will hide tooltip and monitor modal
+                // Set up monitoring for when modal opens after user clicks
+                setTimeout(() => {
+                    this.monitorForCategoryModal();
+                }, 100);
                 
             } else if (step.step_name === 'create_categories') {
-                console.log('🔧 Handling create categories step - monitoring for modal');
+                console.log('🔧 Handling create categories step - allowing click and hiding tooltip');
                 
-                // Allow the click, then monitor for modal opening
-                setTimeout(() => {
-                    const modal = document.getElementById('addCategoryModal');
-                    console.log('🔍 Checking add category modal state:', modal ? modal.style.display : 'modal not found');
-                    
-                    if (modal && modal.style.display === 'flex') {
-                        console.log('✅ Add category modal opened, advancing to next step');
-                        // Hide current walkthrough tooltip while modal is open
-                        this.cleanup();
-                        // Modal opened successfully, advance to next step
-                        this.completeStep('create_categories');
-                    } else {
-                        console.log('❌ Modal not opened, trying fallback');
-                        // Try to open the modal manually
-                        if (typeof window.showAddCategoryModal === 'function') {
-                            window.showAddCategoryModal();
-                        } else if (typeof window.showModal === 'function') {
-                            window.showModal('addCategoryModal');
-                        }
-                        
-                        // Check again after fallback
-                        setTimeout(() => {
-                            const modal2 = document.getElementById('addCategoryModal');
-                            if (modal2 && modal2.style.display === 'flex') {
-                                console.log('✅ Fallback worked, advancing to next step');
-                                // Hide current walkthrough tooltip while modal is open
-                                this.cleanup();
-                                this.completeStep('create_categories');
-                            }
-                        }, 100);
-                    }
-                }, 100);
+                // Allow the click to proceed (don't prevent default)
+                // Hide the tooltip immediately when user clicks
+                this.cleanup();
+                
+                // The monitoring is already set up, it will detect when modal opens
+                // and advance to the next step
                 
             } else if (step.step_name === 'fill_category_form') {
                 console.log('🔧 Handling fill category form step');
@@ -2410,7 +2369,7 @@ class BudgetWalkthrough {
                 <div class="tooltip-header">
                     <h4>✅ Transportation Category Created!</h4>
                     <div class="tooltip-progress">
-                        Step 8 of 9
+                        Step 7 of 8
                     </div>
                 </div>
                 <div class="tooltip-content">
@@ -2421,6 +2380,62 @@ class BudgetWalkthrough {
                 </div>
             `;
         }
+    }
+
+    monitorTemplateSelection(modal) {
+        console.log('👀 Monitoring template selection...');
+        
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target === modal && modal.style.display === 'none') {
+                    console.log('✅ Template modal closed, template likely selected');
+                    observer.disconnect();
+                    // Complete the choose_template step and advance to create_categories
+                    setTimeout(() => {
+                        this.completeStep('choose_template');
+                    }, 500);
+                }
+            });
+        });
+        
+        observer.observe(modal, { 
+            attributes: true, 
+            attributeFilter: ['style'] 
+        });
+        
+        // Also add listeners to template cards for immediate detection
+        const templateCards = document.querySelectorAll('.template-card');
+        templateCards.forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('✅ Template card clicked');
+                observer.disconnect();
+                setTimeout(() => {
+                    this.completeStep('choose_template');
+                }, 1000);
+            }, { once: true });
+        });
+    }
+
+    monitorForCategoryModal() {
+        console.log('👀 Monitoring for category modal opening...');
+        
+        const checkForModal = () => {
+            const modal = document.getElementById('addCategoryModal');
+            if (modal && modal.style.display === 'flex') {
+                console.log('✅ Category modal opened, advancing to fill_category_form step');
+                // Hide any existing tooltips
+                this.cleanup();
+                // Complete the create_categories step
+                this.completeStep('create_categories');
+                return;
+            }
+            
+            // Continue checking every 500ms
+            setTimeout(checkForModal, 500);
+        };
+        
+        // Start monitoring
+        setTimeout(checkForModal, 100);
     }
 }
 

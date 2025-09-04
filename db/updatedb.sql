@@ -470,7 +470,7 @@ DELETE FROM walkthrough_steps WHERE walkthrough_type IN ('initial_setup', 'help_
 -- Insert improved initial setup walkthrough steps with TEMPLATE SELECTION requirement
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
 -- Step 1: Setup Income (Dashboard)
-('initial_setup', 'setup_income', 1, '/personal-dashboard', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome to Budgetly! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click the "Set Up Income" button to begin.', 1, 0, 1),
+('initial_setup', 'setup_income', 1, '/personal-dashboard', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome to Budgetly! Let us start by setting up your income. This is essential for budget planning and goal tracking. Click the "Set Up Income" button to begin.', 1, 0, 1),
 
 -- Step 2: Configure Salary (Salary Page)  
 ('initial_setup', 'configure_salary', 2, '/salary', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. Fill in your income information to help us calculate your available budget and auto-save for your goals.', 1, 0, 1),
@@ -478,23 +478,20 @@ INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url
 -- Step 3: Choose Budget Template (Budget Page) - REQUIRED
 ('initial_setup', 'choose_template', 3, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Choose a Budget Template', 'Perfect! Now you MUST choose a budget template to get started. Templates help organize your finances with proven strategies. Click "Use Template" to see options.', 1, 0, 1),
 
--- Step 4: Complete Template Selection (Inside Modal) - REQUIRED
-('initial_setup', 'select_template', 4, '/budgets', '.template-card', 'Select Your Template', 'Choose one of these popular budget templates. The 50/30/20 rule is great for beginners - 50% needs, 30% wants, 20% savings. Click on a template to select it.', 1, 0, 1),
+-- Step 4: Create Sample Categories (After template selection)
+('initial_setup', 'create_categories', 4, '/budgets', '.add-category-btn', 'Add Your First Category', 'Excellent! Your template is applied. Now create your first budget category. Click "Add Category" to start creating a sample "Transportation" category for tracking vehicle costs, fuel, and public transit.', 1, 0, 1),
 
--- Step 5: Create Sample Categories
-('initial_setup', 'create_categories', 5, '/budgets', '.add-category-btn', 'Add Your First Category', 'Excellent! Your template is applied. Now let\'s create your first budget category. Click "Add Category" to start creating a sample "Transportation" category for tracking vehicle costs, fuel, and public transit.', 1, 0, 1),
+-- Step 5: Fill Category Form
+('initial_setup', 'fill_category_form', 5, '/budgets', '#addCategoryModal input[name="name"]', 'Create Transportation Category', 'Great! Now create a "Transportation" category. This will help you track vehicle expenses, fuel costs, and public transit. Enter "Transportation" as the category name and select "Needs" as the type.', 1, 0, 1),
 
--- Step 6: Fill Category Form
-('initial_setup', 'fill_category_form', 6, '/budgets', '#addCategoryModal input[name="name"]', 'Create Transportation Category', 'Great! Now let\'s create a "Transportation" category. This will help you track vehicle expenses, fuel costs, and public transit. Enter "Transportation" as the category name and select "Needs" as the type.', 1, 0, 1),
+-- Step 6: Set Category Budget
+('initial_setup', 'set_category_budget', 6, '/budgets', '#addCategoryModal input[name="budget_limit"]', 'Set Transportation Budget', 'Now set a monthly budget for transportation. A typical amount might be ₵200-500 depending on your commute and vehicle costs. Enter an amount that fits your situation.', 1, 0, 1),
 
--- Step 7: Set Category Budget
-('initial_setup', 'set_category_budget', 7, '/budgets', '#addCategoryModal input[name="budget_limit"]', 'Set Transportation Budget', 'Now set a monthly budget for transportation. A typical amount might be ₵200-500 depending on your commute and vehicle costs. Enter an amount that fits your situation.', 1, 0, 1),
+-- Step 7: Complete Category Creation
+('initial_setup', 'complete_category', 7, '/budgets', '#addCategoryModal button[type="submit"]', 'Save Your Category', 'Perfect! Now click "Add Category" to save your Transportation category. This creates your first budget category and you can add more categories later for other expenses.', 1, 0, 1),
 
--- Step 8: Complete Category Creation
-('initial_setup', 'complete_category', 8, '/budgets', '#addCategoryModal button[type="submit"]', 'Save Your Category', 'Perfect! Now click "Add Category" to save your Transportation category. This creates your first budget category and you can add more categories later for other expenses.', 1, 0, 1),
-
--- Step 9: Complete Initial Setup  
-('initial_setup', 'setup_complete', 9, '/personal-dashboard', '.dashboard-container', 'Setup Complete!', 'Congratulations! Your budget is now set up with your first category. You can now track expenses, monitor your budget, and work towards your financial goals. Welcome to your personal finance dashboard!', 0, 0, 1);
+-- Step 8: Setup Complete (Redirect to Dashboard)
+('initial_setup', 'setup_complete', 8, '/personal-dashboard', '.dashboard-container', 'Setup Complete!', 'Congratulations! Your budget is now set up with your first category. You can now track expenses, monitor your budget, and work towards your financial goals. Welcome to your personal finance dashboard!', 0, 0, 1);
 
 -- Dashboard Help Guide - Specific Elements Only
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
