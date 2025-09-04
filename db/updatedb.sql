@@ -466,74 +466,74 @@ CREATE TABLE IF NOT EXISTS walkthrough_steps (
 
 -- Insert initial setup walkthrough steps
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('initial_setup', 'setup_income', 1, '/personal-dashboard.php', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click "Set Up Income" to begin.', TRUE, FALSE),
-('initial_setup', 'configure_salary', 2, '/salary.php', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. This will help us calculate your available budget and auto-save for your goals.', TRUE, FALSE),
-('initial_setup', 'setup_budget', 3, '/budgets.php', 'button[onclick="showBudgetTemplateModal()"]', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can click "Use Template" to choose from our popular templates, or skip this step to create a custom budget later.', FALSE, TRUE);
+('initial_setup', 'setup_income', 1, '/personal-dashboard', '.setup-salary-btn-hero', 'Set Up Your Income', 'Welcome! Let\'s start by setting up your income. This is essential for budget planning and goal tracking. Click "Set Up Income" to begin.', TRUE, FALSE),
+('initial_setup', 'configure_salary', 2, '/salary', '#salaryActionBtn', 'Configure Your Salary', 'Great! Now enter your salary details. This will help us calculate your available budget and auto-save for your goals.', TRUE, FALSE),
+('initial_setup', 'setup_budget', 3, '/budgets', 'button[onclick="showBudgetTemplateModal()"]', 'Set Up Your Budget', 'Perfect! Now let\'s set up your budget. You can click "Use Template" to choose from our popular templates, or skip this step to create a custom budget later.', FALSE, TRUE);
 
 -- Clear existing help guide steps and insert comprehensive new ones
 DELETE FROM walkthrough_steps WHERE walkthrough_type = 'help_guide';
 
 -- Dashboard help tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'dashboard_welcome', 1, '/personal-dashboard.php', '.main-content', 'Welcome to Your Dashboard', 'This is your personal finance dashboard. Here you can see your financial overview, track goals, and manage your budget.', FALSE, TRUE),
-('help_guide', 'dashboard_navigation', 2, '/personal-dashboard.php', '.header-nav', 'Navigation Menu', 'Use the navigation menu to access different sections: Dashboard, Budget, Expenses, Salary, Goals, and Analytics.', FALSE, TRUE),
-('help_guide', 'dashboard_quick_actions', 3, '/personal-dashboard.php', '.quick-actions', 'Quick Actions', 'Use these quick action buttons to add expenses, income, or access key features quickly.', FALSE, TRUE),
-('help_guide', 'dashboard_financial_overview', 4, '/personal-dashboard.php', '.financial-overview', 'Financial Overview', 'View your current month\'s income, expenses, and remaining budget at a glance.', FALSE, TRUE),
-('help_guide', 'dashboard_goals_summary', 5, '/personal-dashboard.php', '.goals-summary', 'Goals Progress', 'Track progress towards your savings goals and see which ones need attention.', FALSE, TRUE);
+('help_guide', 'dashboard_welcome', 1, '/personal-dashboard', '.main-content', 'Welcome to Your Dashboard', 'This is your personal finance dashboard. Here you can see your financial overview, track goals, and manage your budget.', FALSE, TRUE),
+('help_guide', 'dashboard_navigation', 2, '/personal-dashboard', '.header-nav', 'Navigation Menu', 'Use the navigation menu to access different sections: Dashboard, Budget, Expenses, Salary, Goals, and Analytics.', FALSE, TRUE),
+('help_guide', 'dashboard_quick_actions', 3, '/personal-dashboard', '.quick-actions', 'Quick Actions', 'Use these quick action buttons to add expenses, income, or access key features quickly.', FALSE, TRUE),
+('help_guide', 'dashboard_financial_overview', 4, '/personal-dashboard', '.financial-overview', 'Financial Overview', 'View your current month\'s income, expenses, and remaining budget at a glance.', FALSE, TRUE),
+('help_guide', 'dashboard_goals_summary', 5, '/personal-dashboard', '.goals-summary', 'Goals Progress', 'Track progress towards your savings goals and see which ones need attention.', FALSE, TRUE);
 
 -- Budget page comprehensive tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'budget_overview', 1, '/budgets.php', '.page-header', 'Budget Management', 'This is where you manage your budget categories and allocations. You can create templates or custom budgets.', FALSE, TRUE),
-('help_guide', 'budget_templates', 2, '/budgets.php', '.template-section', 'Budget Templates', 'Choose from popular budget templates like 50/30/20 rule, envelope method, or zero-based budgeting.', FALSE, TRUE),
-('help_guide', 'budget_categories_section', 3, '/budgets.php', '.budget-categories', 'Budget Categories', 'View and manage your spending categories. Set limits for each category to stay within your budget.', FALSE, TRUE),
-('help_guide', 'budget_create_category', 4, '/budgets.php', '.add-category-btn', 'Add New Category', 'Click here to create a new budget category. You can set custom spending limits and track expenses.', FALSE, TRUE),
-('help_guide', 'budget_category_types', 5, '/budgets.php', '.category-list', 'Category Types', 'Categories are organized by Needs (essentials), Wants (discretionary), and Savings (goals). This helps with the 50/30/20 budgeting rule.', FALSE, TRUE),
-('help_guide', 'budget_allocation', 6, '/budgets.php', '.budget-allocation', 'Budget Allocation', 'See how your budget is allocated across different categories and ensure you\'re following your financial plan.', FALSE, TRUE);
+('help_guide', 'budget_overview', 1, '/budgets', '.page-header', 'Budget Management', 'This is where you manage your budget categories and allocations. You can create templates or custom budgets.', FALSE, TRUE),
+('help_guide', 'budget_templates', 2, '/budgets', '.template-section', 'Budget Templates', 'Choose from popular budget templates like 50/30/20 rule, envelope method, or zero-based budgeting.', FALSE, TRUE),
+('help_guide', 'budget_categories_section', 3, '/budgets', '.budget-categories', 'Budget Categories', 'View and manage your spending categories. Set limits for each category to stay within your budget.', FALSE, TRUE),
+('help_guide', 'budget_create_category', 4, '/budgets', '.add-category-btn', 'Add New Category', 'Click here to create a new budget category. You can set custom spending limits and track expenses.', FALSE, TRUE),
+('help_guide', 'budget_category_types', 5, '/budgets', '.category-list', 'Category Types', 'Categories are organized by Needs (essentials), Wants (discretionary), and Savings (goals). This helps with the 50/30/20 budgeting rule.', FALSE, TRUE),
+('help_guide', 'budget_allocation', 6, '/budgets', '.budget-allocation', 'Budget Allocation', 'See how your budget is allocated across different categories and ensure you\'re following your financial plan.', FALSE, TRUE);
 
 -- Salary/Income page tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'salary_overview', 1, '/salary.php', '.page-header', 'Income Management', 'Set up and manage your income sources here. This is essential for accurate budget planning.', FALSE, TRUE),
-('help_guide', 'salary_setup', 2, '/salary.php', '#salaryActionBtn', 'Set Up Primary Salary', 'Click here to configure your primary salary. Include your monthly amount and pay frequency.', FALSE, TRUE),
-('help_guide', 'salary_schedule', 3, '/salary.php', '.salary-overview', 'Payment Schedule', 'View your upcoming payments and income history to track your earnings over time.', FALSE, TRUE),
-('help_guide', 'salary_additional_income', 4, '/salary.php', '.additional-income', 'Additional Income Sources', 'Add other income sources like freelance work, investments, or side hustles to get a complete picture.', FALSE, TRUE);
+('help_guide', 'salary_overview', 1, '/salary', '.page-header', 'Income Management', 'Set up and manage your income sources here. This is essential for accurate budget planning.', FALSE, TRUE),
+('help_guide', 'salary_setup', 2, '/salary', '#salaryActionBtn', 'Set Up Primary Salary', 'Click here to configure your primary salary. Include your monthly amount and pay frequency.', FALSE, TRUE),
+('help_guide', 'salary_schedule', 3, '/salary', '.salary-overview', 'Payment Schedule', 'View your upcoming payments and income history to track your earnings over time.', FALSE, TRUE),
+('help_guide', 'salary_additional_income', 4, '/salary', '.additional-income', 'Additional Income Sources', 'Add other income sources like freelance work, investments, or side hustles to get a complete picture.', FALSE, TRUE);
 
 -- Expenses page comprehensive tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'expenses_overview', 1, '/personal-expense.php', '.page-header', 'Expense Tracking', 'Track your daily expenses here. Categorize spending to see where your money goes.', FALSE, TRUE),
-('help_guide', 'expenses_add', 2, '/personal-expense.php', '.add-expense-btn', 'Add New Expense', 'Click to add a new expense. Choose the category and amount to keep your budget on track.', FALSE, TRUE),
-('help_guide', 'expenses_categories', 3, '/personal-expense.php', '.expense-categories', 'Expense Categories', 'View your expenses organized by categories to understand your spending patterns.', FALSE, TRUE),
-('help_guide', 'expenses_monthly_view', 4, '/personal-expense.php', '.monthly-expenses', 'Monthly Summary', 'See your monthly expense totals and compare against your budget limits.', FALSE, TRUE),
-('help_guide', 'expenses_recent', 5, '/personal-expense.php', '.recent-expenses', 'Recent Transactions', 'View your recent expenses and edit or delete them if needed.', FALSE, TRUE);
+('help_guide', 'expenses_overview', 1, '/personal-expense', '.page-header', 'Expense Tracking', 'Track your daily expenses here. Categorize spending to see where your money goes.', FALSE, TRUE),
+('help_guide', 'expenses_add', 2, '/personal-expense', '.add-expense-btn', 'Add New Expense', 'Click to add a new expense. Choose the category and amount to keep your budget on track.', FALSE, TRUE),
+('help_guide', 'expenses_categories', 3, '/personal-expense', '.expense-categories', 'Expense Categories', 'View your expenses organized by categories to understand your spending patterns.', FALSE, TRUE),
+('help_guide', 'expenses_monthly_view', 4, '/personal-expense', '.monthly-expenses', 'Monthly Summary', 'See your monthly expense totals and compare against your budget limits.', FALSE, TRUE),
+('help_guide', 'expenses_recent', 5, '/personal-expense', '.recent-expenses', 'Recent Transactions', 'View your recent expenses and edit or delete them if needed.', FALSE, TRUE);
 
 -- Savings/Goals page detailed tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'savings_overview', 1, '/savings.php', '.page-header', 'Savings Goals', 'Set and track progress towards your financial goals. Whether it\'s an emergency fund, vacation, or major purchase.', FALSE, TRUE),
-('help_guide', 'savings_create', 2, '/savings.php', '.create-goal-btn', 'Create New Goal', 'Click to create a new savings goal. Set your target amount, deadline, and priority level.', FALSE, TRUE),
-('help_guide', 'savings_goal_types', 3, '/savings.php', '.goal-types', 'Goal Types', 'Choose from various goal types like Emergency Fund, Vacation, Car, House, or create custom goals.', FALSE, TRUE),
-('help_guide', 'savings_progress', 4, '/savings.php', '.goals-progress', 'Track Progress', 'Monitor your progress towards each goal with visual progress bars and milestone tracking.', FALSE, TRUE),
-('help_guide', 'savings_contribute', 5, '/savings.php', '.contribute-btn', 'Make Contributions', 'Add money to your goals manually or set up automatic contributions from your income.', FALSE, TRUE),
-('help_guide', 'savings_autosave', 6, '/savings.php', '.auto-save-section', 'Auto-Save System', 'Configure automatic savings to reach your goals faster with smart allocation rules.', FALSE, TRUE);
+('help_guide', 'savings_overview', 1, '/savings', '.page-header', 'Savings Goals', 'Set and track progress towards your financial goals. Whether it\'s an emergency fund, vacation, or major purchase.', FALSE, TRUE),
+('help_guide', 'savings_create', 2, '/savings', '.create-goal-btn', 'Create New Goal', 'Click to create a new savings goal. Set your target amount, deadline, and priority level.', FALSE, TRUE),
+('help_guide', 'savings_goal_types', 3, '/savings', '.goal-types', 'Goal Types', 'Choose from various goal types like Emergency Fund, Vacation, Car, House, or create custom goals.', FALSE, TRUE),
+('help_guide', 'savings_progress', 4, '/savings', '.goals-progress', 'Track Progress', 'Monitor your progress towards each goal with visual progress bars and milestone tracking.', FALSE, TRUE),
+('help_guide', 'savings_contribute', 5, '/savings', '.contribute-btn', 'Make Contributions', 'Add money to your goals manually or set up automatic contributions from your income.', FALSE, TRUE),
+('help_guide', 'savings_autosave', 6, '/savings', '.auto-save-section', 'Auto-Save System', 'Configure automatic savings to reach your goals faster with smart allocation rules.', FALSE, TRUE);
 
 -- Analytics/Reports page tour
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'analytics_overview', 1, '/analytics.php', '.page-header', 'Financial Analytics', 'View detailed reports and analytics about your spending patterns and financial health.', FALSE, TRUE),
-('help_guide', 'analytics_charts', 2, '/analytics.php', '.charts-section', 'Spending Charts', 'Visual charts show your spending by category, trends over time, and budget performance.', FALSE, TRUE),
-('help_guide', 'analytics_insights', 3, '/analytics.php', '.insights-section', 'Financial Insights', 'Get personalized insights and recommendations to improve your financial habits.', FALSE, TRUE),
-('help_guide', 'analytics_trends', 4, '/analytics.php', '.trends-section', 'Spending Trends', 'Analyze your spending trends to identify patterns and opportunities for savings.', FALSE, TRUE),
-('help_guide', 'analytics_goals_progress', 5, '/analytics.php', '.goals-analytics', 'Goals Analytics', 'Track your savings goals performance and see projected completion dates.', FALSE, TRUE);
+('help_guide', 'analytics_overview', 1, '/analytics', '.page-header', 'Financial Analytics', 'View detailed reports and analytics about your spending patterns and financial health.', FALSE, TRUE),
+('help_guide', 'analytics_charts', 2, '/analytics', '.charts-section', 'Spending Charts', 'Visual charts show your spending by category, trends over time, and budget performance.', FALSE, TRUE),
+('help_guide', 'analytics_insights', 3, '/analytics', '.insights-section', 'Financial Insights', 'Get personalized insights and recommendations to improve your financial habits.', FALSE, TRUE),
+('help_guide', 'analytics_trends', 4, '/analytics', '.trends-section', 'Spending Trends', 'Analyze your spending trends to identify patterns and opportunities for savings.', FALSE, TRUE),
+('help_guide', 'analytics_goals_progress', 5, '/analytics', '.goals-analytics', 'Goals Analytics', 'Track your savings goals performance and see projected completion dates.', FALSE, TRUE);
 
 -- Page-specific help for key features
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'budget_create_flow', 1, '/budgets.php', '.create-budget-btn', 'Create Your First Budget', 'Let\'s create your first budget! Click here to start the budget creation process.', FALSE, TRUE),
-('help_guide', 'budget_template_selection', 2, '/budgets.php', '.template-modal', 'Choose a Template', 'Select a budget template that matches your financial goals. The 50/30/20 rule is great for beginners.', FALSE, TRUE),
-('help_guide', 'budget_category_setup', 3, '/budgets.php', '.category-setup', 'Set Up Categories', 'Configure your spending categories with appropriate limits. Start with essentials like rent, food, and transportation.', FALSE, TRUE),
-('help_guide', 'budget_allocation_review', 4, '/budgets.php', '.allocation-review', 'Review Allocation', 'Review your budget allocation to ensure it aligns with your income and financial goals.', FALSE, TRUE);
+('help_guide', 'budget_create_flow', 1, '/budgets', '.create-budget-btn', 'Create Your First Budget', 'Let\'s create your first budget! Click here to start the budget creation process.', FALSE, TRUE),
+('help_guide', 'budget_template_selection', 2, '/budgets', '.template-modal', 'Choose a Template', 'Select a budget template that matches your financial goals. The 50/30/20 rule is great for beginners.', FALSE, TRUE),
+('help_guide', 'budget_category_setup', 3, '/budgets', '.category-setup', 'Set Up Categories', 'Configure your spending categories with appropriate limits. Start with essentials like rent, food, and transportation.', FALSE, TRUE),
+('help_guide', 'budget_allocation_review', 4, '/budgets', '.allocation-review', 'Review Allocation', 'Review your budget allocation to ensure it aligns with your income and financial goals.', FALSE, TRUE);
 
 -- Emergency features help
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip) VALUES
-('help_guide', 'help_menu_access', 1, '/personal-dashboard.php', '#page-help-icon', 'Getting Help', 'Click the help icon anytime to get assistance with the current page you\'re viewing.', FALSE, TRUE),
-('help_guide', 'navigation_basics', 2, '/personal-dashboard.php', '.nav-menu', 'Navigation Basics', 'Use the main navigation to move between different sections of your budget app.', FALSE, TRUE),
-('help_guide', 'settings_access', 3, '/personal-dashboard.php', '.user-menu', 'Settings & Profile', 'Access your profile settings, preferences, and account management from the user menu.', FALSE, TRUE);
+('help_guide', 'help_menu_access', 1, '/personal-dashboard', '#page-help-icon', 'Getting Help', 'Click the help icon anytime to get assistance with the current page you\'re viewing.', FALSE, TRUE),
+('help_guide', 'navigation_basics', 2, '/personal-dashboard', '.nav-menu', 'Navigation Basics', 'Use the main navigation to move between different sections of your budget app.', FALSE, TRUE),
+('help_guide', 'settings_access', 3, '/personal-dashboard', '.user-menu', 'Settings & Profile', 'Access your profile settings, preferences, and account management from the user menu.', FALSE, TRUE);
 
 -- ============================================================================
 -- 11. USER FEEDBACK SYSTEM
