@@ -915,8 +915,8 @@
                     <div class="bank-detail">
                         <span class="label">Bank:</span>
                         <div class="value-container">
-                            <span class="value">MTN Mobile Money</span>
-                            <button class="copy-btn" onclick="copyToClipboard('MTN Mobile Money', this)">Copy</button>
+                            <span class="value">Ecobank Ghana</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Ecobank Ghana', this)">Copy</button>
                         </div>
                     </div>
                     <div class="bank-detail">
