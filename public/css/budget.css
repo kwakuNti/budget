@@ -1285,7 +1285,7 @@ body {
 .budget-modal {
     display: none;
     position: fixed;
-    z-index: 10002; /* Above walkthrough tooltips */
+    z-index: 10010; /* Highest z-index to ensure it's above all walkthrough elements */
     left: 0;
     top: 0;
     width: 100%;

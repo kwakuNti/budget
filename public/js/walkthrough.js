@@ -1188,13 +1188,49 @@ class BudgetWalkthrough {
                             if (modal3 && modal3.style.display !== 'flex') {
                                 console.log('🔧 Using direct DOM manipulation');
                                 modal3.style.display = 'flex';
-                                modal3.style.zIndex = '99999';
+                                modal3.style.zIndex = '10015'; // Ensure highest z-index
                             }
                         }, 100);
-                    } else {
-                        console.log('✅ Modal is already open');
                     }
+                    
+                    // Hide walkthrough tooltip when modal opens
+                    setTimeout(() => {
+                        const modal4 = document.getElementById('budgetTemplateModal');
+                        if (modal4 && modal4.style.display === 'flex') {
+                            console.log('✅ Template modal opened, hiding walkthrough tooltip');
+                            this.cleanup(); // Hide current tooltip
+                            // Complete the step to advance
+                            this.completeStep('choose_template');
+                        }
+                    }, 200);
+                    
                 }, 50);
+                
+            } else if (step.step_name === 'select_template') {
+                console.log('🔧 Handling select template step - monitoring for template selection');
+                
+                // Monitor for template card clicks
+                const templateCards = document.querySelectorAll('.template-card');
+                if (templateCards.length > 0) {
+                    console.log(`📋 Found ${templateCards.length} template cards`);
+                    
+                    // Add click listeners to all template cards
+                    templateCards.forEach(card => {
+                        card.addEventListener('click', () => {
+                            console.log('✅ Template card clicked, advancing walkthrough');
+                            // Give some time for the template to be processed
+                            setTimeout(() => {
+                                this.completeStep('select_template');
+                            }, 1000);
+                        }, { once: true });
+                    });
+                } else {
+                    console.warn('⚠️ No template cards found');
+                    // Auto-advance if no cards found
+                    setTimeout(() => {
+                        this.completeStep('select_template');
+                    }, 2000);
+                }
                 
             } else if (step.step_name === 'create_categories') {
                 console.log('🔧 Handling create categories step - monitoring for modal');
