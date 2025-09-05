@@ -660,8 +660,9 @@ class BudgetWalkthrough {
         } else if (step.step_name === 'setup_budget') {
             console.log('💰 Setting up budget step monitoring');
             this.setupBudgetStepMonitoring(targetElement, step);
-        } else if (step.action_required && step.walkthrough_type !== 'help_guide') {
-            // For other action-required steps, but not help guides
+        } else if (step.action_required && step.walkthrough_type !== 'help_guide' && 
+                   !['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(step.step_name)) {
+            // For other action-required steps, but not help guides or category steps
             this.disableOtherElements(targetElement);
         }
     }
@@ -820,10 +821,24 @@ class BudgetWalkthrough {
             
             const openModals = document.querySelectorAll('.modal[style*="display: flex"], .modal[style*="display:flex"], .budget-modal[style*="display: flex"], .budget-modal[style*="display:flex"], .modal.show, .budget-modal.show');
             
+            // Check if we're on a category step
+            const isCategoryStep = self.currentStep && ['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(self.currentStep.step_name);
+            
             if (openModals.length > 0 && !self.isModalHidden) {
                 console.log('🎭 Periodic check: Found open modal, hiding walkthrough');
                 self.hideWalkthroughForModal();
                 self.isModalHidden = true;
+                
+                // If it's a category step and the addCategoryModal is open, advance the step
+                if (isCategoryStep && self.currentStep.step_name === 'create_categories') {
+                    const categoryModal = document.getElementById('addCategoryModal');
+                    if (categoryModal && categoryModal.style.display === 'flex') {
+                        console.log('✅ Category modal detected, completing create_categories step');
+                        setTimeout(() => {
+                            self.completeStep('create_categories');
+                        }, 500);
+                    }
+                }
             } else if (openModals.length === 0 && self.isModalHidden) {
                 console.log('🎭 Periodic check: No open modals, showing walkthrough');
                 self.showWalkthroughAfterModal();
@@ -852,6 +867,21 @@ class BudgetWalkthrough {
     }
 
     hideWalkthroughForModal() {
+        // If we're on a category creation step, don't hide the walkthrough completely
+        // Instead, just hide the overlay but keep the tooltip for guidance
+        if (this.currentStep && ['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(this.currentStep.step_name)) {
+            console.log('🔧 Category step - hiding overlay but keeping tooltip for modal guidance');
+            
+            // Hide the overlay only
+            if (this.overlay) {
+                this.overlay.classList.add('modal-open');
+            }
+            
+            // Keep the tooltip and instruction visible for modal guidance
+            return;
+        }
+        
+        // For other steps, hide everything
         // Hide the overlay
         if (this.overlay) {
             this.overlay.classList.add('modal-open');
@@ -869,6 +899,20 @@ class BudgetWalkthrough {
     }
 
     showWalkthroughAfterModal() {
+        // If we're on a category creation step, only restore overlay
+        if (this.currentStep && ['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(this.currentStep.step_name)) {
+            console.log('🔧 Category step - restoring overlay, tooltip should already be visible');
+            
+            // Show the overlay
+            if (this.overlay) {
+                this.overlay.classList.remove('modal-open');
+            }
+            
+            // Tooltip and instruction should already be visible
+            return;
+        }
+        
+        // For other steps, show everything
         // Show the overlay
         if (this.overlay) {
             this.overlay.classList.remove('modal-open');
@@ -1275,32 +1319,22 @@ class BudgetWalkthrough {
                 }, 50);
                 
             } else if (step.step_name === 'create_categories') {
-                console.log('🔧 Handling create categories step - showing normal tooltip, monitoring for click');
-                
-                // This will show the normal tooltip for "Add Category" button
-                // When user clicks, the action handler will hide tooltip and monitor modal
-                
-            } else if (step.step_name === 'create_categories') {
-                console.log('🔧 Handling create categories step - allowing click and hiding tooltip');
+                console.log('🔧 Handling create categories step - allowing click and monitoring modal');
                 
                 // Allow the click to proceed (don't prevent default)
-                // Hide the tooltip immediately when user clicks
-                this.cleanup();
+                // Don't hide tooltip immediately - let modal detection handle it
                 
-                // Mark that we're transitioning to avoid duplicate tooltips
-                this.isTransitioning = true;
-                
-                // Wait a moment, then monitor for modal opening
+                // Wait a moment for the modal to open, then advance step
                 setTimeout(() => {
-                    // Only start monitoring if we're not already transitioning
-                    if (!this.modalAlreadyOpen()) {
-                        this.monitorForCategoryModal();
-                    } else {
-                        // Modal is already open, directly advance
-                        console.log('✅ Modal already open, advancing immediately');
+                    const modal = document.getElementById('addCategoryModal');
+                    if (modal && modal.style.display === 'flex') {
+                        console.log('✅ Category modal opened, advancing to next step');
                         this.completeStep('create_categories');
+                    } else {
+                        // If modal didn't open, start monitoring
+                        this.monitorForCategoryModal();
                     }
-                }, 200);
+                }, 300);
                 
             } else if (step.step_name === 'fill_category_form') {
                 console.log('🔧 Handling fill category form step');
