@@ -660,6 +660,18 @@ class BudgetWalkthrough {
         } else if (step.step_name === 'setup_budget') {
             console.log('💰 Setting up budget step monitoring');
             this.setupBudgetStepMonitoring(targetElement, step);
+        } else if (step.step_name === 'fill_category_form') {
+            console.log('📝 Setting up category form fill handler');
+            this.handleCategoryFormFill(step);
+            return; // Don't show regular tooltip
+        } else if (step.step_name === 'set_category_budget') {
+            console.log('💰 Setting up budget setting handler');
+            this.handleBudgetSetting(step);
+            return; // Don't show regular tooltip
+        } else if (step.step_name === 'complete_category') {
+            console.log('✅ Setting up category completion handler');
+            this.handleCategoryCompletion(step);
+            return; // Don't show regular tooltip
         } else if (step.action_required && step.walkthrough_type !== 'help_guide' && 
                    !['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(step.step_name)) {
             // For other action-required steps, but not help guides or category steps
@@ -2493,25 +2505,34 @@ class BudgetWalkthrough {
             </div>
         `;
 
-        // FORCE extremely high z-index to appear above modal
-        this.tooltip.style.zIndex = '99999';
-        this.tooltip.style.position = 'fixed';
-        document.body.appendChild(this.tooltip);
+        // FORCE extremely high z-index to appear above modal AND backdrop
+        this.tooltip.style.cssText = `
+            position: fixed !important;
+            z-index: 999999 !important;
+            top: 50px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            max-width: 400px !important;
+            width: 90% !important;
+            background: white !important;
+            border: 3px solid #007bff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        `;
         
-        // Force the tooltip to be positioned at top center of screen to be clearly visible
-        this.tooltip.style.top = '50px';
-        this.tooltip.style.left = '50%';
-        this.tooltip.style.transform = 'translateX(-50%)';
-        this.tooltip.style.maxWidth = '400px';
-        this.tooltip.style.width = '90%';
-        this.tooltip.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
-        this.tooltip.style.border = '2px solid #007bff';
-        
-        console.log('🔧 Applied FORCED positioning with z-index 99999 at top center');
-        console.log('🔍 Modal z-index check:');
+        // Try appending to modal container if it exists, otherwise body
         const modal = document.getElementById('addCategoryModal');
+        const container = modal && modal.parentElement ? modal.parentElement : document.body;
+        container.appendChild(this.tooltip);
+        
+        console.log('🔧 Applied EXTREME z-index 999999 and appended to container:', container.tagName);
+        console.log('🔍 Modal z-index check:');
         if (modal) {
             console.log('  Modal z-index:', getComputedStyle(modal).zIndex);
+            console.log('  Modal parent z-index:', getComputedStyle(modal.parentElement).zIndex);
             console.log('  Tooltip z-index:', getComputedStyle(this.tooltip).zIndex);
         }
         
@@ -2588,21 +2609,30 @@ class BudgetWalkthrough {
             </div>
         `;
 
-        // FORCE extremely high z-index to appear above modal
-        this.tooltip.style.zIndex = '99999';
-        this.tooltip.style.position = 'fixed';
-        document.body.appendChild(this.tooltip);
+        // FORCE extremely high z-index to appear above modal AND backdrop
+        this.tooltip.style.cssText = `
+            position: fixed !important;
+            z-index: 999999 !important;
+            top: 50px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            max-width: 400px !important;
+            width: 90% !important;
+            background: white !important;
+            border: 3px solid #007bff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        `;
         
-        // Force the tooltip to be positioned at top center of screen to be clearly visible
-        this.tooltip.style.top = '50px';
-        this.tooltip.style.left = '50%';
-        this.tooltip.style.transform = 'translateX(-50%)';
-        this.tooltip.style.maxWidth = '400px';
-        this.tooltip.style.width = '90%';
-        this.tooltip.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
-        this.tooltip.style.border = '2px solid #007bff';
+        // Try appending to modal container if it exists, otherwise body
+        const modal = document.getElementById('addCategoryModal');
+        const container = modal && modal.parentElement ? modal.parentElement : document.body;
+        container.appendChild(this.tooltip);
         
-        console.log('🔧 Applied FORCED positioning for category type with z-index 99999');
+        console.log('🔧 Applied EXTREME z-index 999999 for category type tooltip');
         
         // Store reference for event handling
         this.currentTypeSelect = targetElement;
