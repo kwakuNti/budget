@@ -833,10 +833,13 @@ class BudgetWalkthrough {
                 if (isCategoryStep && self.currentStep.step_name === 'create_categories') {
                     const categoryModal = document.getElementById('addCategoryModal');
                     if (categoryModal && categoryModal.style.display === 'flex') {
-                        console.log('✅ Category modal detected, completing create_categories step');
+                        console.log('✅ Category modal detected, completing create_categories step after delay');
+                        // Wait longer to ensure user actually clicked and modal is stable
                         setTimeout(() => {
-                            self.completeStep('create_categories');
-                        }, 500);
+                            if (categoryModal.style.display === 'flex') { // Double-check modal is still open
+                                self.completeStep('create_categories');
+                            }
+                        }, 1000); // Wait 1 second before advancing
                     }
                 }
             } else if (openModals.length === 0 && self.isModalHidden) {
@@ -1321,20 +1324,8 @@ class BudgetWalkthrough {
             } else if (step.step_name === 'create_categories') {
                 console.log('🔧 Handling create categories step - allowing click and monitoring modal');
                 
-                // Allow the click to proceed (don't prevent default)
-                // Don't hide tooltip immediately - let modal detection handle it
-                
-                // Wait a moment for the modal to open, then advance step
-                setTimeout(() => {
-                    const modal = document.getElementById('addCategoryModal');
-                    if (modal && modal.style.display === 'flex') {
-                        console.log('✅ Category modal opened, advancing to next step');
-                        this.completeStep('create_categories');
-                    } else {
-                        // If modal didn't open, start monitoring
-                        this.monitorForCategoryModal();
-                    }
-                }, 300);
+                // Don't auto-complete immediately, wait for user to actually click and modal to open
+                // The periodic checker will handle advancing the step when modal opens
                 
             } else if (step.step_name === 'fill_category_form') {
                 console.log('🔧 Handling fill category form step');
@@ -1656,8 +1647,10 @@ class BudgetWalkthrough {
                     // For initial setup, just cleanup without showing completion message or redirecting
                     console.log('✅ Initial setup complete - staying on current page');
                     return;
-                } else if (data.next_step && data.redirect_url && stepName !== 'setup_budget' && stepName !== 'choose_template' && stepName !== 'select_template') {
-                    // Only redirect if it's not a budget-related step (we want to stay on budget page for template selection)
+                } else if (data.next_step && data.redirect_url && 
+                          stepName !== 'setup_budget' && stepName !== 'choose_template' && stepName !== 'select_template' &&
+                          !['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(stepName)) {
+                    // Only redirect if it's not a budget-related step or category step (we want to stay on budget page)
                     console.log('🔄 Redirecting to:', data.redirect_url);
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
@@ -1667,9 +1660,16 @@ class BudgetWalkthrough {
                     // If we have a next step but we're staying on the same page, continue the walkthrough
                     if (data.next_step) {
                         console.log('🔄 Continuing walkthrough on same page...');
-                        setTimeout(() => {
-                            this.startWalkthrough();
-                        }, 1000);
+                        
+                        // For category steps, wait for modal to be ready before continuing
+                        if (['fill_category_form', 'set_category_budget', 'complete_category'].includes(data.next_step)) {
+                            console.log('🔧 Next step is category-related, waiting for modal...');
+                            this.waitForCategoryModalAndContinue(data.next_step);
+                        } else {
+                            setTimeout(() => {
+                                this.startWalkthrough();
+                            }, 1000);
+                        }
                     }
                 }
             } else {
@@ -1709,6 +1709,29 @@ class BudgetWalkthrough {
             console.error('❌ Failed to complete step:', error);
             this.showMessage('Error', 'Network error completing step: ' + error.message, 'warning');
         }
+    }
+
+    waitForCategoryModalAndContinue(nextStep) {
+        console.log('⏳ Waiting for category modal to be ready for step:', nextStep);
+        
+        const checkModalReady = () => {
+            const modal = document.getElementById('addCategoryModal');
+            const isModalOpen = modal && modal.style.display === 'flex';
+            
+            if (isModalOpen) {
+                console.log('✅ Category modal is ready, continuing with next step');
+                // Wait a bit more for modal to fully render
+                setTimeout(() => {
+                    this.startWalkthrough();
+                }, 500);
+            } else {
+                console.log('⏳ Modal not ready yet, checking again...');
+                setTimeout(checkModalReady, 200);
+            }
+        };
+        
+        // Start checking immediately
+        checkModalReady();
     }
 
     async nextStep() {
@@ -2367,27 +2390,106 @@ class BudgetWalkthrough {
     handleCategoryFormFill(step) {
         console.log('📝 Handling category form fill step');
         
-        // Auto-fill the Transportation category data
+        // Instead of auto-filling, guide the user to fill the form
         const nameInput = document.querySelector('#addCategoryModal input[name="name"]');
         const typeSelect = document.querySelector('#addCategoryModal select[name="category_type"]');
         
         if (nameInput && typeSelect) {
-            nameInput.value = 'Transportation';
-            typeSelect.value = 'needs';
+            // Set placeholders to guide the user
+            nameInput.placeholder = 'Try "Transportation" for example';
+            nameInput.focus();
             
-            // Trigger change events
-            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-            typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            // Show helpful tooltip on the name input
+            this.showFormGuidanceTooltip(nameInput, step);
             
-            console.log('✅ Auto-filled Transportation category data');
+            // Listen for when user fills in the name
+            const handleNameFilled = () => {
+                if (nameInput.value && nameInput.value.length > 2) {
+                    console.log('✅ Category name filled:', nameInput.value);
+                    nameInput.removeEventListener('input', handleNameFilled);
+                    
+                    // Move to category type guidance
+                    setTimeout(() => {
+                        this.showCategoryTypeGuidance(typeSelect, step);
+                    }, 500);
+                }
+            };
             
-            // Auto-complete this step and move to budget setting
-            setTimeout(() => {
-                this.completeStep(step.step_name);
-            }, 1000);
+            nameInput.addEventListener('input', handleNameFilled);
         } else {
             console.warn('⚠️ Could not find form inputs');
         }
+    }
+
+    showFormGuidanceTooltip(targetElement, step) {
+        // Remove any existing tooltip first
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
+        
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'walkthrough-tooltip';
+        
+        this.tooltip.innerHTML = `
+            <div class="tooltip-header">
+                <h4>📝 Fill in Category Name</h4>
+                <div class="tooltip-progress">
+                    Step ${step.step_order} of 8
+                </div>
+            </div>
+            <div class="tooltip-content">
+                <p>Enter a name for your budget category. For example, try "Transportation" to track car expenses, gas, and public transport.</p>
+            </div>
+            <div class="tooltip-actions">
+                <p class="action-note"><i class="fas fa-keyboard"></i> Type in the field above</p>
+            </div>
+        `;
+
+        document.body.appendChild(this.tooltip);
+        this.positionTooltip(targetElement);
+    }
+
+    showCategoryTypeGuidance(targetElement, step) {
+        // Remove any existing tooltip first
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
+        
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'walkthrough-tooltip';
+        
+        this.tooltip.innerHTML = `
+            <div class="tooltip-header">
+                <h4>🏷️ Select Category Type</h4>
+                <div class="tooltip-progress">
+                    Step ${step.step_order} of 8
+                </div>
+            </div>
+            <div class="tooltip-content">
+                <p>Choose the category type. Transportation is usually a "Need" since it's essential for getting to work and daily activities.</p>
+            </div>
+            <div class="tooltip-actions">
+                <p class="action-note"><i class="fas fa-mouse-pointer"></i> Select "Needs (Essential)" from dropdown</p>
+            </div>
+        `;
+
+        document.body.appendChild(this.tooltip);
+        this.positionTooltip(targetElement);
+        
+        // Listen for selection
+        const handleTypeSelected = () => {
+            if (targetElement.value) {
+                console.log('✅ Category type selected:', targetElement.value);
+                targetElement.removeEventListener('change', handleTypeSelected);
+                
+                // Auto-complete this step and move to budget setting
+                setTimeout(() => {
+                    this.completeStep(step.step_name);
+                }, 1000);
+            }
+        };
+        
+        targetElement.addEventListener('change', handleTypeSelected);
     }
 
     handleBudgetSetting(step) {
