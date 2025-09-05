@@ -2142,6 +2142,11 @@ class BudgetWalkthrough {
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             }
             
+            .walkthrough-tooltip.modal-tooltip {
+                z-index: 10020 !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            }
+            
             .tooltip-header {
                 padding: 16px 16px 8px;
                 border-bottom: 1px solid #f0f0f0;
@@ -2428,7 +2433,7 @@ class BudgetWalkthrough {
         }
         
         this.tooltip = document.createElement('div');
-        this.tooltip.className = 'walkthrough-tooltip';
+        this.tooltip.className = 'walkthrough-tooltip modal-tooltip';
         
         this.tooltip.innerHTML = `
             <div class="tooltip-header">
@@ -2439,14 +2444,64 @@ class BudgetWalkthrough {
             </div>
             <div class="tooltip-content">
                 <p>Enter a name for your budget category. For example, try "Transportation" to track car expenses, gas, and public transport.</p>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-sm btn-primary" onclick="window.budgetWalkthrough.fillTransportationExample()">
+                        ✨ Fill "Transportation" for me
+                    </button>
+                </div>
             </div>
             <div class="tooltip-actions">
-                <p class="action-note"><i class="fas fa-keyboard"></i> Type in the field above</p>
+                <p class="action-note"><i class="fas fa-keyboard"></i> Type in the field above or use the button</p>
             </div>
         `;
 
+        // Set high z-index to appear above modal
+        this.tooltip.style.zIndex = '10020';
         document.body.appendChild(this.tooltip);
         this.positionTooltip(targetElement);
+        
+        // Store reference for event handling
+        this.currentFormInput = targetElement;
+        
+        // Listen for when user fills in the name (more robust detection)
+        const handleNameFilled = () => {
+            const currentValue = targetElement.value.trim();
+            if (currentValue && currentValue.length > 2) {
+                console.log('✅ Category name filled:', currentValue);
+                targetElement.removeEventListener('input', handleNameFilled);
+                targetElement.removeEventListener('change', handleNameFilled);
+                targetElement.removeEventListener('keyup', handleNameFilled);
+                
+                // Move to category type guidance
+                setTimeout(() => {
+                    const typeSelect = document.querySelector('#addCategoryModal select[name="category_type"]');
+                    if (typeSelect) {
+                        this.showCategoryTypeGuidance(typeSelect, step);
+                    }
+                }, 800);
+            }
+        };
+        
+        // Add multiple event listeners for better detection
+        targetElement.addEventListener('input', handleNameFilled);
+        targetElement.addEventListener('change', handleNameFilled);
+        targetElement.addEventListener('keyup', handleNameFilled);
+    }
+
+    // Helper method to fill transportation example
+    fillTransportationExample() {
+        const nameInput = this.currentFormInput || document.querySelector('#addCategoryModal input[name="name"]');
+        if (nameInput) {
+            nameInput.value = 'Transportation';
+            nameInput.focus();
+            
+            // Trigger events to simulate user input
+            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+            nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+            nameInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+            
+            console.log('✅ Auto-filled Transportation category');
+        }
     }
 
     showCategoryTypeGuidance(targetElement, step) {
@@ -2456,7 +2511,7 @@ class BudgetWalkthrough {
         }
         
         this.tooltip = document.createElement('div');
-        this.tooltip.className = 'walkthrough-tooltip';
+        this.tooltip.className = 'walkthrough-tooltip modal-tooltip';
         
         this.tooltip.innerHTML = `
             <div class="tooltip-header">
@@ -2467,14 +2522,24 @@ class BudgetWalkthrough {
             </div>
             <div class="tooltip-content">
                 <p>Choose the category type. Transportation is usually a "Need" since it's essential for getting to work and daily activities.</p>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-sm btn-primary" onclick="window.budgetWalkthrough.selectNeedsType()">
+                        ✨ Select "Needs" for me
+                    </button>
+                </div>
             </div>
             <div class="tooltip-actions">
-                <p class="action-note"><i class="fas fa-mouse-pointer"></i> Select "Needs (Essential)" from dropdown</p>
+                <p class="action-note"><i class="fas fa-mouse-pointer"></i> Select "Needs (Essential)" from dropdown or use button</p>
             </div>
         `;
 
+        // Set high z-index to appear above modal
+        this.tooltip.style.zIndex = '10020';
         document.body.appendChild(this.tooltip);
         this.positionTooltip(targetElement);
+        
+        // Store reference for event handling
+        this.currentTypeSelect = targetElement;
         
         // Listen for selection
         const handleTypeSelected = () => {
@@ -2490,6 +2555,20 @@ class BudgetWalkthrough {
         };
         
         targetElement.addEventListener('change', handleTypeSelected);
+    }
+
+    // Helper method to select needs type
+    selectNeedsType() {
+        const typeSelect = this.currentTypeSelect || document.querySelector('#addCategoryModal select[name="category_type"]');
+        if (typeSelect) {
+            typeSelect.value = 'needs';
+            typeSelect.focus();
+            
+            // Trigger change event
+            typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('✅ Auto-selected Needs category type');
+        }
     }
 
     handleBudgetSetting(step) {
