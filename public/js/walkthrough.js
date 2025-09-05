@@ -832,12 +832,21 @@ class BudgetWalkthrough {
                 // If it's a category step and the addCategoryModal is open, advance the step
                 if (isCategoryStep && self.currentStep.step_name === 'create_categories') {
                     const categoryModal = document.getElementById('addCategoryModal');
-                    if (categoryModal && categoryModal.style.display === 'flex') {
+                    
+                    console.log('🔍 Periodic check - Category step details:');
+                    console.log('  Modal element found:', !!categoryModal);
+                    console.log('  Modal style.display:', categoryModal ? categoryModal.style.display : 'N/A');
+                    console.log('  Modal computed display:', categoryModal ? getComputedStyle(categoryModal).display : 'N/A');
+                    
+                    if (categoryModal && (categoryModal.style.display === 'flex' || getComputedStyle(categoryModal).display === 'flex')) {
                         console.log('✅ Category modal detected, completing create_categories step after delay');
                         // Wait longer to ensure user actually clicked and modal is stable
                         setTimeout(() => {
-                            if (categoryModal.style.display === 'flex') { // Double-check modal is still open
+                            if (categoryModal.style.display === 'flex' || getComputedStyle(categoryModal).display === 'flex') { // Double-check modal is still open
+                                console.log('🚀 Confirming modal still open, advancing step');
                                 self.completeStep('create_categories');
+                            } else {
+                                console.log('⚠️ Modal closed before step completion');
                             }
                         }, 1000); // Wait 1 second before advancing
                     }
@@ -2409,35 +2418,50 @@ class BudgetWalkthrough {
     handleCategoryFormFill(step) {
         console.log('📝 Handling category form fill step');
         
-        // Instead of auto-filling, guide the user to fill the form
-        const nameInput = document.querySelector('#addCategoryModal input[name="name"]');
-        const typeSelect = document.querySelector('#addCategoryModal select[name="category_type"]');
-        
-        if (nameInput && typeSelect) {
-            // Set placeholders to guide the user
-            nameInput.placeholder = 'Try "Transportation" for example';
-            nameInput.focus();
+        // Wait a moment for modal to be fully rendered
+        setTimeout(() => {
+            // Check if modal is open and log debug info
+            const modal = document.getElementById('addCategoryModal');
+            console.log('🔍 Modal found:', !!modal);
+            console.log('🔍 Modal display:', modal ? modal.style.display : 'N/A');
+            console.log('🔍 Modal computed display:', modal ? getComputedStyle(modal).display : 'N/A');
             
-            // Show helpful tooltip on the name input
-            this.showFormGuidanceTooltip(nameInput, step);
+            // Instead of auto-filling, guide the user to fill the form
+            const nameInput = document.querySelector('#addCategoryModal input[name="name"]');
+            const typeSelect = document.querySelector('#addCategoryModal select[name="category_type"]');
             
-            // Listen for when user fills in the name
-            const handleNameFilled = () => {
-                if (nameInput.value && nameInput.value.length > 2) {
-                    console.log('✅ Category name filled:', nameInput.value);
-                    nameInput.removeEventListener('input', handleNameFilled);
-                    
-                    // Move to category type guidance
-                    setTimeout(() => {
-                        this.showCategoryTypeGuidance(typeSelect, step);
-                    }, 500);
-                }
-            };
+            console.log('🔍 Found inputs:', { nameInput: !!nameInput, typeSelect: !!typeSelect });
             
-            nameInput.addEventListener('input', handleNameFilled);
-        } else {
-            console.warn('⚠️ Could not find form inputs');
-        }
+            if (nameInput && typeSelect) {
+                // Set placeholders to guide the user
+                nameInput.placeholder = 'Try "Transportation" for example';
+                nameInput.focus();
+                
+                // Show helpful tooltip on the name input
+                this.showFormGuidanceTooltip(nameInput, step);
+                
+                // Listen for when user fills in the name
+                const handleNameFilled = () => {
+                    if (nameInput.value && nameInput.value.length > 2) {
+                        console.log('✅ Category name filled:', nameInput.value);
+                        nameInput.removeEventListener('input', handleNameFilled);
+                        
+                        // Move to category type guidance
+                        setTimeout(() => {
+                            this.showCategoryTypeGuidance(typeSelect, step);
+                        }, 500);
+                    }
+                };
+                
+                nameInput.addEventListener('input', handleNameFilled);
+            } else {
+                console.warn('⚠️ Could not find form inputs - modal may not be ready');
+                // Retry after longer delay
+                setTimeout(() => {
+                    this.handleCategoryFormFill(step);
+                }, 1000);
+            }
+        }, 1500); // Wait longer for modal to be fully ready
     }
 
     showFormGuidanceTooltip(targetElement, step) {
@@ -2469,18 +2493,27 @@ class BudgetWalkthrough {
             </div>
         `;
 
-        // Set high z-index to appear above modal
-        this.tooltip.style.zIndex = '10020';
+        // FORCE extremely high z-index to appear above modal
+        this.tooltip.style.zIndex = '99999';
         this.tooltip.style.position = 'fixed';
         document.body.appendChild(this.tooltip);
         
-        // Force the tooltip to be positioned relative to viewport for modal
-        const rect = targetElement.getBoundingClientRect();
-        this.tooltip.style.top = (rect.bottom + 10) + 'px';
-        this.tooltip.style.left = Math.max(10, rect.left) + 'px';
-        this.tooltip.style.maxWidth = '350px';
+        // Force the tooltip to be positioned at top center of screen to be clearly visible
+        this.tooltip.style.top = '50px';
+        this.tooltip.style.left = '50%';
+        this.tooltip.style.transform = 'translateX(-50%)';
+        this.tooltip.style.maxWidth = '400px';
+        this.tooltip.style.width = '90%';
+        this.tooltip.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
+        this.tooltip.style.border = '2px solid #007bff';
         
-        console.log('🔧 Applied fixed positioning and z-index 10020 for modal tooltip');
+        console.log('🔧 Applied FORCED positioning with z-index 99999 at top center');
+        console.log('🔍 Modal z-index check:');
+        const modal = document.getElementById('addCategoryModal');
+        if (modal) {
+            console.log('  Modal z-index:', getComputedStyle(modal).zIndex);
+            console.log('  Tooltip z-index:', getComputedStyle(this.tooltip).zIndex);
+        }
         
         // Store reference for event handling
         this.currentFormInput = targetElement;
@@ -2555,18 +2588,21 @@ class BudgetWalkthrough {
             </div>
         `;
 
-        // Set high z-index to appear above modal
-        this.tooltip.style.zIndex = '10020';
+        // FORCE extremely high z-index to appear above modal
+        this.tooltip.style.zIndex = '99999';
         this.tooltip.style.position = 'fixed';
         document.body.appendChild(this.tooltip);
         
-        // Force the tooltip to be positioned relative to viewport for modal
-        const rect = targetElement.getBoundingClientRect();
-        this.tooltip.style.top = (rect.bottom + 10) + 'px';
-        this.tooltip.style.left = Math.max(10, rect.left) + 'px';
-        this.tooltip.style.maxWidth = '350px';
+        // Force the tooltip to be positioned at top center of screen to be clearly visible
+        this.tooltip.style.top = '50px';
+        this.tooltip.style.left = '50%';
+        this.tooltip.style.transform = 'translateX(-50%)';
+        this.tooltip.style.maxWidth = '400px';
+        this.tooltip.style.width = '90%';
+        this.tooltip.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
+        this.tooltip.style.border = '2px solid #007bff';
         
-        console.log('🔧 Applied fixed positioning and z-index 10020 for category type tooltip');
+        console.log('🔧 Applied FORCED positioning for category type with z-index 99999');
         
         // Store reference for event handling
         this.currentTypeSelect = targetElement;
