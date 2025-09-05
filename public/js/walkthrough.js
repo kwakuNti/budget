@@ -634,6 +634,13 @@ class BudgetWalkthrough {
 
         console.log('✅ Using target element:', targetElement);
 
+        // Handle special step types first (before any highlighting or tooltip)
+        if (step.step_name === 'setup_complete') {
+            console.log('🎉 Setup complete - showing congratulations');
+            this.showCompletionCongratulations(step);
+            return; // Don't show regular tooltip or highlight anything
+        }
+
         // For help guides with missing elements, show general help
         if (!targetElement || targetElement === document.body) {
             if (step.walkthrough_type === 'help_guide') {
@@ -654,11 +661,7 @@ class BudgetWalkthrough {
         this.showTooltip(targetElement, step);
         
         // Handle different step types
-        if (step.step_name === 'setup_complete') {
-            console.log('🎉 Setup complete - showing congratulations');
-            this.showCompletionCongratulations(step);
-            return; // Don't show regular tooltip or highlight anything
-        } else if (step.step_name === 'configure_salary') {
+        if (step.step_name === 'configure_salary') {
             console.log('🔧 Setting up salary step monitoring');
             this.setupSalaryButtonMonitoring(targetElement, step);
         } else if (step.step_name === 'setup_budget') {
@@ -2683,9 +2686,6 @@ class BudgetWalkthrough {
                 // Suggest ₵300 as a reasonable transportation budget
                 budgetInput.placeholder = 'Suggested: ₵300';
                 budgetInput.focus();
-                
-                // Show forced tooltip for budget setting
-                this.showBudgetGuidanceTooltipForced(budgetInput, step);
                 
                 // Listen for when user sets a value
                 const handleBudgetSet = () => {

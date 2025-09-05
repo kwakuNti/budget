@@ -490,8 +490,8 @@ INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url
 -- Step 7: Complete Category Creation
 ('initial_setup', 'complete_category', 7, '/budgets', '#addCategoryModal button[type="submit"]', 'Save Your Category', 'Perfect! Now click "Add Category" to save your Transportation category. This creates your first budget category and you can add more categories later for other expenses.', 1, 0, 1),
 
--- Step 8: Setup Complete (Redirect to Dashboard)
-('initial_setup', 'setup_complete', 8, '/personal-dashboard', '.dashboard-container', 'Setup Complete!', 'Congratulations! Your budget is now set up with your first category. You can now track expenses, monitor your budget, and work towards your financial goals. Welcome to your personal finance dashboard!', 0, 0, 1);
+-- Step 8: Setup Complete (Show Congratulations Modal)
+('initial_setup', 'setup_complete', 8, '/personal-dashboard', '', 'Setup Complete!', 'Congratulations! Your budget is now set up with your first category. You can now track expenses, monitor your budget, and work towards your financial goals. Welcome to your personal finance dashboard!', 0, 0, 1);
 
 -- Dashboard Help Guide - Specific Elements Only
 INSERT INTO walkthrough_steps (walkthrough_type, step_name, step_order, page_url, target_element, title, content, action_required, can_skip, is_active) VALUES
