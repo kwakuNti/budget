@@ -995,6 +995,13 @@ class BudgetWalkthrough {
         this.tooltip = document.createElement('div');
         this.tooltip.className = 'walkthrough-tooltip';
         
+        // Check if we're in a modal and adjust accordingly
+        const isInModal = targetElement.closest('.modal, .budget-modal') !== null;
+        if (isInModal) {
+            this.tooltip.classList.add('modal-tooltip');
+            console.log('🎭 Tooltip is in modal, applying high z-index');
+        }
+        
         const canSkip = step.can_skip || step.walkthrough_type === 'help_guide';
         const isHelpGuide = step.walkthrough_type === 'help_guide';
         
@@ -1024,6 +1031,13 @@ class BudgetWalkthrough {
                 ${canSkip ? '<button class="btn btn-outline-secondary btn-sm tooltip-skip">Close Help</button>' : ''}
             </div>
         `;
+
+        // Force high z-index for modal tooltips
+        if (isInModal) {
+            this.tooltip.style.zIndex = '10020';
+            this.tooltip.style.position = 'fixed';
+            console.log('🔧 Applied z-index 10020 and fixed positioning for modal tooltip');
+        }
 
         document.body.appendChild(this.tooltip);
         
@@ -2457,8 +2471,16 @@ class BudgetWalkthrough {
 
         // Set high z-index to appear above modal
         this.tooltip.style.zIndex = '10020';
+        this.tooltip.style.position = 'fixed';
         document.body.appendChild(this.tooltip);
-        this.positionTooltip(targetElement);
+        
+        // Force the tooltip to be positioned relative to viewport for modal
+        const rect = targetElement.getBoundingClientRect();
+        this.tooltip.style.top = (rect.bottom + 10) + 'px';
+        this.tooltip.style.left = Math.max(10, rect.left) + 'px';
+        this.tooltip.style.maxWidth = '350px';
+        
+        console.log('🔧 Applied fixed positioning and z-index 10020 for modal tooltip');
         
         // Store reference for event handling
         this.currentFormInput = targetElement;
@@ -2535,8 +2557,16 @@ class BudgetWalkthrough {
 
         // Set high z-index to appear above modal
         this.tooltip.style.zIndex = '10020';
+        this.tooltip.style.position = 'fixed';
         document.body.appendChild(this.tooltip);
-        this.positionTooltip(targetElement);
+        
+        // Force the tooltip to be positioned relative to viewport for modal
+        const rect = targetElement.getBoundingClientRect();
+        this.tooltip.style.top = (rect.bottom + 10) + 'px';
+        this.tooltip.style.left = Math.max(10, rect.left) + 'px';
+        this.tooltip.style.maxWidth = '350px';
+        
+        console.log('🔧 Applied fixed positioning and z-index 10020 for category type tooltip');
         
         // Store reference for event handling
         this.currentTypeSelect = targetElement;
