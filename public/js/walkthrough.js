@@ -654,7 +654,11 @@ class BudgetWalkthrough {
         this.showTooltip(targetElement, step);
         
         // Handle different step types
-        if (step.step_name === 'configure_salary') {
+        if (step.step_name === 'setup_complete') {
+            console.log('🎉 Setup complete - showing congratulations');
+            this.showCompletionCongratulations(step);
+            return; // Don't show regular tooltip or highlight anything
+        } else if (step.step_name === 'configure_salary') {
             console.log('🔧 Setting up salary step monitoring');
             this.setupSalaryButtonMonitoring(targetElement, step);
         } else if (step.step_name === 'setup_budget') {
@@ -2670,30 +2674,264 @@ class BudgetWalkthrough {
     handleBudgetSetting(step) {
         console.log('💰 Handling budget setting step');
         
-        // Suggest a budget amount but let user set it
-        const budgetInput = document.querySelector('#addCategoryModal input[name="budget_limit"]');
+        // Wait for modal to be ready
+        setTimeout(() => {
+            // Suggest a budget amount but let user set it
+            const budgetInput = document.querySelector('#addCategoryModal input[name="budget_limit"]');
+            
+            if (budgetInput) {
+                // Suggest ₵300 as a reasonable transportation budget
+                budgetInput.placeholder = 'Suggested: ₵300';
+                budgetInput.focus();
+                
+                // Show forced tooltip for budget setting
+                this.showBudgetGuidanceTooltipForced(budgetInput, step);
+                
+                // Listen for when user sets a value
+                const handleBudgetSet = () => {
+                    if (budgetInput.value && parseFloat(budgetInput.value) > 0) {
+                        console.log('✅ Budget amount set:', budgetInput.value);
+                        budgetInput.removeEventListener('input', handleBudgetSet);
+                        
+                        // Auto-complete this step
+                        setTimeout(() => {
+                            this.completeStep(step.step_name);
+                        }, 500);
+                    }
+                };
+                
+                budgetInput.addEventListener('input', handleBudgetSet);
+            } else {
+                console.warn('⚠️ Could not find budget input - retrying...');
+                setTimeout(() => {
+                    this.handleBudgetSetting(step);
+                }, 1000);
+            }
+        }, 1000);
+    }
+
+    showBudgetGuidanceTooltipForced(targetElement, step) {
+        console.log('🚀 Creating FORCED budget guidance tooltip');
         
+        // Remove any existing tooltip first
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
+        
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'walkthrough-tooltip modal-tooltip-forced';
+        
+        this.tooltip.innerHTML = `
+            <div class="tooltip-header">
+                <h4>💰 Set Transportation Budget</h4>
+                <div class="tooltip-progress">
+                    Step ${step.step_order} of 8
+                </div>
+            </div>
+            <div class="tooltip-content">
+                <p>Now set a monthly budget for transportation. A typical amount might be ₵200-500 depending on your commute and vehicle costs. Enter an amount that fits your situation.</p>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-sm btn-primary" onclick="window.budgetWalkthrough.fillSuggestedBudget()">
+                        ✨ Use suggested ₵300
+                    </button>
+                </div>
+            </div>
+            <div class="tooltip-actions">
+                <p class="action-note"><i class="fas fa-calculator"></i> Enter amount in the field above or use suggested amount</p>
+            </div>
+        `;
+
+        // FORCE extremely high z-index to appear above modal AND backdrop
+        this.tooltip.style.cssText = `
+            position: fixed !important;
+            z-index: 999999 !important;
+            top: 50px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            max-width: 400px !important;
+            width: 90% !important;
+            background: white !important;
+            border: 3px solid #28a745 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        `;
+        
+        // Try appending to modal container if it exists, otherwise body
+        const modal = document.getElementById('addCategoryModal');
+        const container = modal && modal.parentElement ? modal.parentElement : document.body;
+        container.appendChild(this.tooltip);
+        
+        console.log('🔧 Applied EXTREME z-index for budget guidance tooltip');
+        
+        // Store reference for event handling
+        this.currentBudgetInput = targetElement;
+    }
+
+    showCompletionCongratulations(step) {
+        console.log('🎉 Showing setup completion congratulations');
+        
+        // Create overlay but make it more celebratory
+        this.createOverlay();
+        if (this.overlay) {
+            this.overlay.style.background = 'rgba(40, 167, 69, 0.1)'; // Green tint
+        }
+        
+        // Remove any existing tooltip
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
+        
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'walkthrough-tooltip completion-tooltip';
+        
+        this.tooltip.innerHTML = `
+            <div class="completion-celebration">
+                <div class="celebration-icon">🎉</div>
+                <h2>Congratulations!</h2>
+                <p class="completion-subtitle">Your budget setup is complete!</p>
+            </div>
+            <div class="completion-content">
+                <div class="achievement-list">
+                    <div class="achievement">✅ Income configured</div>
+                    <div class="achievement">✅ Budget categories created</div>
+                    <div class="achievement">✅ Transportation budget set</div>
+                    <div class="achievement">✅ Ready to track expenses</div>
+                </div>
+                <p class="next-steps">
+                    You're all set! You can now start tracking your expenses, view insights, and manage your budget effectively.
+                </p>
+            </div>
+            <div class="completion-actions">
+                <button class="btn btn-success btn-lg completion-btn" onclick="window.budgetWalkthrough.completeSetup()">
+                    🚀 Start Using Budget Tracker
+                </button>
+            </div>
+        `;
+
+        // Style the completion tooltip
+        this.tooltip.style.cssText = `
+            position: fixed !important;
+            z-index: 999999 !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            max-width: 500px !important;
+            width: 90% !important;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%) !important;
+            border: 3px solid #28a745 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 20px 60px rgba(40, 167, 69, 0.3) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            text-align: center !important;
+        `;
+        
+        document.body.appendChild(this.tooltip);
+        
+        // Add celebration styles
+        const celebrationStyles = document.createElement('style');
+        celebrationStyles.textContent = `
+            .completion-celebration {
+                padding: 30px 20px 20px;
+                background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+                color: white;
+                border-radius: 16px 16px 0 0;
+                margin: -3px -3px 0 -3px;
+            }
+            .celebration-icon {
+                font-size: 48px;
+                margin-bottom: 10px;
+                animation: bounce 1s infinite;
+            }
+            .completion-celebration h2 {
+                margin: 0 0 8px 0;
+                font-size: 28px;
+                font-weight: bold;
+            }
+            .completion-subtitle {
+                margin: 0;
+                opacity: 0.9;
+                font-size: 16px;
+            }
+            .completion-content {
+                padding: 25px;
+            }
+            .achievement-list {
+                margin: 20px 0;
+            }
+            .achievement {
+                margin: 8px 0;
+                font-size: 14px;
+                color: #28a745;
+                font-weight: 500;
+            }
+            .next-steps {
+                margin: 20px 0 0 0;
+                color: #666;
+                line-height: 1.5;
+            }
+            .completion-actions {
+                padding: 0 25px 25px;
+            }
+            .completion-btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 16px;
+                font-weight: 600;
+                border: none;
+                border-radius: 8px;
+                background: #28a745;
+                color: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .completion-btn:hover {
+                background: #218838;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            }
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-10px); }
+                60% { transform: translateY(-5px); }
+            }
+        `;
+        document.head.appendChild(celebrationStyles);
+        
+        console.log('✅ Completion congratulations displayed');
+    }
+
+    completeSetup() {
+        console.log('🚀 User clicked complete setup');
+        
+        // Complete the final step
+        this.completeStep('setup_complete');
+        
+        // Clean up the walkthrough
+        this.cleanup();
+        
+        // Show a final snackbar message
+        if (typeof showSnackbar === 'function') {
+            showSnackbar('🎉 Welcome to your budget tracker! Start adding expenses to see insights.', 'success');
+        }
+    }
+
+    // Helper method to fill suggested budget
+    fillSuggestedBudget() {
+        const budgetInput = this.currentBudgetInput || document.querySelector('#addCategoryModal input[name="budget_limit"]');
         if (budgetInput) {
-            // Suggest ₵300 as a reasonable transportation budget
-            budgetInput.placeholder = 'Suggested: ₵300';
+            budgetInput.value = '300';
             budgetInput.focus();
             
-            // Listen for when user sets a value
-            const handleBudgetSet = () => {
-                if (budgetInput.value && parseFloat(budgetInput.value) > 0) {
-                    console.log('✅ Budget amount set:', budgetInput.value);
-                    budgetInput.removeEventListener('input', handleBudgetSet);
-                    
-                    // Auto-complete this step
-                    setTimeout(() => {
-                        this.completeStep(step.step_name);
-                    }, 500);
-                }
-            };
+            // Trigger events to simulate user input
+            budgetInput.dispatchEvent(new Event('input', { bubbles: true }));
+            budgetInput.dispatchEvent(new Event('change', { bubbles: true }));
             
-            budgetInput.addEventListener('input', handleBudgetSet);
-        } else {
-            console.warn('⚠️ Could not find budget input');
+            console.log('✅ Auto-filled suggested budget of ₵300');
         }
     }
 
