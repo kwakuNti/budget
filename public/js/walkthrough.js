@@ -41,11 +41,6 @@ class BudgetWalkthrough {
             setTimeout(() => {
                 this.startWalkthrough();
             }, 500);
-        } else {
-            // If no initial walkthrough needed, add page help icon
-            setTimeout(() => {
-                this.initPageHelp();
-            }, 1000);
         }
     }
 
