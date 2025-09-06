@@ -2773,68 +2773,85 @@ class BudgetWalkthrough {
     showCompletionCongratulations(step) {
         console.log('🎉 Showing setup completion congratulations');
         
-        // Create overlay but make it more celebratory
-        this.createOverlay();
-        if (this.overlay) {
-            this.overlay.style.background = 'rgba(40, 167, 69, 0.1)'; // Green tint
-        }
+        // Clean up any existing walkthrough elements first
+        this.cleanup();
         
-        // Remove any existing tooltip
-        if (this.tooltip) {
-            this.tooltip.remove();
-        }
+        // Create a completely independent congratulations modal
+        const congratsModal = document.createElement('div');
+        congratsModal.id = 'completion-congratulations-modal';
+        congratsModal.className = 'completion-modal';
         
-        this.tooltip = document.createElement('div');
-        this.tooltip.className = 'walkthrough-tooltip completion-tooltip';
-        
-        this.tooltip.innerHTML = `
-            <div class="completion-celebration">
-                <div class="celebration-icon">🎉</div>
-                <h2>Congratulations!</h2>
-                <p class="completion-subtitle">Your budget setup is complete!</p>
-            </div>
+        congratsModal.innerHTML = `
+            <div class="completion-backdrop"></div>
             <div class="completion-content">
-                <div class="achievement-list">
-                    <div class="achievement">✅ Income configured</div>
-                    <div class="achievement">✅ Budget categories created</div>
-                    <div class="achievement">✅ Transportation budget set</div>
-                    <div class="achievement">✅ Ready to track expenses</div>
+                <div class="completion-celebration">
+                    <div class="celebration-icon">🎉</div>
+                    <h2>Congratulations!</h2>
+                    <p class="completion-subtitle">Your budget setup is complete!</p>
                 </div>
-                <p class="next-steps">
-                    You're all set! You can now start tracking your expenses, view insights, and manage your budget effectively.
-                </p>
-            </div>
-            <div class="completion-actions">
-                <button class="btn btn-success btn-lg completion-btn" onclick="window.budgetWalkthrough.completeSetup()">
-                    🚀 Start Using Budget Tracker
-                </button>
+                <div class="completion-body">
+                    <div class="achievement-list">
+                        <div class="achievement">✅ Income configured</div>
+                        <div class="achievement">✅ Budget categories created</div>
+                        <div class="achievement">✅ Transportation budget set</div>
+                        <div class="achievement">✅ Ready to track expenses</div>
+                    </div>
+                    <p class="next-steps">
+                        You're all set! You can now start tracking your expenses, view insights, and manage your budget effectively.
+                    </p>
+                </div>
+                <div class="completion-actions">
+                    <button class="btn btn-success btn-lg completion-btn" onclick="window.budgetWalkthrough.completeSetup()">
+                        🚀 Start Using Budget Tracker
+                    </button>
+                </div>
             </div>
         `;
 
-        // Style the completion tooltip
-        this.tooltip.style.cssText = `
+        // Style the modal with extremely high z-index and fixed positioning
+        congratsModal.style.cssText = `
             position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
             z-index: 999999 !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            max-width: 500px !important;
-            width: 90% !important;
-            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%) !important;
-            border: 3px solid #28a745 !important;
-            border-radius: 16px !important;
-            box-shadow: 0 20px 60px rgba(40, 167, 69, 0.3) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            text-align: center !important;
         `;
         
-        document.body.appendChild(this.tooltip);
+        document.body.appendChild(congratsModal);
         
-        // Add celebration styles
+        // Add comprehensive celebration styles
         const celebrationStyles = document.createElement('style');
+        celebrationStyles.id = 'completion-celebration-styles';
         celebrationStyles.textContent = `
+            .completion-modal {
+                pointer-events: auto !important;
+            }
+            .completion-backdrop {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(40, 167, 69, 0.1);
+                backdrop-filter: blur(2px);
+            }
+            .completion-content {
+                position: relative;
+                max-width: 500px;
+                width: 90%;
+                background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+                border: 3px solid #28a745;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(40, 167, 69, 0.3);
+                text-align: center;
+                z-index: 1000000;
+                animation: modalBounceIn 0.5s ease;
+            }
             .completion-celebration {
                 padding: 30px 20px 20px;
                 background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
@@ -2857,7 +2874,7 @@ class BudgetWalkthrough {
                 opacity: 0.9;
                 font-size: 16px;
             }
-            .completion-content {
+            .completion-body {
                 padding: 25px;
             }
             .achievement-list {
@@ -2873,6 +2890,7 @@ class BudgetWalkthrough {
                 margin: 20px 0 0 0;
                 color: #666;
                 line-height: 1.5;
+                font-size: 14px;
             }
             .completion-actions {
                 padding: 0 25px 25px;
@@ -2899,25 +2917,72 @@ class BudgetWalkthrough {
                 40% { transform: translateY(-10px); }
                 60% { transform: translateY(-5px); }
             }
+            @keyframes modalBounceIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.7);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
         `;
         document.head.appendChild(celebrationStyles);
         
-        console.log('✅ Completion congratulations displayed');
+        console.log('✅ Completion congratulations modal created and displayed');
+        console.log('🎯 Modal element:', congratsModal);
+        console.log('🎯 Modal z-index:', getComputedStyle(congratsModal).zIndex);
     }
 
     completeSetup() {
         console.log('🚀 User clicked complete setup');
         
+        // Remove the congratulations modal
+        const congratsModal = document.getElementById('completion-congratulations-modal');
+        if (congratsModal) {
+            congratsModal.remove();
+        }
+        
+        // Remove styles
+        const styles = document.getElementById('completion-celebration-styles');
+        if (styles) {
+            styles.remove();
+        }
+        
         // Complete the final step
         this.completeStep('setup_complete');
         
-        // Clean up the walkthrough
+        // Completely disable the walkthrough system
+        this.isCompleted = true;
+        this.currentStep = null;
+        this.walkthroughType = null;
+        
+        // Clean up the walkthrough UI
         this.cleanup();
+        
+        // Remove any navigation blocking
+        this.restoreNavigation();
+        
+        // Clear any stored walkthrough state
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('walkthrough_active');
+            localStorage.removeItem('walkthrough_step');
+            localStorage.setItem('walkthrough_completed', 'true');
+        }
+        
+        // Disable any further walkthrough checks
+        window.budgetWalkthrough = null;
         
         // Show a final snackbar message
         if (typeof showSnackbar === 'function') {
             showSnackbar('🎉 Welcome to your budget tracker! Start adding expenses to see insights.', 'success');
         }
+        
+        console.log('🏁 Walkthrough completely disabled and cleaned up');
     }
 
     // Helper method to fill suggested budget
