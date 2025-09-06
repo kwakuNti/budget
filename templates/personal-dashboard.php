@@ -1071,54 +1071,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 font-size: 0.8rem;
             }
 
-            /* Mobile Navigation Fixes */
-            .header-nav {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(10px);
-                padding: 80px 20px 20px;
-                transform: translateX(-100%);
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
-                z-index: 9999;
-                flex-direction: column;
-                gap: 15px;
-                justify-content: flex-start;
-                align-items: stretch;
-            }
-
-            .header-nav.mobile-open {
-                transform: translateX(0);
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .header-nav .nav-item {
-                color: #1f2937;
-                padding: 15px 20px;
-                border-radius: 12px;
-                font-size: 1.1rem;
-                font-weight: 600;
-                text-decoration: none;
-                display: flex;
-                align-items: center;
-                border: 2px solid transparent;
-                background: #f8fafc;
-                transition: all 0.3s ease;
-            }
-
-            .header-nav .nav-item:hover,
-            .header-nav .nav-item.active {
-                background: #3b82f6;
-                color: white;
-                border-color: #2563eb;
-                transform: translateX(5px);
-            }
+            /* Remove conflicting mobile navigation styles - using the primary definition above */
 
             /* Hide unnecessary elements on mobile */
             .theme-selector {
