@@ -1793,7 +1793,7 @@ function createCategorySection(type, typeInfo, totals, categories) {
         <div class="category-content">
             ${type === 'savings' ? (categories.length > 0 ? createSavingsCategoryTable(categories) : createSavingsMessage(totals)) : createCategoryTable(categories)}
             ${type !== 'savings' ? `<button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>` : 
-              (categories.length > 0 ? '<div class="savings-actions" style="margin-top: 1rem;"><a href="savings.php" class="btn-primary">Manage All Goals</a></div>' : '<div class="savings-actions"><a href="savings" class="btn-primary">Create Your First Goal</a></div>')}
+              (categories.length > 0 ? '<div class="savings-actions" style="margin-top: 1rem;"><a href="savings" class="btn-primary">Manage All Goals</a></div>' : '<div class="savings-actions"><a href="savings" class="btn-primary">Create Your First Goal</a></div>')}
         </div>
     `;
     
@@ -1822,7 +1822,7 @@ function createSavingsMessage(totals) {
                 </div>
             </div>
             <div class="savings-actions">
-                <a href="savings.php" class="btn-primary">Create Your First Goal</a>
+                <a href="savings" class="btn-primary">Create Your First Goal</a>
                 <button onclick="showSavingsInfo()" class="btn-secondary">Learn More</button>
             </div>
         </div>
@@ -2698,21 +2698,21 @@ window.toggleBudgetInputType = toggleBudgetInputType;
 
 // Savings-specific functions for budget integration
 window.editSavingsGoal = function(goalId) {
-    window.open(`savings.php?edit=${goalId}`, '_blank');
+    window.open(`savings?edit=${goalId}`, '_blank');
 };
 
 window.addToSavingsGoal = function(goalId, goalName) {
     if (confirm(`Add money to your "${goalName}" savings goal?`)) {
-        window.open(`savings.php?contribute=${goalId}`, '_blank');
+        window.open(`savings?contribute=${goalId}`, '_blank');
     }
 };
 
 window.viewGoalDetails = function(goalId, goalName) {
-    window.open(`savings.php?goal=${goalId}`, '_blank');
+    window.open(`savings?goal=${goalId}`, '_blank');
 };
 
 window.goToSavingsPage = function() {
-    window.open('savings.php', '_blank');
+    window.open('savings', '_blank');
 };
 
 // Test function for loading screen (can be called from browser console)

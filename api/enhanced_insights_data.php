@@ -204,7 +204,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Great Spending Control!',
             'message' => "You've only spent {$spending_ratio}% of your income this month. Consider increasing savings or investments.",
             'action' => 'Optimize Savings',
-            'link' => 'savings.php'
+            'link' => 'savings'
         ];
     }
     
@@ -217,7 +217,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Goal Deadline Approaching',
             'message' => "Your '{$urgent_goal['goal_name']}' goal needs ₵{$urgent_goal['daily_required']} daily to stay on track.",
             'action' => 'Adjust Goal',
-            'link' => 'savings.php'
+            'link' => 'savings'
         ];
     }
     
