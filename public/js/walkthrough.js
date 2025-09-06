@@ -946,6 +946,9 @@ class BudgetWalkthrough {
         // Resume walkthrough to show the reminder
         this.resumeFromHiding();
         
+        // Show a prominent snackbar message
+        showSnackbar('⚠️ Please select and apply a budget template to continue with the walkthrough.', 'warning', 5000);
+        
         // Update tooltip to show reminder message
         if (this.tooltip) {
             const content = this.tooltip.querySelector('.tooltip-content');
@@ -1754,6 +1757,9 @@ class BudgetWalkthrough {
         
         // Resume walkthrough to show the reminder
         this.resumeFromHiding();
+        
+        // Show a prominent snackbar message
+        showSnackbar('⚠️ Please complete your salary setup to continue with the walkthrough.', 'warning', 5000);
         
         // Update tooltip to show reminder message
         if (this.tooltip) {
@@ -3164,7 +3170,7 @@ class BudgetWalkthrough {
             <div class="completion-backdrop"></div>
             <div class="completion-content">
                 <div class="completion-celebration">
-                    <div class="celebration-icon">🎉</div>
+                    <div class="celebration-icon"><i class="fas fa-trophy"></i></div>
                     <h2>Congratulations!</h2>
                     <p class="completion-subtitle">Your budget setup is complete!</p>
                 </div>
@@ -3762,7 +3768,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    window.budgetWalkthrough.completeSetup = function() {
-        walkthroughInstance.completeSetup();
-    };
+    // Note: completeSetup is available directly on the walkthroughInstance 
+    // which is assigned to window.budgetWalkthrough
 });
