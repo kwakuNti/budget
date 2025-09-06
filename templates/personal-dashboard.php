@@ -1035,6 +1035,307 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 font-size: 1rem;
                 min-width: auto;
             }
+
+            /* Enhanced Mobile Layout */
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
+            .container {
+                padding: 10px;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .header {
+                padding: 10px 15px;
+                margin: 0 -10px 15px -10px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .header-content {
+                gap: 10px;
+            }
+
+            .logo {
+                flex: 1;
+            }
+
+            .logo-text h1 {
+                font-size: 1.4rem;
+            }
+
+            .logo-text p {
+                font-size: 0.8rem;
+            }
+
+            /* Mobile Navigation Fixes */
+            .header-nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                padding: 80px 20px 20px;
+                transform: translateX(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 9999;
+                flex-direction: column;
+                gap: 15px;
+                justify-content: flex-start;
+                align-items: stretch;
+            }
+
+            .header-nav.mobile-open {
+                transform: translateX(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .header-nav .nav-item {
+                color: #1f2937;
+                padding: 15px 20px;
+                border-radius: 12px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                border: 2px solid transparent;
+                background: #f8fafc;
+                transition: all 0.3s ease;
+            }
+
+            .header-nav .nav-item:hover,
+            .header-nav .nav-item.active {
+                background: #3b82f6;
+                color: white;
+                border-color: #2563eb;
+                transform: translateX(5px);
+            }
+
+            /* Hide unnecessary elements on mobile */
+            .theme-selector {
+                display: none;
+            }
+
+            /* Mobile grid layout */
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card h3 {
+                font-size: 0.85rem;
+            }
+
+            .stat-card .amount {
+                font-size: 1.3rem;
+            }
+
+            /* Payday countdown mobile */
+            .payday-countdown-hero {
+                padding: 1.5rem 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 16px;
+            }
+
+            .payday-countdown-hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .payday-countdown-hero p {
+                font-size: 1rem;
+            }
+
+            .countdown-main-display {
+                gap: 1.5rem;
+            }
+
+            .countdown-item {
+                min-width: auto;
+            }
+
+            .countdown-number {
+                font-size: 1.8rem;
+            }
+
+            .countdown-label {
+                font-size: 0.75rem;
+            }
+
+            /* Charts mobile */
+            .chart-container {
+                height: 250px;
+                padding: 15px;
+            }
+
+            /* Action buttons mobile */
+            .action-buttons {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .action-btn {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            /* Quick stats mobile */
+            .quick-stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            /* Recent transactions mobile */
+            .recent-transactions .transactions-list {
+                max-height: 300px;
+            }
+
+            .transaction-item {
+                padding: 12px;
+            }
+
+            .transaction-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+
+            .transaction-details h4 {
+                font-size: 0.9rem;
+            }
+
+            .transaction-details p {
+                font-size: 0.75rem;
+            }
+
+            .transaction-amount {
+                font-size: 0.9rem;
+            }
+
+            /* Hide empty states that take too much space */
+            .empty-state {
+                padding: 20px;
+                min-height: auto;
+            }
+
+            .empty-state i {
+                font-size: 2rem;
+            }
+
+            .empty-state h3 {
+                font-size: 1.1rem;
+            }
+
+            .empty-state p {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 8px 10px;
+                margin: 0 -5px 10px -5px;
+            }
+
+            .logo-text h1 {
+                font-size: 1.2rem;
+            }
+
+            .logo-text p {
+                font-size: 0.7rem;
+            }
+
+            .mobile-menu-toggle {
+                width: 35px;
+                height: 35px;
+            }
+
+            .hamburger-line {
+                width: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 12px;
+            }
+
+            .stat-card .amount {
+                font-size: 1.1rem;
+            }
+
+            .payday-countdown-hero {
+                padding: 1rem 0.75rem;
+                margin-bottom: 1rem;
+                border-radius: 12px;
+            }
+
+            .payday-countdown-hero h2 {
+                font-size: 1.5rem;
+            }
+
+            .countdown-main-display {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .countdown-item {
+                flex: 1;
+                min-width: 70px;
+            }
+
+            .countdown-number {
+                font-size: 1.5rem;
+            }
+
+            .chart-container {
+                height: 200px;
+                padding: 10px;
+            }
+
+            .transaction-item {
+                padding: 10px;
+                margin-bottom: 5px;
+            }
+
+            .transaction-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .header-nav {
+                padding: 70px 15px 15px;
+            }
+
+            .header-nav .nav-item {
+                padding: 12px 15px;
+                font-size: 1rem;
+            }
         }
 
         /* Budget Template Preview Modal styles - Minimalistic & Clean */
@@ -2549,25 +2850,41 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         function toggleMobileMenu() {
             const nav = document.getElementById('headerNav');
             const toggle = document.querySelector('.mobile-menu-toggle');
+            const body = document.body;
             
             nav.classList.toggle('mobile-open');
             toggle.classList.toggle('active');
+            
+            // Prevent body scrolling when menu is open
+            if (nav.classList.contains('mobile-open')) {
+                body.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
+            }
         }
 
         function closeMobileMenu() {
             const nav = document.getElementById('headerNav');
             const toggle = document.querySelector('.mobile-menu-toggle');
+            const body = document.body;
             
             nav.classList.remove('mobile-open');
             toggle.classList.remove('active');
+            body.style.overflow = '';
         }
 
-        // Close mobile menu when clicking outside
+        // Close mobile menu when clicking outside or on a nav item
         document.addEventListener('click', function(event) {
             const nav = document.getElementById('headerNav');
             const toggle = document.querySelector('.mobile-menu-toggle');
             
+            // Close when clicking outside
             if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+                closeMobileMenu();
+            }
+            
+            // Close when clicking on a nav item (for navigation)
+            if (event.target.classList.contains('nav-item')) {
                 closeMobileMenu();
             }
         });

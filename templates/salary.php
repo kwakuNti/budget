@@ -809,8 +809,41 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         /* Remove hardcoded CSS variables - use theme variables from personal.css instead */
 
         @media (max-width: 768px) {
+            /* Enhanced Mobile Layout */
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
+            .container {
+                padding: 10px;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .header {
+                padding: 10px 15px;
+                margin: 0 -10px 15px -10px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .header-content {
+                gap: 10px;
+            }
+
+            .logo-text h1 {
+                font-size: 1.4rem;
+            }
+
+            .logo-text p {
+                font-size: 0.8rem;
+            }
+
+            /* Form mobile styles */
             .form-row {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
 
             .allocation-summary {
@@ -821,6 +854,91 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             .payment-method-group {
                 flex-direction: column;
+                gap: 10px;
+            }
+
+            /* Salary configuration form */
+            .salary-config-form {
+                padding: 16px;
+                margin: 10px 0;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 6px;
+            }
+
+            .form-control {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            /* Salary display */
+            .salary-display-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding: 16px;
+            }
+
+            .salary-amount {
+                font-size: 2rem;
+                margin: 10px 0;
+            }
+
+            /* Hide unnecessary elements on mobile */
+            .theme-selector {
+                display: none;
+            }
+
+            /* Salary confirmation banner */
+            .salary-confirmation-banner {
+                padding: 16px;
+                margin: 10px 0;
+            }
+
+            .salary-confirmation-banner h3 {
+                font-size: 1.1rem;
+            }
+
+            .salary-confirmation-banner p {
+                font-size: 0.9rem;
+            }
+
+            /* Buttons */
+            .btn {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            /* Charts and displays */
+            .chart-container {
+                height: 200px;
+                padding: 10px;
+            }
+
+            /* Tables */
+            .table-responsive {
+                overflow-x: auto;
+            }
+
+            .table {
+                font-size: 0.85rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 8px 4px;
             }
         }
 
@@ -1089,38 +1207,64 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 8px 10px;
+                margin: 0 -5px 10px -5px;
+            }
+
             .primary-salary-hero {
-                padding: 20px;
+                padding: 16px;
+                margin: 10px 0;
             }
 
             .salary-hero-header {
                 flex-direction: column;
-                gap: 16px;
+                gap: 12px;
                 text-align: center;
             }
 
             .hero-text h2 {
-                font-size: 24px;
+                font-size: 1.3rem;
             }
 
             .salary-display-card {
                 grid-template-columns: 1fr;
                 text-align: center;
+                padding: 12px;
             }
 
             .salary-amount {
-                font-size: 36px;
+                font-size: 1.8rem;
             }
 
             .salary-schedule {
                 justify-content: center;
-                gap: 16px;
+                gap: 12px;
+                flex-wrap: wrap;
             }
 
             .salary-quick-actions {
-                flex-direction: row;
-                justify-content: center;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .salary-config-form {
+                padding: 12px;
+            }
+
+            .form-control {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.85rem;
             }
         }
 
