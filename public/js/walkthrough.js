@@ -664,9 +664,13 @@ class BudgetWalkthrough {
         if (step.step_name === 'configure_salary') {
             console.log('🔧 Setting up salary step monitoring');
             this.setupSalaryButtonMonitoring(targetElement, step);
-        } else if (step.step_name === 'setup_budget') {
-            console.log('💰 Setting up budget step monitoring');
+        } else if (step.step_name === 'setup_budget' || step.step_name === 'choose_template') {
+            console.log('💰 Setting up budget/template step monitoring');
             this.setupBudgetStepMonitoring(targetElement, step);
+        } else if (step.step_name === 'create_categories') {
+            console.log('📝 Setting up category creation monitoring - waiting for user to click Add Category');
+            // Don't auto-handle, just wait for user to click and modal to open
+            // The periodic checker will detect the modal and call handleCategoryCreationStep
         } else if (step.step_name === 'fill_category_form') {
             console.log('📝 Setting up category form fill handler');
             this.handleCategoryFormFill(step);
@@ -709,71 +713,275 @@ class BudgetWalkthrough {
     }
 
     setupBudgetStepMonitoring(targetElement, step) {
-        console.log('💰 Setting up budget step monitoring');
+        console.log('💰 Setting up budget step monitoring without interference');
         
-        // For budget step, we allow the user to either:
-        // 1. Click "Use Template" to open template modal
-        // 2. Skip the step entirely
-        
-        // Monitor for template modal opening
-        const checkForTemplateModal = () => {
+        // Don't add interfering click listeners to the template button
+        // Instead, monitor for the modal to appear after user clicks
+        const checkForClick = () => {
+            // Monitor for modal appearance which indicates user clicked the button
             const modal = document.getElementById('budgetTemplateModal');
-            if (modal && (modal.style.display === 'block' || modal.classList.contains('show'))) {
-                console.log('📊 Budget template modal opened!');
-                this.monitorTemplateSelection(step);
+            if (modal && (modal.style.display === 'flex' || modal.style.display === 'block' || modal.classList.contains('show'))) {
+                console.log('🎉 Template modal opened - user clicked the button!');
+                this.handleTemplateSelectionStep(step);
                 return; // Stop monitoring
             }
             
-            // Continue monitoring
-            setTimeout(checkForTemplateModal, 100);
+            // Continue monitoring for click
+            setTimeout(checkForClick, 100);
         };
         
         // Start monitoring
-        setTimeout(checkForTemplateModal, 100);
+        setTimeout(checkForClick, 100);
     }
 
-    monitorTemplateSelection(step) {
-        console.log('👀 Monitoring template selection...');
+    handleTemplateSelectionStep(step) {
+        console.log('� Handling template selection step');
         
-        // Monitor for template selection or modal closure
+        // Disable automatic modal listeners during template selection
+        this.isHandlingTemplateSelection = true;
+        
+        // Temporarily hide the walkthrough to avoid z-index conflicts
+        console.log('👻 Temporarily hiding walkthrough for template selection');
+        this.temporarilyHide();
+        
+        // Wait for the modal to appear, then monitor for template selection
+        const checkForModal = () => {
+            const modal = document.getElementById('budgetTemplateModal');
+            if (modal && (modal.style.display === 'flex' || modal.style.display === 'block' || modal.classList.contains('show'))) {
+                console.log('✅ Template modal detected, setting up template listener');
+                this.monitorTemplateModalInteraction(step);
+            } else {
+                // Check again in a short while
+                setTimeout(checkForModal, 100);
+            }
+        };
+        
+        // Start checking for modal
+        setTimeout(checkForModal, 50);
+    }
+
+    monitorTemplateModalInteraction(step) {
         const modal = document.getElementById('budgetTemplateModal');
         if (!modal) return;
+        
+        console.log('📝 Monitoring template modal for interaction');
+        
+        let templateWasSelected = false;
         
         // Listen for template selection (template cards have onclick events)
         const templateCards = modal.querySelectorAll('.template-card');
         templateCards.forEach(card => {
             card.addEventListener('click', () => {
-                console.log('✅ Template selected!');
-                setTimeout(() => {
-                    this.completeBudgetStep(step);
-                }, 1000); // Allow time for template to be applied
+                console.log('✅ Template card clicked!');
+                templateWasSelected = true;
+                
+                // Monitor for template application
+                this.monitorTemplateApplication(step);
             }, { once: true });
         });
         
         // Also monitor for modal closure
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    if (modal.style.display === 'none' || !modal.style.display) {
+                if (mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                    const isVisible = modal.style.display === 'flex' || 
+                                    modal.style.display === 'block' || 
+                                    modal.classList.contains('show');
+                    
+                    if (!isVisible && observer) {
                         console.log('📊 Template modal closed');
                         observer.disconnect();
-                        // Complete the step anyway (they may have selected a template)
+                        
+                        // Check if template was actually selected/applied
                         setTimeout(() => {
-                            this.completeBudgetStep(step);
+                            this.checkTemplateCompletionOnModalClose(step, templateWasSelected);
                         }, 500);
                     }
                 }
             });
         });
         
-        observer.observe(modal, { attributes: true });
+        observer.observe(modal, { 
+            attributes: true, 
+            attributeFilter: ['style', 'class'] 
+        });
     }
 
-    completeBudgetStep(step) {
-        console.log('🎉 Completing budget setup step');
+    monitorTemplateApplication(step) {
+        console.log('👀 Monitoring for template application...');
+        
+        // Look for the apply button clicks and monitor for API calls
+        const checkForApplyButton = () => {
+            const applyButtons = document.querySelectorAll('.apply-btn, button[onclick*="applyTemplate"]');
+            applyButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    console.log('🚀 Apply template button clicked!');
+                    // Monitor for successful template application
+                    this.monitorTemplateApplicationSuccess(step);
+                }, { once: true });
+            });
+        };
+        
+        // Check immediately and retry in case template preview loads later
+        checkForApplyButton();
+        setTimeout(checkForApplyButton, 1000);
+    }
+
+    monitorTemplateApplicationSuccess(step) {
+        console.log('👀 Monitoring for template application success...');
+        
+        let successDetected = false;
+        
+        // Watch for success indicators
+        const checkForSuccess = () => {
+            if (successDetected) return;
+            
+            // Check if modal is closed (success indicator)
+            const modal = document.getElementById('budgetTemplateModal');
+            if (!modal || modal.style.display === 'none' || !modal.classList.contains('show')) {
+                console.log('✅ Template modal closed - checking if template was applied');
+                
+                // Double-check by looking for success snackbar
+                const snackbar = document.getElementById('snackbar');
+                if (snackbar && snackbar.classList.contains('show') && 
+                    (snackbar.textContent.includes('applied') || snackbar.textContent.includes('Template'))) {
+                    console.log('✅ Success snackbar detected for template');
+                    successDetected = true;
+                    this.completeTemplateStep(step);
+                    return;
+                }
+                
+                // Check if budget data was updated (alternative success check)
+                setTimeout(() => {
+                    // If we reach here, assume template was applied successfully
+                    if (!successDetected) {
+                        console.log('✅ Assuming template was applied based on modal closure');
+                        successDetected = true;
+                        this.completeTemplateStep(step);
+                    }
+                }, 1000);
+                return;
+            }
+            
+            // Check for success snackbar
+            const snackbar = document.getElementById('snackbar');
+            if (snackbar && snackbar.classList.contains('show') && 
+                (snackbar.textContent.includes('applied') || snackbar.textContent.includes('success'))) {
+                console.log('✅ Success snackbar detected');
+                successDetected = true;
+                this.completeTemplateStep(step);
+                return;
+            }
+            
+            // Continue monitoring for a reasonable time
+            setTimeout(checkForSuccess, 500);
+        };
+        
+        // Start monitoring after a brief delay to allow submission to process
+        setTimeout(checkForSuccess, 1000);
+    }
+
+    checkTemplateCompletionOnModalClose(step, templateWasSelected) {
+        console.log('🔍 Checking if template was actually completed...', { templateWasSelected });
+        
+        // Check if any template allocation exists in the page or data
+        // This is a simple check - you might want to make an API call here for more accuracy
+        const hasTemplateApplied = this.checkIfTemplateWasApplied();
+        
+        console.log('💡 Template was applied:', hasTemplateApplied);
+        
+        if (hasTemplateApplied || templateWasSelected) {
+            console.log('✅ Template was completed - proceeding with walkthrough');
+            this.completeTemplateStep(step);
+        } else {
+            console.log('❌ Template was not completed - showing reminder');
+            this.handleIncompleteTemplateSelection(step);
+        }
+    }
+
+    checkIfTemplateWasApplied() {
+        // Check for any indication that a template was applied
+        // This could be improved with an API call to check budget allocation
+        
+        // Check for budget allocation data in the page
+        try {
+            if (window.budgetData && window.budgetData.allocation) {
+                const allocation = window.budgetData.allocation;
+                const hasAllocation = allocation.needs_percent > 0 || 
+                                    allocation.wants_percent > 0 || 
+                                    allocation.savings_percent > 0;
+                return hasAllocation;
+            }
+        } catch (e) {
+            console.log('Could not check budget data:', e);
+        }
+        
+        // Fallback: assume template was applied if modal was interacted with
+        // In a production environment, you'd want to make an API call here
+        return true;
+    }
+
+    handleIncompleteTemplateSelection(step) {
+        console.log('⚠️ User closed modal without selecting a template');
+        
+        // Re-enable automatic modal listeners
+        this.isHandlingTemplateSelection = false;
+        
+        // Resume walkthrough to show the reminder
+        this.resumeFromHiding();
+        
+        // Update tooltip to show reminder message
+        if (this.tooltip) {
+            const content = this.tooltip.querySelector('.tooltip-content');
+            if (content) {
+                content.innerHTML = `
+                    <h3 style="color: #ff6b6b;">⚠️ Template Selection Required</h3>
+                    <p>You need to select and apply a budget template to continue. This helps organize your spending into needs, wants, and savings.</p>
+                    <p style="font-weight: bold; color: #007bff;">Please click "Use Template" and choose a template that works for you.</p>
+                `;
+            }
+        }
+        
+        // Set up monitoring again for the next attempt
+        this.setupBudgetStepMonitoring(this.currentTargetElement, step);
+    }
+
+    completeTemplateStep(step) {
+        console.log('🎉 Completing template selection step');
+        
+        // Re-enable automatic modal listeners
+        this.isHandlingTemplateSelection = false;
+        
+        // Show walkthrough again
+        this.resumeFromHiding();
+        
+        // Update the UI to show successful template selection
+        this.updateTooltipForTemplateSuccess();
         
         // Complete the walkthrough step
-        this.completeStep(step.step_name);
+        setTimeout(() => {
+            this.completeStep(step.step_name);
+        }, 1000);
+    }
+
+    updateTooltipForTemplateSuccess() {
+        if (this.tooltip) {
+            this.tooltip.innerHTML = `
+                <div class="tooltip-header">
+                    <h4>✅ Template Applied!</h4>
+                    <div class="tooltip-progress">
+                        Step 3 of 8
+                    </div>
+                </div>
+                <div class="tooltip-content">
+                    <p>Great! Your budget template has been applied. Now let's create your first budget category to start tracking specific expenses.</p>
+                </div>
+                <div class="tooltip-actions">
+                    <p class="action-note"><i class="fas fa-check-circle"></i> Moving to category creation...</p>
+                </div>
+            `;
+        }
     }
 
     createOverlay() {
@@ -848,7 +1056,7 @@ class BudgetWalkthrough {
                 self.hideWalkthroughForModal();
                 self.isModalHidden = true;
                 
-                // If it's a category step and the addCategoryModal is open, advance the step
+                // If it's a category step and the addCategoryModal is open, start monitoring properly
                 if (isCategoryStep && self.currentStep.step_name === 'create_categories') {
                     const categoryModal = document.getElementById('addCategoryModal');
                     
@@ -858,16 +1066,9 @@ class BudgetWalkthrough {
                     console.log('  Modal computed display:', categoryModal ? getComputedStyle(categoryModal).display : 'N/A');
                     
                     if (categoryModal && (categoryModal.style.display === 'flex' || getComputedStyle(categoryModal).display === 'flex')) {
-                        console.log('✅ Category modal detected, completing create_categories step after delay');
-                        // Wait longer to ensure user actually clicked and modal is stable
-                        setTimeout(() => {
-                            if (categoryModal.style.display === 'flex' || getComputedStyle(categoryModal).display === 'flex') { // Double-check modal is still open
-                                console.log('🚀 Confirming modal still open, advancing step');
-                                self.completeStep('create_categories');
-                            } else {
-                                console.log('⚠️ Modal closed before step completion');
-                            }
-                        }, 1000); // Wait 1 second before advancing
+                        console.log('✅ Category modal detected, setting up category monitoring');
+                        // Set up proper category monitoring instead of auto-completing
+                        self.handleCategoryCreationStep(self.currentStep);
                     }
                 }
             } else if (openModals.length === 0 && self.isModalHidden) {
@@ -1302,15 +1503,15 @@ class BudgetWalkthrough {
                 // The button click should open the modal, then we monitor for form submission
                 this.handleSalarySetupStep(step);
                 
-            } else if (step.step_name === 'choose_template') {
-                console.log('🔧 Handling choose template step - forcing modal open');
+            } else if (step.step_name === 'choose_template' || step.step_name === 'setup_budget') {
+                console.log('🔧 Handling choose template step - allowing click to open modal');
                 
                 // Allow the click first, then check if modal opened
                 setTimeout(() => {
                     const modal = document.getElementById('budgetTemplateModal');
                     console.log('🔍 Checking modal state:', modal ? modal.style.display : 'modal not found');
                     
-                    if (!modal || modal.style.display !== 'flex') {
+                    if (!modal || (modal.style.display !== 'flex' && modal.style.display !== 'block')) {
                         console.log('🔧 Modal not opened, attempting multiple fallbacks');
                         
                         // Try method 1: Call the function directly
@@ -1326,7 +1527,7 @@ class BudgetWalkthrough {
                         // Try method 2: Call showModal directly  
                         setTimeout(() => {
                             const modal2 = document.getElementById('budgetTemplateModal');
-                            if (!modal2 || modal2.style.display !== 'flex') {
+                            if (!modal2 || (modal2.style.display !== 'flex' && modal2.style.display !== 'block')) {
                                 try {
                                     if (typeof window.showModal === 'function') {
                                         window.showModal('budgetTemplateModal');
@@ -1341,7 +1542,7 @@ class BudgetWalkthrough {
                         // Try method 3: Direct DOM manipulation
                         setTimeout(() => {
                             const modal3 = document.getElementById('budgetTemplateModal');
-                            if (modal3 && modal3.style.display !== 'flex') {
+                            if (modal3 && modal3.style.display !== 'flex' && modal3.style.display !== 'block') {
                                 console.log('🔧 Using direct DOM manipulation');
                                 modal3.style.display = 'flex';
                                 modal3.style.zIndex = '10015'; // Ensure highest z-index
@@ -1349,17 +1550,7 @@ class BudgetWalkthrough {
                         }, 100);
                     }
                     
-                    // Hide walkthrough tooltip when modal opens and monitor for template selection
-                    setTimeout(() => {
-                        const modal4 = document.getElementById('budgetTemplateModal');
-                        if (modal4 && modal4.style.display === 'flex') {
-                            console.log('✅ Template modal opened, hiding walkthrough tooltip');
-                            this.cleanup(); // Hide current tooltip
-                            
-                            // Monitor for modal close (template selected)
-                            this.monitorTemplateSelection(modal4);
-                        }
-                    }, 200);
+                    // The template selection handler will be triggered automatically by setupBudgetStepMonitoring
                     
                 }, 50);
                 
@@ -2423,15 +2614,186 @@ class BudgetWalkthrough {
     handleCategoryCreationStep(step) {
         console.log('🏗️ Handling category creation step');
         
-        // Allow the modal to open first, then proceed to next step
-        setTimeout(() => {
-            // Wait for modal to be visible
-            const modal = document.getElementById('addCategoryModal');
-            if (modal && modal.style.display === 'flex') {
-                console.log('✅ Category modal opened, proceeding to next step');
-                this.completeStep(step.step_name);
+        // Disable automatic modal listeners during category creation
+        this.isHandlingCategoryCreation = true;
+        
+        // Don't temporarily hide walkthrough for category steps - we want to provide guidance
+        // Set up monitoring for actual category form submission
+        this.monitorCategoryModalInteraction(step);
+    }
+
+    monitorCategoryModalInteraction(step) {
+        const modal = document.getElementById('addCategoryModal');
+        if (!modal) return;
+        
+        console.log('📝 Monitoring category modal for interaction');
+        
+        let categoryFormWasSubmitted = false;
+        
+        // Listen for form submission
+        const form = document.getElementById('addCategoryForm');
+        if (form) {
+            const handleSubmission = (event) => {
+                console.log('🚀 Category form submitted');
+                categoryFormWasSubmitted = true;
+                
+                // Allow the form to submit normally and monitor for success
+                setTimeout(() => {
+                    this.monitorCategoryCreationSuccess(step);
+                }, 1000);
+            };
+            
+            form.addEventListener('submit', handleSubmission, { once: true });
+        }
+        
+        // Also monitor for modal closure
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                    const isVisible = modal.style.display === 'flex' || 
+                                    modal.style.display === 'block' || 
+                                    getComputedStyle(modal).display === 'flex';
+                    
+                    if (!isVisible && observer) {
+                        console.log('📊 Category modal closed');
+                        observer.disconnect();
+                        
+                        // Check if category was actually created
+                        setTimeout(() => {
+                            this.checkCategoryCompletionOnModalClose(step, categoryFormWasSubmitted);
+                        }, 500);
+                    }
+                }
+            });
+        });
+        
+        observer.observe(modal, { 
+            attributes: true, 
+            attributeFilter: ['style', 'class'] 
+        });
+    }
+
+    checkCategoryCompletionOnModalClose(step, categoryFormWasSubmitted) {
+        console.log('🔍 Checking if category was actually created...', { categoryFormWasSubmitted });
+        
+        // Check for success indicators
+        const hasCategoryCreated = this.checkIfCategoryWasCreated();
+        
+        console.log('💡 Category was created:', hasCategoryCreated);
+        
+        if (hasCategoryCreated || categoryFormWasSubmitted) {
+            console.log('✅ Category was completed - proceeding with walkthrough');
+            this.completeCategoryCreationStep(step);
+        } else {
+            console.log('❌ Category was not completed - showing reminder');
+            this.handleIncompleteCategoryCreation(step);
+        }
+    }
+
+    checkIfCategoryWasCreated() {
+        // Check for any indication that a category was created
+        
+        // Check for success snackbar
+        const snackbar = document.getElementById('snackbar');
+        if (snackbar && snackbar.classList.contains('show') && 
+            (snackbar.textContent.includes('created') || snackbar.textContent.includes('added'))) {
+            return true;
+        }
+        
+        // Check if budget data was updated with new categories
+        try {
+            if (window.budgetData && window.budgetData.categories && window.budgetData.categories.length > 0) {
+                return true;
             }
-        }, 500);
+        } catch (e) {
+            console.log('Could not check budget categories:', e);
+        }
+        
+        // Check for any category elements on the page
+        const categoryElements = document.querySelectorAll('.budget-category, .category-card');
+        if (categoryElements.length > 0) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    handleIncompleteCategoryCreation(step) {
+        console.log('⚠️ User closed modal without creating a category');
+        
+        // Re-enable automatic modal listeners
+        this.isHandlingCategoryCreation = false;
+        
+        // Update tooltip to show reminder message (tooltip should still be visible)
+        if (this.tooltip) {
+            const content = this.tooltip.querySelector('.tooltip-content');
+            if (content) {
+                content.innerHTML = `
+                    <h3 style="color: #ff6b6b;">⚠️ Category Creation Required</h3>
+                    <p>You need to create at least one budget category to continue. Categories help you track specific types of expenses like transportation, food, or entertainment.</p>
+                    <p style="font-weight: bold; color: #007bff;">Please click "Add Category" and create your first category.</p>
+                `;
+            }
+        }
+        
+        // Set up monitoring again for the next attempt
+        this.monitorForCategoryModalAgain(step);
+    }
+
+    monitorForCategoryModalAgain(step) {
+        console.log('👀 Setting up category modal monitoring again...');
+        
+        const checkForModal = () => {
+            const modal = document.getElementById('addCategoryModal');
+            const isModalOpen = modal && (modal.style.display === 'flex' || getComputedStyle(modal).display === 'flex');
+            
+            if (isModalOpen) {
+                console.log('✅ Category modal opened again, setting up monitoring');
+                this.handleCategoryCreationStep(step);
+                return;
+            }
+            
+            // Continue checking every 200ms
+            setTimeout(checkForModal, 200);
+        };
+        
+        // Start monitoring immediately
+        checkForModal();
+    }
+
+    completeCategoryCreationStep(step) {
+        console.log('🎉 Completing category creation step');
+        
+        // Re-enable automatic modal listeners
+        this.isHandlingCategoryCreation = false;
+        
+        // Update the UI to show successful category creation
+        this.updateTooltipForCategoryCreationSuccess();
+        
+        // Complete the walkthrough step
+        setTimeout(() => {
+            this.completeStep(step.step_name);
+        }, 1000);
+    }
+
+    updateTooltipForCategoryCreationSuccess() {
+        if (this.tooltip) {
+            this.tooltip.innerHTML = `
+                <div class="tooltip-header">
+                    <h4>✅ Category Created!</h4>
+                    <div class="tooltip-progress">
+                        Step 4 of 8
+                    </div>
+                </div>
+                <div class="tooltip-content">
+                    <p>Perfect! You've created your first budget category. Categories help you organize and track your spending effectively.</p>
+                </div>
+                <div class="tooltip-actions">
+                    <p class="action-note"><i class="fas fa-check-circle"></i> Moving to next step...</p>
+                </div>
+            `;
+        }
     }
 
     handleCategoryFormFill(step) {
@@ -3003,44 +3365,222 @@ class BudgetWalkthrough {
     handleCategoryCompletion(step) {
         console.log('✅ Handling category completion step');
         
+        // Set up monitoring flag
+        this.isHandlingCategoryCompletion = true;
+        
         // Listen for form submission
         const form = document.getElementById('addCategoryForm');
         const submitButton = document.querySelector('#addCategoryModal button[type="submit"]');
         
         if (form && submitButton) {
             const handleSubmission = (event) => {
-                console.log('🚀 Category form submitted');
+                console.log('🚀 Category form submitted for completion');
                 
                 // Allow the form to submit normally
                 // Monitor for success
                 setTimeout(() => {
-                    this.monitorCategoryCreationSuccess(step);
+                    this.monitorCategoryCompletionSuccess(step);
                 }, 1000);
             };
             
             form.addEventListener('submit', handleSubmission, { once: true });
+            
+            // Also monitor for modal closure
+            this.monitorModalClosureForCompletion(step);
         } else {
-            console.warn('⚠️ Could not find category form');
+            console.warn('⚠️ Could not find category form or submit button');
         }
+    }
+
+    monitorModalClosureForCompletion(step) {
+        const modal = document.getElementById('addCategoryModal');
+        if (!modal) return;
+        
+        let formWasSubmitted = false;
+        
+        // Use MutationObserver to watch for modal closure
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                    const isVisible = modal.style.display === 'flex' || 
+                                    modal.style.display === 'block' || 
+                                    getComputedStyle(modal).display === 'flex';
+                    
+                    if (!isVisible && observer) {
+                        console.log('🎯 Category modal closed during completion step');
+                        observer.disconnect();
+                        
+                        // Check if category was actually completed
+                        setTimeout(() => {
+                            this.checkCategoryCompletionOnModalClose(step, formWasSubmitted);
+                        }, 500);
+                    }
+                }
+            });
+        });
+        
+        // Listen for form submission
+        const form = document.getElementById('addCategoryForm');
+        if (form) {
+            form.addEventListener('submit', () => {
+                formWasSubmitted = true;
+            }, { once: true });
+        }
+        
+        observer.observe(modal, { 
+            attributes: true, 
+            attributeFilter: ['style', 'class'] 
+        });
+    }
+
+    monitorCategoryCompletionSuccess(step) {
+        console.log('🔍 Monitoring category completion success');
+        
+        let successDetected = false;
+        
+        const checkForSuccess = () => {
+            if (successDetected) return;
+            
+            // Check if modal closed (success indicator)
+            const modal = document.getElementById('addCategoryModal');
+            if (!modal || modal.style.display === 'none' || getComputedStyle(modal).display === 'none') {
+                console.log('✅ Category modal closed - checking for completion success');
+                
+                // Check for success snackbar
+                const snackbar = document.getElementById('snackbar');
+                if (snackbar && snackbar.classList.contains('show') && 
+                    (snackbar.textContent.includes('created') || snackbar.textContent.includes('added') || snackbar.textContent.includes('success'))) {
+                    console.log('✅ Success snackbar detected for completion');
+                    successDetected = true;
+                    this.completeCategoryCompletionStep(step);
+                    return;
+                }
+                
+                // Check if categories were updated (alternative success check)
+                setTimeout(() => {
+                    if (!successDetected && this.checkIfCategoryWasCreated()) {
+                        console.log('✅ Category completion confirmed via page check');
+                        successDetected = true;
+                        this.completeCategoryCompletionStep(step);
+                    }
+                }, 1000);
+                return;
+            }
+            
+            // Check for success snackbar while modal is open
+            const snackbar = document.getElementById('snackbar');
+            if (snackbar && snackbar.classList.contains('show') && 
+                (snackbar.textContent.includes('created') || snackbar.textContent.includes('success'))) {
+                console.log('✅ Success snackbar detected during completion');
+                successDetected = true;
+                this.completeCategoryCompletionStep(step);
+                return;
+            }
+            
+            // Continue monitoring for a reasonable time
+            setTimeout(checkForSuccess, 500);
+        };
+        
+        // Start monitoring after a brief delay
+        setTimeout(checkForSuccess, 1000);
+    }
+
+    checkCategoryCompletionOnModalClose(step, formWasSubmitted) {
+        console.log('🔍 Checking if category completion was successful...', { formWasSubmitted });
+        
+        // Check for success indicators
+        const hasCategoryCompleted = this.checkIfCategoryWasCreated();
+        
+        console.log('💡 Category was completed:', hasCategoryCompleted);
+        
+        if (hasCategoryCompleted || formWasSubmitted) {
+            console.log('✅ Category completion was successful - proceeding with walkthrough');
+            this.completeCategoryCompletionStep(step);
+        } else {
+            console.log('❌ Category completion was not successful - showing reminder');
+            this.handleIncompleteCategoryCompletion(step);
+        }
+    }
+
+    handleIncompleteCategoryCompletion(step) {
+        console.log('⚠️ User closed modal without completing category');
+        
+        // Re-enable automatic modal listeners
+        this.isHandlingCategoryCompletion = false;
+        
+        // Update tooltip to show reminder message
+        if (this.tooltip) {
+            const content = this.tooltip.querySelector('.tooltip-content');
+            if (content) {
+                content.innerHTML = `
+                    <h3 style="color: #ff6b6b;">⚠️ Category Completion Required</h3>
+                    <p>You need to finish creating your category by filling in all required information and submitting the form.</p>
+                    <p style="font-weight: bold; color: #007bff;">Please reopen the category form and complete all the fields.</p>
+                `;
+            }
+        }
+        
+        // Set up monitoring again for the next attempt
+        this.monitorForCategoryModalAgain(step);
+    }
+
+    completeCategoryCompletionStep(step) {
+        console.log('🎉 Completing category completion step');
+        
+        // Re-enable automatic modal listeners
+        this.isHandlingCategoryCompletion = false;
+        
+        // Update the UI to show successful category completion
+        this.updateTooltipForCategorySuccess();
+        
+        // Complete the walkthrough step
+        setTimeout(() => {
+            this.completeStep(step.step_name);
+        }, 1000);
     }
 
     monitorCategoryCreationSuccess(step) {
         console.log('🔍 Monitoring category creation success');
         
+        let successDetected = false;
+        
         const checkForSuccess = () => {
+            if (successDetected) return;
+            
             // Check if modal closed (success indicator)
             const modal = document.getElementById('addCategoryModal');
-            if (!modal || modal.style.display === 'none') {
-                console.log('✅ Category modal closed - likely successful');
-                this.completeCategoryStep(step);
+            if (!modal || modal.style.display === 'none' || getComputedStyle(modal).display === 'none') {
+                console.log('✅ Category modal closed - checking for success indicators');
+                
+                // Check for success snackbar
+                const snackbar = document.getElementById('snackbar');
+                if (snackbar && snackbar.classList.contains('show') && 
+                    (snackbar.textContent.includes('created') || snackbar.textContent.includes('added') || snackbar.textContent.includes('success'))) {
+                    console.log('✅ Success snackbar detected');
+                    successDetected = true;
+                    this.completeCategoryCreationStep(step);
+                    return;
+                }
+                
+                // Check if categories were updated
+                setTimeout(() => {
+                    if (!successDetected && this.checkIfCategoryWasCreated()) {
+                        console.log('✅ Category creation confirmed via page check');
+                        successDetected = true;
+                        this.completeCategoryCreationStep(step);
+                    }
+                }, 1000);
                 return;
             }
             
-            // Check for success snackbar
+            // Check for success snackbar while modal is open
             const snackbar = document.getElementById('snackbar');
-            if (snackbar && snackbar.classList.contains('show') && snackbar.classList.contains('success')) {
-                console.log('✅ Success snackbar detected');
-                this.completeCategoryStep(step);
+            if (snackbar && snackbar.classList.contains('show') && 
+                (snackbar.textContent.includes('created') || snackbar.textContent.includes('added') || snackbar.textContent.includes('success'))) {
+                console.log('✅ Success snackbar detected while modal open');
+                successDetected = true;
+                this.completeCategoryCreationStep(step);
                 return;
             }
             
@@ -3053,7 +3593,7 @@ class BudgetWalkthrough {
     }
 
     completeCategoryStep(step) {
-        console.log('🎉 Completing category creation step');
+        console.log('🎉 Completing category completion step');
         
         // Update the UI to show successful category creation
         this.updateTooltipForCategorySuccess();
@@ -3084,16 +3624,17 @@ class BudgetWalkthrough {
     }
 
     monitorTemplateSelection(modal) {
-        console.log('👀 Monitoring template selection...');
+        console.log('👀 Monitoring template selection for completion validation...');
         
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.target === modal && modal.style.display === 'none') {
-                    console.log('✅ Template modal closed, template likely selected');
+                    console.log('✅ Template modal closed, checking if template was applied');
                     observer.disconnect();
-                    // Complete the choose_template step and advance to create_categories
+                    
+                    // Use the new completion checking logic
                     setTimeout(() => {
-                        this.completeStep('choose_template');
+                        this.checkTemplateCompletionOnModalClose(this.currentStep, true);
                     }, 500);
                 }
             });
@@ -3109,10 +3650,7 @@ class BudgetWalkthrough {
         templateCards.forEach(card => {
             card.addEventListener('click', () => {
                 console.log('✅ Template card clicked');
-                observer.disconnect();
-                setTimeout(() => {
-                    this.completeStep('choose_template');
-                }, 1000);
+                // The template application monitoring will be handled by handleTemplateSelectionStep
             }, { once: true });
         });
     }
@@ -3161,5 +3699,53 @@ class BudgetWalkthrough {
 
 // Initialize walkthrough when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.budgetWalkthrough = new BudgetWalkthrough();
+    const walkthroughInstance = new BudgetWalkthrough();
+    window.budgetWalkthrough = walkthroughInstance;
+    
+    // Add global helper functions for auto-fill buttons
+    window.budgetWalkthrough.fillTransportationExample = function() {
+        const nameInput = walkthroughInstance.currentFormInput || document.querySelector('#addCategoryModal input[name="name"]');
+        if (nameInput) {
+            nameInput.value = 'Transportation';
+            nameInput.focus();
+            
+            // Trigger events to simulate user input
+            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+            nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+            nameInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+            
+            console.log('✅ Auto-filled Transportation category');
+        }
+    };
+    
+    window.budgetWalkthrough.selectNeedsType = function() {
+        const typeSelect = walkthroughInstance.currentTypeSelect || document.querySelector('#addCategoryModal select[name="category_type"]');
+        if (typeSelect) {
+            typeSelect.value = 'needs';
+            typeSelect.focus();
+            
+            // Trigger change event
+            typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('✅ Auto-selected Needs category type');
+        }
+    };
+    
+    window.budgetWalkthrough.fillSuggestedBudget = function() {
+        const budgetInput = walkthroughInstance.currentBudgetInput || document.querySelector('#addCategoryModal input[name="budget_limit"]');
+        if (budgetInput) {
+            budgetInput.value = '300';
+            budgetInput.focus();
+            
+            // Trigger events to simulate user input
+            budgetInput.dispatchEvent(new Event('input', { bubbles: true }));
+            budgetInput.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            console.log('✅ Auto-filled suggested budget of ₵300');
+        }
+    };
+    
+    window.budgetWalkthrough.completeSetup = function() {
+        walkthroughInstance.completeSetup();
+    };
 });
