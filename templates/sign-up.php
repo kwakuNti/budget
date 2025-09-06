@@ -1483,7 +1483,6 @@
         document.getElementById('signupForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            console.log('Sign-up form submitted');
             
             // Show unified loading screen
             if (window.budgetlyLoader) {
@@ -1622,19 +1621,14 @@
 
         // Initialize loading screen when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Sign-up: DOMContentLoaded fired');
-            console.log('Sign-up: LoadingScreen available?', typeof window.LoadingScreen);
             
             if (window.LoadingScreen) {
-                console.log('Sign-up: Creating LoadingScreen');
                 window.budgetlyLoader = new LoadingScreen();
-                console.log('Sign-up: LoadingScreen created', window.budgetlyLoader);
                 
                 // Customize the loading message for sign-up
                 const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
                 if (loadingMessage) {
                     loadingMessage.innerHTML = 'Creating your account<span class="loading-dots-text">...</span>';
-                    console.log('Sign-up: Loading message customized');
                 } else {
                     console.error('Sign-up: Could not find loading message element');
                 }
@@ -1649,33 +1643,27 @@
         // Test function for loading screen (can be called from browser console)
         window.testSignupLoadingScreen = function(duration = 3000) {
             if (window.budgetlyLoader) {
-                console.log('Testing signup loading screen for', duration, 'ms');
                 window.budgetlyLoader.show();
                 setTimeout(() => {
                     window.budgetlyLoader.hide();
-                    console.log('Signup loading screen test complete');
                 }, duration);
             } else {
-                console.log('Loading screen not available');
             }
         };
 
         // Test function for snackbar (can be called from browser console)
         window.testSignupSnackbar = function(message = 'Test notification', type = 'success') {
             showSnackbar(message, type);
-            console.log(`Showing ${type} snackbar: "${message}"`);
         };
 
         // Emergency function to hide loading screen (can be called from browser console)
         window.hideLoadingScreen = function() {
             if (window.budgetlyLoader) {
                 window.budgetlyLoader.hide();
-                console.log('Loading screen forcefully hidden');
             } else {
                 const loadingScreen = document.getElementById('loadingScreen');
                 if (loadingScreen) {
                     loadingScreen.style.display = 'none';
-                    console.log('Loading screen element hidden');
                 }
             }
         };

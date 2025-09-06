@@ -2176,7 +2176,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     logoUserName.textContent = data.user.first_name;
                 }
             } else {
-                console.log('No user data found');
             }
 
             // Update salary overview cards
@@ -3635,7 +3634,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
                 if (loadingMessage) {
                     loadingMessage.innerHTML = 'Loading your salary information<span class="loading-dots-text">...</span>';
-                    console.log('Salary: Loading message customized');
                 } else {
                     console.error('Salary: Could not find loading message element');
                 }
@@ -3906,14 +3904,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Test function for loading screen (can be called from browser console)
         window.testSalaryLoadingScreen = function(duration = 3000) {
             if (window.budgetlyLoader) {
-                console.log('Testing salary loading screen for', duration, 'ms');
                 window.budgetlyLoader.show();
                 setTimeout(() => {
                     window.budgetlyLoader.hide();
-                    console.log('Salary loading screen test complete');
                 }, duration);
             } else {
-                console.log('Loading screen not available');
             }
         };
     </script>

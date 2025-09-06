@@ -40,7 +40,6 @@ class SessionTimeoutMonitor {
             this.checkSession();
         }, this.options.checkInterval);
         
-        console.log('Session timeout monitor started');
     }
     
     stopMonitoring() {
@@ -48,7 +47,6 @@ class SessionTimeoutMonitor {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
         }
-        console.log('Session timeout monitor stopped');
     }
     
     async checkSession() {
@@ -126,13 +124,11 @@ class SessionTimeoutMonitor {
         
         warningDialog.style.display = 'flex';
         
-        console.log(`Session timeout warning shown: ${minutesLeft} minutes left`);
     }
     
     hideTimeoutWarning() {
         this.isWarningShown = false;
         this.warningDialog.style.display = 'none';
-        console.log('Session timeout warning hidden');
     }
     
     showExpiredMessage() {
@@ -318,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (isProtectedPage) {
         window.sessionMonitor = new SessionTimeoutMonitor();
-        console.log('Session timeout monitor initialized');
     }
 });
 

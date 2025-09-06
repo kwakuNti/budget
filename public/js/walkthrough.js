@@ -22,7 +22,6 @@ class BudgetWalkthrough {
         // Emergency disable switch - check for URL parameter to disable walkthrough
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('disable_walkthrough') === '1') {
-            console.log('🚨 Walkthrough disabled via URL parameter');
             return;
         }
         
@@ -61,7 +60,6 @@ class BudgetWalkthrough {
                 return hasSalary;
             }
         } catch (error) {
-            console.log('❌ Error checking salary status:', error);
         }
         
         // Fallback - check the display element on the page
@@ -96,10 +94,8 @@ class BudgetWalkthrough {
                 this.isSalaryCompleted = isCompleted;
                 
                 if (!isCompleted) {
-                    console.log('🚫 Salary not completed, blocking navigation');
                     this.blockNavigationForSalarySetup();
                 } else {
-                    console.log('✅ Salary already completed, not blocking navigation');
                 }
             });
         }
@@ -414,7 +410,6 @@ class BudgetWalkthrough {
         
         document.body.appendChild(helpIcon);
         
-        console.log('✅ Page help icon added');
     }
 
     // Start page-specific help tour
@@ -441,7 +436,6 @@ class BudgetWalkthrough {
                 this.walkthroughType = 'help_guide';
                 this.showStep(data.step);
             } else {
-                console.log('ℹ️ No help available for this page');
             }
         } catch (error) {
             console.error('❌ Error starting page help:', error);
@@ -456,7 +450,6 @@ class BudgetWalkthrough {
             });
             
             if (!response.ok) {
-                console.log('Walkthrough API not available:', response.status);
                 return;
             }
             
@@ -467,11 +460,9 @@ class BudgetWalkthrough {
                 this.currentStep = data.data.current_step;
                 this.completedSteps = data.data.steps_completed || [];
             } else {
-                console.log('Walkthrough status error:', data.error);
                 this.walkthroughData = null;
             }
         } catch (error) {
-            console.log('Walkthrough status check failed:', error);
             this.walkthroughData = null;
         }
     }
@@ -485,8 +476,6 @@ class BudgetWalkthrough {
 
     getCurrentPageStep() {
         const currentPage = window.location.pathname;
-        console.log('🌍 Current page:', currentPage);
-        console.log('📍 Current step:', this.currentStep);
         
         // If user has setup_income step, start it on any page (dashboard)
         if (this.currentStep === 'setup_income') {
@@ -494,7 +483,6 @@ class BudgetWalkthrough {
                 return 'setup_income';
             } else {
                 // Redirect to dashboard to start walkthrough
-                console.log('🚀 Redirecting to dashboard to start walkthrough');
                 window.location.href = '/personal-dashboard';
                 return null;
             }
@@ -509,7 +497,6 @@ class BudgetWalkthrough {
                 // Just start the walkthrough where they are if it's dashboard
                 if (currentPage.includes('personal-dashboard')) {
                     // Redirect to salary page for salary step
-                    console.log('🚀 Redirecting to salary page for salary configuration');
                     window.location.href = '/salary';
                     return null;
                 }
@@ -524,7 +511,6 @@ class BudgetWalkthrough {
                 return this.currentStep;
             } else {
                 // Redirect to budget page
-                console.log('🚀 Redirecting to budget page for template selection');
                 window.location.href = '/budgets';
                 return null;
             }
@@ -536,7 +522,6 @@ class BudgetWalkthrough {
                 return this.currentStep;
             } else {
                 // Redirect to dashboard
-                console.log('🚀 Redirecting to dashboard for setup completion');
                 window.location.href = '/personal-dashboard';
                 return null;
             }
@@ -548,7 +533,6 @@ class BudgetWalkthrough {
                 return 'setup_budget';
             } else {
                 // Redirect to budget page
-                console.log('🚀 Redirecting to budget page for budget setup');
                 window.location.href = '/budgets';
                 return null;
             }
@@ -559,9 +543,7 @@ class BudgetWalkthrough {
 
     async startWalkthrough() {
         const stepName = this.getCurrentPageStep();
-        console.log('Starting walkthrough for step:', stepName);
         if (!stepName) {
-            console.log('No step found for current page');
             return;
         }
 
@@ -576,7 +558,6 @@ class BudgetWalkthrough {
             });
             
             const data = await response.json();
-            console.log('Walkthrough step data:', data);
             
             if (data.success) {
                 this.showStep(data.step);
@@ -592,8 +573,6 @@ class BudgetWalkthrough {
         this.isActive = true;
         this.currentStep = step; // Store current step
         
-        console.log('🎯 Showing step:', step);
-        console.log('🎯 Target element selector:', step.target_element);
         
         // Create overlay
         this.createOverlay();
@@ -612,26 +591,21 @@ class BudgetWalkthrough {
             try {
                 targetElement = document.querySelector(selector);
                 if (targetElement) {
-                    console.log('✅ Found target with selector:', selector);
                     break;
                 }
             } catch (e) {
-                console.log('❌ Invalid selector:', selector);
                 continue;
             }
         }
         
         if (!targetElement) {
-            console.log('❌ No suitable target element found, using fallback');
             // Use a very generic fallback
             targetElement = document.body;
         }
 
-        console.log('✅ Using target element:', targetElement);
 
         // Handle special step types first (before any highlighting or tooltip)
         if (step.step_name === 'setup_complete') {
-            console.log('🎉 Setup complete - showing congratulations');
             this.showCompletionCongratulations(step);
             return; // Don't show regular tooltip or highlight anything
         }
@@ -657,25 +631,19 @@ class BudgetWalkthrough {
         
         // Handle different step types
         if (step.step_name === 'configure_salary') {
-            console.log('🔧 Setting up salary step monitoring');
             this.setupSalaryButtonMonitoring(targetElement, step);
         } else if (step.step_name === 'setup_budget' || step.step_name === 'choose_template') {
-            console.log('💰 Setting up budget/template step monitoring');
             this.setupBudgetStepMonitoring(targetElement, step);
         } else if (step.step_name === 'create_categories') {
-            console.log('📝 Setting up category creation monitoring - waiting for user to click Add Category');
             // Don't auto-handle, just wait for user to click and modal to open
             // The periodic checker will detect the modal and call handleCategoryCreationStep
         } else if (step.step_name === 'fill_category_form') {
-            console.log('📝 Setting up category form fill handler');
             this.handleCategoryFormFill(step);
             return; // Don't show regular tooltip
         } else if (step.step_name === 'set_category_budget') {
-            console.log('💰 Setting up budget setting handler');
             this.handleBudgetSetting(step);
             return; // Don't show regular tooltip
         } else if (step.step_name === 'complete_category') {
-            console.log('✅ Setting up category completion handler');
             this.handleCategoryCompletion(step);
             return; // Don't show regular tooltip
         } else if (step.action_required && step.walkthrough_type !== 'help_guide' && 
@@ -686,7 +654,6 @@ class BudgetWalkthrough {
     }
 
     setupSalaryButtonMonitoring(targetElement, step) {
-        console.log('🔧 Setting up salary button monitoring without interference');
         
         // Don't add interfering click listeners to the salary button
         // Instead, monitor for the modal to appear after user clicks
@@ -694,7 +661,6 @@ class BudgetWalkthrough {
             // Monitor for modal appearance which indicates user clicked the button
             const modal = document.getElementById('primarySalaryModal');
             if (modal && (modal.style.display === 'flex' || modal.classList.contains('show'))) {
-                console.log('🎉 Salary modal opened - user clicked the button!');
                 this.handleSalarySetupStep(step);
                 return; // Stop monitoring
             }
@@ -708,7 +674,6 @@ class BudgetWalkthrough {
     }
 
     setupBudgetStepMonitoring(targetElement, step) {
-        console.log('💰 Setting up budget step monitoring without interference');
         
         // Don't add interfering click listeners to the template button
         // Instead, monitor for the modal to appear after user clicks
@@ -716,7 +681,6 @@ class BudgetWalkthrough {
             // Monitor for modal appearance which indicates user clicked the button
             const modal = document.getElementById('budgetTemplateModal');
             if (modal && (modal.style.display === 'flex' || modal.style.display === 'block' || modal.classList.contains('show'))) {
-                console.log('🎉 Template modal opened - user clicked the button!');
                 this.handleTemplateSelectionStep(step);
                 return; // Stop monitoring
             }
@@ -730,20 +694,17 @@ class BudgetWalkthrough {
     }
 
     handleTemplateSelectionStep(step) {
-        console.log('� Handling template selection step');
         
         // Disable automatic modal listeners during template selection
         this.isHandlingTemplateSelection = true;
         
         // Temporarily hide the walkthrough to avoid z-index conflicts
-        console.log('👻 Temporarily hiding walkthrough for template selection');
         this.temporarilyHide();
         
         // Wait for the modal to appear, then monitor for template selection
         const checkForModal = () => {
             const modal = document.getElementById('budgetTemplateModal');
             if (modal && (modal.style.display === 'flex' || modal.style.display === 'block' || modal.classList.contains('show'))) {
-                console.log('✅ Template modal detected, setting up template listener');
                 this.monitorTemplateModalInteraction(step);
             } else {
                 // Check again in a short while
@@ -759,7 +720,6 @@ class BudgetWalkthrough {
         const modal = document.getElementById('budgetTemplateModal');
         if (!modal) return;
         
-        console.log('📝 Monitoring template modal for interaction');
         
         let templateWasSelected = false;
         
@@ -767,7 +727,6 @@ class BudgetWalkthrough {
         const templateCards = modal.querySelectorAll('.template-card');
         templateCards.forEach(card => {
             card.addEventListener('click', () => {
-                console.log('✅ Template card clicked!');
                 templateWasSelected = true;
                 
                 // Monitor for template application
@@ -785,7 +744,6 @@ class BudgetWalkthrough {
                                     modal.classList.contains('show');
                     
                     if (!isVisible && observer) {
-                        console.log('📊 Template modal closed');
                         observer.disconnect();
                         
                         // Check if template was actually selected/applied
@@ -804,14 +762,12 @@ class BudgetWalkthrough {
     }
 
     monitorTemplateApplication(step) {
-        console.log('👀 Monitoring for template application...');
         
         // Look for the apply button clicks and monitor for API calls
         const checkForApplyButton = () => {
             const applyButtons = document.querySelectorAll('.apply-btn, button[onclick*="applyTemplate"]');
             applyButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    console.log('🚀 Apply template button clicked!');
                     // Monitor for successful template application
                     this.monitorTemplateApplicationSuccess(step);
                 }, { once: true });
@@ -824,7 +780,6 @@ class BudgetWalkthrough {
     }
 
     monitorTemplateApplicationSuccess(step) {
-        console.log('👀 Monitoring for template application success...');
         
         let successDetected = false;
         
@@ -836,7 +791,6 @@ class BudgetWalkthrough {
             const snackbar = document.getElementById('snackbar');
             if (snackbar && snackbar.classList.contains('show') && 
                 (snackbar.textContent.includes('applied') || snackbar.textContent.includes('Template') || snackbar.textContent.includes('saved'))) {
-                console.log('✅ Success snackbar detected for template application');
                 successDetected = true;
                 this.completeTemplateStep(step);
                 return;
@@ -845,18 +799,15 @@ class BudgetWalkthrough {
             // Check if modal is closed (might indicate success)
             const modal = document.getElementById('budgetTemplateModal');
             if (!modal || modal.style.display === 'none' || modal.style.display === '') {
-                console.log('✅ Template modal closed - verifying if template was actually applied');
                 
                 // Wait a bit longer and double-check if template was applied
                 setTimeout(() => {
                     if (!successDetected) {
                         const templateApplied = this.checkIfTemplateWasApplied();
                         if (templateApplied) {
-                            console.log('✅ Template application confirmed');
                             successDetected = true;
                             this.completeTemplateStep(step);
                         } else {
-                            console.log('❌ Template not applied, continuing to monitor...');
                             // Continue monitoring or show reminder
                             setTimeout(checkForSuccess, 500);
                         }
@@ -874,22 +825,17 @@ class BudgetWalkthrough {
     }
 
     checkTemplateCompletionOnModalClose(step, templateWasSelected) {
-        console.log('🔍 Checking if template was actually completed...', { templateWasSelected });
         
         // Give a moment for any success indicators to appear
         setTimeout(() => {
             // Check if any template allocation exists in the page or data
             const hasTemplateApplied = this.checkIfTemplateWasApplied();
             
-            console.log('💡 Template was applied:', hasTemplateApplied);
-            console.log('💡 Template was selected:', templateWasSelected);
             
             // Only consider it complete if template was actually applied (not just selected)
             if (hasTemplateApplied) {
-                console.log('✅ Template was completed - proceeding with walkthrough');
                 this.completeTemplateStep(step);
             } else {
-                console.log('❌ Template was not completed - showing reminder');
                 this.handleIncompleteTemplateSelection(step);
             }
         }, 1000); // Wait for any success messages or state changes
@@ -909,13 +855,11 @@ class BudgetWalkthrough {
                 return hasAllocation;
             }
         } catch (e) {
-            console.log('Could not check budget data:', e);
         }
         
         // Check for template preview or applied template indication
         const templatePreview = document.getElementById('templatePreview');
         if (templatePreview && templatePreview.style.display !== 'none' && templatePreview.innerHTML.trim()) {
-            console.log('Found template preview, checking content');
             return templatePreview.innerHTML.includes('Apply This Template') || templatePreview.innerHTML.includes('applied');
         }
         
@@ -923,17 +867,14 @@ class BudgetWalkthrough {
         const snackbar = document.getElementById('snackbar');
         if (snackbar && snackbar.classList.contains('show') && 
             (snackbar.textContent.includes('applied') || snackbar.textContent.includes('Template'))) {
-            console.log('Found template success message');
             return true;
         }
         
         // Don't assume template was applied if modal was just interacted with
-        console.log('No clear indication template was applied');
         return false;
     }
 
     handleIncompleteTemplateSelection(step) {
-        console.log('⚠️ User closed modal without selecting a template');
         
         // Re-enable automatic modal listeners
         this.isHandlingTemplateSelection = false;
@@ -961,7 +902,6 @@ class BudgetWalkthrough {
     }
 
     completeTemplateStep(step) {
-        console.log('🎉 Completing template selection step');
         
         // Re-enable automatic modal listeners
         this.isHandlingTemplateSelection = false;
@@ -1014,7 +954,6 @@ class BudgetWalkthrough {
         const openModals = document.querySelectorAll('.modal[style*="display: flex"], .budget-modal[style*="display: flex"], .modal.show, .budget-modal.show');
         
         if (openModals.length > 0) {
-            console.log('🎭 Found open modal on startup, hiding walkthrough');
             this.hideWalkthroughForModal();
         }
     }
@@ -1038,10 +977,8 @@ class BudgetWalkthrough {
                                         getComputedStyle(target).display === 'flex';
                         
                         if (isVisible) {
-                            console.log('🎭 Modal detected, hiding walkthrough elements');
                             self.hideWalkthroughForModal();
                         } else {
-                            console.log('🎭 Modal closed, showing walkthrough elements');
                             self.showWalkthroughAfterModal();
                         }
                     }
@@ -1065,7 +1002,6 @@ class BudgetWalkthrough {
             const isCategoryStep = self.currentStep && ['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(self.currentStep.step_name);
             
             if (openModals.length > 0 && !self.isModalHidden) {
-                console.log('🎭 Periodic check: Found open modal, hiding walkthrough');
                 self.hideWalkthroughForModal();
                 self.isModalHidden = true;
                 
@@ -1073,19 +1009,13 @@ class BudgetWalkthrough {
                 if (isCategoryStep && self.currentStep.step_name === 'create_categories') {
                     const categoryModal = document.getElementById('addCategoryModal');
                     
-                    console.log('🔍 Periodic check - Category step details:');
-                    console.log('  Modal element found:', !!categoryModal);
-                    console.log('  Modal style.display:', categoryModal ? categoryModal.style.display : 'N/A');
-                    console.log('  Modal computed display:', categoryModal ? getComputedStyle(categoryModal).display : 'N/A');
                     
                     if (categoryModal && (categoryModal.style.display === 'flex' || getComputedStyle(categoryModal).display === 'flex')) {
-                        console.log('✅ Category modal detected, setting up category monitoring');
                         // Set up proper category monitoring instead of auto-completing
                         self.handleCategoryCreationStep(self.currentStep);
                     }
                 }
             } else if (openModals.length === 0 && self.isModalHidden) {
-                console.log('🎭 Periodic check: No open modals, showing walkthrough');
                 self.showWalkthroughAfterModal();
                 self.isModalHidden = false;
             }
@@ -1096,7 +1026,6 @@ class BudgetWalkthrough {
             // Skip if we're handling salary setup manually
             if (self.isHandlingSalarySetup) return;
             
-            console.log('🎭 Modal show event, hiding walkthrough elements');
             self.hideWalkthroughForModal();
             self.isModalHidden = true;
         });
@@ -1105,7 +1034,6 @@ class BudgetWalkthrough {
             // Skip if we're handling salary setup manually
             if (self.isHandlingSalarySetup) return;
             
-            console.log('🎭 Modal hide event, showing walkthrough elements');
             self.showWalkthroughAfterModal();
             self.isModalHidden = false;
         });
@@ -1115,7 +1043,6 @@ class BudgetWalkthrough {
         // If we're on a category creation step, don't hide the walkthrough completely
         // Instead, just hide the overlay but keep the tooltip for guidance
         if (this.currentStep && ['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(this.currentStep.step_name)) {
-            console.log('🔧 Category step - hiding overlay but keeping tooltip for modal guidance');
             
             // Hide the overlay only
             if (this.overlay) {
@@ -1146,7 +1073,6 @@ class BudgetWalkthrough {
     showWalkthroughAfterModal() {
         // If we're on a category creation step, only restore overlay
         if (this.currentStep && ['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(this.currentStep.step_name)) {
-            console.log('🔧 Category step - restoring overlay, tooltip should already be visible');
             
             // Show the overlay
             if (this.overlay) {
@@ -1241,7 +1167,6 @@ class BudgetWalkthrough {
         const isInModal = targetElement.closest('.modal, .budget-modal') !== null;
         if (isInModal) {
             this.tooltip.classList.add('modal-tooltip');
-            console.log('🎭 Tooltip is in modal, applying high z-index');
         }
         
         const canSkip = step.can_skip || step.walkthrough_type === 'help_guide';
@@ -1278,7 +1203,6 @@ class BudgetWalkthrough {
         if (isInModal) {
             this.tooltip.style.zIndex = '10020';
             this.tooltip.style.position = 'fixed';
-            console.log('🔧 Applied z-index 10020 and fixed positioning for modal tooltip');
         }
 
         document.body.appendChild(this.tooltip);
@@ -1366,10 +1290,6 @@ class BudgetWalkthrough {
                 this.tooltip.classList.add('arrow-bottom');
             }
             
-            console.log(`📱 Mobile tooltip positioned:`, {
-                width: viewportWidth - 20,
-                position: spaceBelow > spaceAbove ? 'below' : 'above'
-            });
             return;
         }
         
@@ -1439,13 +1359,6 @@ class BudgetWalkthrough {
         // Final positioning with scroll offset
         this.tooltip.style.top = (top + scrollY) + 'px';
         this.tooltip.style.left = (left + scrollX) + 'px';
-        
-        console.log(`📍 Positioned tooltip ${position} of target:`, {
-            targetRect: rect,
-            tooltipSize: { width: tooltipRect.width, height: tooltipRect.height },
-            finalPosition: { top: top + scrollY, left: left + scrollX },
-            position: position
-        });
     }
 
     ensureTooltipVisible() {
@@ -1483,11 +1396,6 @@ class BudgetWalkthrough {
         if (needsAdjustment) {
             this.tooltip.style.left = adjustedLeft + 'px';
             this.tooltip.style.top = adjustedTop + 'px';
-            
-            console.log('🔧 Adjusted tooltip position to ensure visibility:', {
-                original: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
-                adjusted: { left: adjustedLeft, top: adjustedTop }
-            });
         }
         
         // On mobile, ensure full width usage
@@ -1499,42 +1407,30 @@ class BudgetWalkthrough {
     }
 
     listenForAction(targetElement, step) {
-        console.log('Setting up action listener for:', step.step_name);
-        console.log('Target element:', targetElement);
-        console.log('Element classes:', targetElement.className);
-        console.log('Element ID:', targetElement.id);
         
         const handleAction = (event) => {
-            console.log('🔥 ACTION TRIGGERED! Event:', event.type);
-            console.log('🔥 Event target:', event.target);
             
             // Handle different step types differently
             if (step.step_name === 'configure_salary') {
-                console.log('🔧 Handling salary configuration step');
                 
                 // Don't prevent the modal from opening - let it open first
                 // The button click should open the modal, then we monitor for form submission
                 this.handleSalarySetupStep(step);
                 
             } else if (step.step_name === 'choose_template' || step.step_name === 'setup_budget') {
-                console.log('🔧 Handling choose template step - allowing click to open modal');
                 
                 // Allow the click first, then check if modal opened
                 setTimeout(() => {
                     const modal = document.getElementById('budgetTemplateModal');
-                    console.log('🔍 Checking modal state:', modal ? modal.style.display : 'modal not found');
                     
                     if (!modal || (modal.style.display !== 'flex' && modal.style.display !== 'block')) {
-                        console.log('🔧 Modal not opened, attempting multiple fallbacks');
                         
                         // Try method 1: Call the function directly
                         try {
                             if (typeof window.showBudgetTemplateModal === 'function') {
                                 window.showBudgetTemplateModal();
-                                console.log('✅ Called showBudgetTemplateModal()');
                             }
                         } catch (e) {
-                            console.log('❌ showBudgetTemplateModal failed:', e);
                         }
                         
                         // Try method 2: Call showModal directly  
@@ -1544,10 +1440,8 @@ class BudgetWalkthrough {
                                 try {
                                     if (typeof window.showModal === 'function') {
                                         window.showModal('budgetTemplateModal');
-                                        console.log('✅ Called showModal("budgetTemplateModal")');
                                     }
                                 } catch (e) {
-                                    console.log('❌ showModal failed:', e);
                                 }
                             }
                         }, 50);
@@ -1556,7 +1450,6 @@ class BudgetWalkthrough {
                         setTimeout(() => {
                             const modal3 = document.getElementById('budgetTemplateModal');
                             if (modal3 && modal3.style.display !== 'flex' && modal3.style.display !== 'block') {
-                                console.log('🔧 Using direct DOM manipulation');
                                 modal3.style.display = 'flex';
                                 modal3.style.zIndex = '10015'; // Ensure highest z-index
                             }
@@ -1568,38 +1461,32 @@ class BudgetWalkthrough {
                 }, 50);
                 
             } else if (step.step_name === 'create_categories') {
-                console.log('🔧 Handling create categories step - allowing click and monitoring modal');
                 
                 // Don't auto-complete immediately, wait for user to actually click and modal to open
                 // The periodic checker will handle advancing the step when modal opens
                 
             } else if (step.step_name === 'fill_category_form') {
-                console.log('🔧 Handling fill category form step');
                 
                 // Auto-fill the Transportation category data
                 this.handleCategoryFormFill(step);
                 
             } else if (step.step_name === 'set_category_budget') {
-                console.log('🔧 Handling set category budget step');
                 
                 // Guide user to set budget amount
                 // Don't auto-complete, let user interact
                 this.handleBudgetSetting(step);
                 
             } else if (step.step_name === 'complete_category') {
-                console.log('🔧 Handling complete category step');
                 
                 // Allow form submission
                 this.handleCategoryCompletion(step);
                 
             } else {
-                console.log('🔥 Preventing default action to complete step first');
                 
                 // For other steps, prevent default action and complete step first
                 event.preventDefault();
                 event.stopPropagation();
                 
-                console.log('🔥 Completing step:', step.step_name);
                 
                 // Complete the step first, then handle navigation
                 this.completeStep(step.step_name);
@@ -1611,28 +1498,22 @@ class BudgetWalkthrough {
             once: true, 
             capture: true  // Use capture phase to get event first
         });
-        console.log('✅ Click listener added to target element');
         
         // Test if element is clickable
-        console.log('Element pointer-events:', window.getComputedStyle(targetElement).pointerEvents);
-        console.log('Element z-index:', window.getComputedStyle(targetElement).zIndex);
     }
 
     handleSalarySetupStep(step) {
-        console.log('🔧 Handling salary setup step');
         
         // Disable automatic modal listeners during salary setup
         this.isHandlingSalarySetup = true;
         
         // Temporarily hide the walkthrough to avoid z-index conflicts
-        console.log('👻 Temporarily hiding walkthrough for salary setup');
         this.temporarilyHide();
         
         // Wait for the modal to appear, then monitor form submission
         const checkForModal = () => {
             const modal = document.getElementById('primarySalaryModal');
             if (modal && modal.classList.contains('show')) {
-                console.log('✅ Salary modal detected, setting up form listener');
                 this.monitorSalaryForm(step);
             } else {
                 // Check again in a short while
@@ -1648,11 +1529,9 @@ class BudgetWalkthrough {
         const form = document.getElementById('primarySalaryForm');
         
         if (form) {
-            console.log('📝 Monitoring salary form submission');
             
             // Listen for successful form submission
             const handleFormSubmit = (event) => {
-                console.log('💰 Salary form submitted');
                 
                 // Don't prevent submission - let it go through
                 // Monitor for success indicators instead
@@ -1669,14 +1548,12 @@ class BudgetWalkthrough {
     }
 
     monitorSalarySuccess(step) {
-        console.log('👀 Monitoring for salary setup success...');
         
         // Watch for success indicators
         const checkForSuccess = () => {
             // Check if modal is closed (success indicator)
             const modal = document.getElementById('primarySalaryModal');
             if (!modal || !modal.classList.contains('show')) {
-                console.log('✅ Modal closed - likely successful');
                 this.completeSalaryStep(step);
                 return;
             }
@@ -1684,7 +1561,6 @@ class BudgetWalkthrough {
             // Check for success snackbar
             const snackbar = document.getElementById('snackbar');
             if (snackbar && snackbar.classList.contains('show') && snackbar.classList.contains('success')) {
-                console.log('✅ Success snackbar detected');
                 this.completeSalaryStep(step);
                 return;
             }
@@ -1706,7 +1582,6 @@ class BudgetWalkthrough {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                     if (!modal.classList.contains('show')) {
-                        console.log('🎯 Modal closed - checking if salary was completed');
                         observer.disconnect();
                         
                         // Check if salary was actually set up before completing
@@ -1722,7 +1597,6 @@ class BudgetWalkthrough {
     }
 
     checkSalaryCompletionOnModalClose(step) {
-        console.log('🔍 Checking if salary was actually completed...');
         
         // Check the primary salary display element
         const primarySalaryAmount = document.getElementById('primarySalaryAmount');
@@ -1735,20 +1609,15 @@ class BudgetWalkthrough {
                             salaryDisplayText !== '₵0.00' &&
                             salaryDisplayText !== '₵0';
         
-        console.log('💰 Salary display text:', salaryDisplayText);
-        console.log('✅ Salary is set:', hasSalarySet);
         
         if (hasSalarySet) {
-            console.log('✅ Salary was completed - proceeding with walkthrough');
             this.completeSalaryStep(step);
         } else {
-            console.log('❌ Salary was not completed - showing reminder');
             this.handleIncompleteSalarySetup(step);
         }
     }
 
     handleIncompleteSalarySetup(step) {
-        console.log('⚠️ User closed modal without completing salary setup');
         
         // Resume walkthrough to show the reminder
         this.resumeFromHiding();
@@ -1773,7 +1642,6 @@ class BudgetWalkthrough {
     }
 
     completeSalaryStep(step) {
-        console.log('🎉 Completing salary setup step');
         
         // Re-enable automatic modal listeners
         this.isHandlingSalarySetup = false;
@@ -1833,10 +1701,8 @@ class BudgetWalkthrough {
     }
 
     async completeStep(stepName) {
-        console.log('🚀 completeStep called with:', stepName);
         
         try {
-            console.log('📡 Sending request to complete_step.php...');
             let response = await fetch('/budget/api/complete_walkthrough_step.php', {
                 method: 'POST',
                 headers: {
@@ -1848,7 +1714,6 @@ class BudgetWalkthrough {
             
             // If main endpoint fails, try test endpoint
             if (!response.ok) {
-                console.log('⚠️ Main endpoint failed, trying test endpoint...');
                 response = await fetch('/budget/api/test_complete_step.php', {
                     method: 'POST',
                     headers: {
@@ -1859,13 +1724,9 @@ class BudgetWalkthrough {
                 });
             }
             
-            console.log('📡 Response status:', response.status);
-            console.log('📡 Response ok:', response.ok);
-            console.log('📡 Response headers:', Object.fromEntries(response.headers));
             
             // Get response text first to see what we're getting
             const responseText = await response.text();
-            console.log('📡 Raw response text:', responseText);
             
             // Try to parse as JSON
             let data;
@@ -1877,13 +1738,8 @@ class BudgetWalkthrough {
                 throw new Error('Invalid JSON response from server. Response: ' + responseText.substring(0, 200));
             }
             
-            console.log('📡 Parsed response data:', data);
             
             if (data.success) {
-                console.log('✅ Step completed successfully!');
-                console.log('📝 Next step:', data.next_step);
-                console.log('🔄 Redirect URL:', data.redirect_url);
-                console.log('🏁 Is completed:', data.is_completed);
                 
                 this.completedSteps.push(stepName);
                 this.currentStep = data.next_step;
@@ -1892,27 +1748,21 @@ class BudgetWalkthrough {
                 
                 // Handle navigation based on response
                 if (data.is_completed) {
-                    console.log('🎉 Walkthrough completed!');
                     // For initial setup, just cleanup without showing completion message or redirecting
-                    console.log('✅ Initial setup complete - staying on current page');
                     return;
                 } else if (data.next_step && data.redirect_url && 
                           stepName !== 'setup_budget' && stepName !== 'choose_template' && stepName !== 'select_template' &&
                           !['create_categories', 'fill_category_form', 'set_category_budget', 'complete_category'].includes(stepName)) {
                     // Only redirect if it's not a budget-related step or category step (we want to stay on budget page)
-                    console.log('🔄 Redirecting to:', data.redirect_url);
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
                     }, 500);
                 } else {
-                    console.log('📍 Staying on current page, no redirect needed');
                     // If we have a next step but we're staying on the same page, continue the walkthrough
                     if (data.next_step) {
-                        console.log('🔄 Continuing walkthrough on same page...');
                         
                         // For category steps, wait for modal to be ready before continuing
                         if (['fill_category_form', 'set_category_budget', 'complete_category'].includes(data.next_step)) {
-                            console.log('🔧 Next step is category-related, waiting for modal...');
                             this.waitForCategoryModalAndContinue(data.next_step);
                         } else {
                             setTimeout(() => {
@@ -1931,7 +1781,6 @@ class BudgetWalkthrough {
                     
                     // For help guides, missing steps are not critical - continue the tour
                     if (this.currentWalkthroughType === 'help_guide') {
-                        console.log('📖 Help guide step missing, continuing tour...');
                         if (typeof showSnackbar === 'function') {
                             showSnackbar('Tour step completed', 'info');
                         }
@@ -1961,20 +1810,17 @@ class BudgetWalkthrough {
     }
 
     waitForCategoryModalAndContinue(nextStep) {
-        console.log('⏳ Waiting for category modal to be ready for step:', nextStep);
         
         const checkModalReady = () => {
             const modal = document.getElementById('addCategoryModal');
             const isModalOpen = modal && modal.style.display === 'flex';
             
             if (isModalOpen) {
-                console.log('✅ Category modal is ready, continuing with next step');
                 // Wait a bit more for modal to fully render
                 setTimeout(() => {
                     this.startWalkthrough();
                 }, 500);
             } else {
-                console.log('⏳ Modal not ready yet, checking again...');
                 setTimeout(checkModalReady, 200);
             }
         };
@@ -2015,7 +1861,6 @@ class BudgetWalkthrough {
                 }
             } else {
                 // No more help guide steps on this page
-                console.log('No more help guide steps on this page');
                 this.cleanup();
             }
         } catch (error) {
@@ -2143,7 +1988,6 @@ class BudgetWalkthrough {
     }
 
     temporarilyHide() {
-        console.log('👻 Temporarily hiding walkthrough');
         this.isTemporarilyHidden = true;
         
         // Store references to elements before removing them
@@ -2184,11 +2028,9 @@ class BudgetWalkthrough {
             el.classList.remove('walkthrough-disabled');
         });
         
-        console.log('✅ Walkthrough completely removed from DOM');
     }
 
     resumeFromHiding() {
-        console.log('👀 Resuming walkthrough from hiding');
         this.isTemporarilyHidden = false;
         
         // Recreate overlay if it was removed
@@ -2222,11 +2064,9 @@ class BudgetWalkthrough {
         // Clear the hidden elements reference
         this.hiddenElements = null;
         
-        console.log('✅ Walkthrough restored to DOM');
     }
 
     showGeneralHelpMessage(step) {
-        console.log('📝 Showing general help message for step:', step.step_name);
         
         // Create overlay
         this.createOverlay();
@@ -2628,11 +2468,9 @@ class BudgetWalkthrough {
 
     // Category Creation Handlers
     handleCategoryCreationStep(step) {
-        console.log('🏗️ Handling category creation step');
         
         // The modal is already open since this is called from the periodic checker
         // We should complete this step and move to the next one (fill_category_form)
-        console.log('✅ Category modal is open, completing create_categories step');
         
         // Complete the step immediately since the modal is open
         setTimeout(() => {
@@ -2644,7 +2482,6 @@ class BudgetWalkthrough {
         const modal = document.getElementById('addCategoryModal');
         if (!modal) return;
         
-        console.log('📝 Monitoring category modal for interaction');
         
         let categoryFormWasSubmitted = false;
         
@@ -2652,7 +2489,6 @@ class BudgetWalkthrough {
         const form = document.getElementById('addCategoryForm');
         if (form) {
             const handleSubmission = (event) => {
-                console.log('🚀 Category form submitted');
                 categoryFormWasSubmitted = true;
                 
                 // Allow the form to submit normally and monitor for success
@@ -2674,7 +2510,6 @@ class BudgetWalkthrough {
                                     getComputedStyle(modal).display === 'flex';
                     
                     if (!isVisible && observer) {
-                        console.log('📊 Category modal closed');
                         observer.disconnect();
                         
                         // Check if category was actually created
@@ -2693,18 +2528,14 @@ class BudgetWalkthrough {
     }
 
     checkCategoryCompletionOnModalClose(step, categoryFormWasSubmitted) {
-        console.log('🔍 Checking if category was actually created...', { categoryFormWasSubmitted });
         
         // Check for success indicators
         const hasCategoryCreated = this.checkIfCategoryWasCreated();
         
-        console.log('💡 Category was created:', hasCategoryCreated);
         
         if (hasCategoryCreated || categoryFormWasSubmitted) {
-            console.log('✅ Category was completed - proceeding with walkthrough');
             this.completeCategoryCreationStep(step);
         } else {
-            console.log('❌ Category was not completed - showing reminder');
             this.handleIncompleteCategoryCreation(step);
         }
     }
@@ -2725,7 +2556,6 @@ class BudgetWalkthrough {
                 return true;
             }
         } catch (e) {
-            console.log('Could not check budget categories:', e);
         }
         
         // Check for any category elements on the page
@@ -2738,7 +2568,6 @@ class BudgetWalkthrough {
     }
 
     handleIncompleteCategoryCreation(step) {
-        console.log('⚠️ User closed modal without creating a category');
         
         // Re-enable automatic modal listeners
         this.isHandlingCategoryCreation = false;
@@ -2760,14 +2589,12 @@ class BudgetWalkthrough {
     }
 
     monitorForCategoryModalAgain(step) {
-        console.log('👀 Setting up category modal monitoring again...');
         
         const checkForModal = () => {
             const modal = document.getElementById('addCategoryModal');
             const isModalOpen = modal && (modal.style.display === 'flex' || getComputedStyle(modal).display === 'flex');
             
             if (isModalOpen) {
-                console.log('✅ Category modal opened again, setting up monitoring');
                 this.handleCategoryCreationStep(step);
                 return;
             }
@@ -2781,7 +2608,6 @@ class BudgetWalkthrough {
     }
 
     completeCategoryCreationStep(step) {
-        console.log('🎉 Completing category creation step');
         
         // Re-enable automatic modal listeners
         this.isHandlingCategoryCreation = false;
@@ -2815,21 +2641,16 @@ class BudgetWalkthrough {
     }
 
     handleCategoryFormFill(step) {
-        console.log('📝 Handling category form fill step');
         
         // Wait a moment for modal to be fully rendered
         setTimeout(() => {
             // Check if modal is open and log debug info
             const modal = document.getElementById('addCategoryModal');
-            console.log('🔍 Modal found:', !!modal);
-            console.log('🔍 Modal display:', modal ? modal.style.display : 'N/A');
-            console.log('🔍 Modal computed display:', modal ? getComputedStyle(modal).display : 'N/A');
             
             // Instead of auto-filling, guide the user to fill the form
             const nameInput = document.querySelector('#addCategoryModal input[name="name"]');
             const typeSelect = document.querySelector('#addCategoryModal select[name="category_type"]');
             
-            console.log('🔍 Found inputs:', { nameInput: !!nameInput, typeSelect: !!typeSelect });
             
             if (nameInput && typeSelect) {
                 // Set placeholders to guide the user
@@ -2842,7 +2663,6 @@ class BudgetWalkthrough {
                 // Listen for when user fills in the name
                 const handleNameFilled = () => {
                     if (nameInput.value && nameInput.value.length > 2) {
-                        console.log('✅ Category name filled:', nameInput.value);
                         nameInput.removeEventListener('input', handleNameFilled);
                         
                         // Move to category type guidance
@@ -2915,12 +2735,7 @@ class BudgetWalkthrough {
         const container = modal && modal.parentElement ? modal.parentElement : document.body;
         container.appendChild(this.tooltip);
         
-        console.log('🔧 Applied EXTREME z-index 999999 and appended to container:', container.tagName);
-        console.log('🔍 Modal z-index check:');
         if (modal) {
-            console.log('  Modal z-index:', getComputedStyle(modal).zIndex);
-            console.log('  Modal parent z-index:', getComputedStyle(modal.parentElement).zIndex);
-            console.log('  Tooltip z-index:', getComputedStyle(this.tooltip).zIndex);
         }
         
         // Store reference for event handling
@@ -2930,7 +2745,6 @@ class BudgetWalkthrough {
         const handleNameFilled = () => {
             const currentValue = targetElement.value.trim();
             if (currentValue && currentValue.length > 2) {
-                console.log('✅ Category name filled:', currentValue);
                 targetElement.removeEventListener('input', handleNameFilled);
                 targetElement.removeEventListener('change', handleNameFilled);
                 targetElement.removeEventListener('keyup', handleNameFilled);
@@ -2963,7 +2777,6 @@ class BudgetWalkthrough {
             nameInput.dispatchEvent(new Event('change', { bubbles: true }));
             nameInput.dispatchEvent(new Event('keyup', { bubbles: true }));
             
-            console.log('✅ Auto-filled Transportation category');
         }
     }
 
@@ -3019,7 +2832,6 @@ class BudgetWalkthrough {
         const container = modal && modal.parentElement ? modal.parentElement : document.body;
         container.appendChild(this.tooltip);
         
-        console.log('🔧 Applied EXTREME z-index 999999 for category type tooltip');
         
         // Store reference for event handling
         this.currentTypeSelect = targetElement;
@@ -3027,7 +2839,6 @@ class BudgetWalkthrough {
         // Listen for selection
         const handleTypeSelected = () => {
             if (targetElement.value) {
-                console.log('✅ Category type selected:', targetElement.value);
                 targetElement.removeEventListener('change', handleTypeSelected);
                 
                 // Auto-complete this step and move to budget setting
@@ -3050,12 +2861,10 @@ class BudgetWalkthrough {
             // Trigger change event
             typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
             
-            console.log('✅ Auto-selected Needs category type');
         }
     }
 
     handleBudgetSetting(step) {
-        console.log('💰 Handling budget setting step');
         
         // Wait for modal to be ready
         setTimeout(() => {
@@ -3070,7 +2879,6 @@ class BudgetWalkthrough {
                 // Listen for when user sets a value
                 const handleBudgetSet = () => {
                     if (budgetInput.value && parseFloat(budgetInput.value) > 0) {
-                        console.log('✅ Budget amount set:', budgetInput.value);
                         budgetInput.removeEventListener('input', handleBudgetSet);
                         
                         // Auto-complete this step
@@ -3091,7 +2899,6 @@ class BudgetWalkthrough {
     }
 
     showBudgetGuidanceTooltipForced(targetElement, step) {
-        console.log('🚀 Creating FORCED budget guidance tooltip');
         
         // Remove any existing tooltip first
         if (this.tooltip) {
@@ -3144,14 +2951,12 @@ class BudgetWalkthrough {
         const container = modal && modal.parentElement ? modal.parentElement : document.body;
         container.appendChild(this.tooltip);
         
-        console.log('🔧 Applied EXTREME z-index for budget guidance tooltip');
         
         // Store reference for event handling
         this.currentBudgetInput = targetElement;
     }
 
     showCompletionCongratulations(step) {
-        console.log('🎉 Showing setup completion congratulations');
         
         // Clean up any existing walkthrough elements first
         this.cleanup();
@@ -3313,13 +3118,9 @@ class BudgetWalkthrough {
         `;
         document.head.appendChild(celebrationStyles);
         
-        console.log('✅ Completion congratulations modal created and displayed');
-        console.log('🎯 Modal element:', congratsModal);
-        console.log('🎯 Modal z-index:', getComputedStyle(congratsModal).zIndex);
     }
 
     completeSetup() {
-        console.log('🚀 User clicked complete setup');
         
         // Remove the congratulations modal
         const congratsModal = document.getElementById('completion-congratulations-modal');
@@ -3362,7 +3163,6 @@ class BudgetWalkthrough {
             showSnackbar('🎉 Welcome to your budget tracker! Start adding expenses to see insights.', 'success');
         }
         
-        console.log('🏁 Walkthrough completely disabled and cleaned up');
     }
 
     // Helper method to fill suggested budget
@@ -3376,12 +3176,10 @@ class BudgetWalkthrough {
             budgetInput.dispatchEvent(new Event('input', { bubbles: true }));
             budgetInput.dispatchEvent(new Event('change', { bubbles: true }));
             
-            console.log('✅ Auto-filled suggested budget of ₵300');
         }
     }
 
     handleCategoryCompletion(step) {
-        console.log('✅ Handling category completion step');
         
         // Set up monitoring flag
         this.isHandlingCategoryCompletion = true;
@@ -3392,7 +3190,6 @@ class BudgetWalkthrough {
         
         if (form && submitButton) {
             const handleSubmission = (event) => {
-                console.log('🚀 Category form submitted for completion');
                 
                 // Allow the form to submit normally
                 // Monitor for success
@@ -3426,7 +3223,6 @@ class BudgetWalkthrough {
                                     getComputedStyle(modal).display === 'flex';
                     
                     if (!isVisible && observer) {
-                        console.log('🎯 Category modal closed during completion step');
                         observer.disconnect();
                         
                         // Check if category was actually completed
@@ -3453,7 +3249,6 @@ class BudgetWalkthrough {
     }
 
     monitorCategoryCompletionSuccess(step) {
-        console.log('🔍 Monitoring category completion success');
         
         let successDetected = false;
         
@@ -3463,13 +3258,11 @@ class BudgetWalkthrough {
             // Check if modal closed (success indicator)
             const modal = document.getElementById('addCategoryModal');
             if (!modal || modal.style.display === 'none' || getComputedStyle(modal).display === 'none') {
-                console.log('✅ Category modal closed - checking for completion success');
                 
                 // Check for success snackbar
                 const snackbar = document.getElementById('snackbar');
                 if (snackbar && snackbar.classList.contains('show') && 
                     (snackbar.textContent.includes('created') || snackbar.textContent.includes('added') || snackbar.textContent.includes('success'))) {
-                    console.log('✅ Success snackbar detected for completion');
                     successDetected = true;
                     this.completeCategoryCompletionStep(step);
                     return;
@@ -3478,7 +3271,6 @@ class BudgetWalkthrough {
                 // Check if categories were updated (alternative success check)
                 setTimeout(() => {
                     if (!successDetected && this.checkIfCategoryWasCreated()) {
-                        console.log('✅ Category completion confirmed via page check');
                         successDetected = true;
                         this.completeCategoryCompletionStep(step);
                     }
@@ -3490,7 +3282,6 @@ class BudgetWalkthrough {
             const snackbar = document.getElementById('snackbar');
             if (snackbar && snackbar.classList.contains('show') && 
                 (snackbar.textContent.includes('created') || snackbar.textContent.includes('success'))) {
-                console.log('✅ Success snackbar detected during completion');
                 successDetected = true;
                 this.completeCategoryCompletionStep(step);
                 return;
@@ -3505,24 +3296,19 @@ class BudgetWalkthrough {
     }
 
     checkCategoryCompletionOnModalClose(step, formWasSubmitted) {
-        console.log('🔍 Checking if category completion was successful...', { formWasSubmitted });
         
         // Check for success indicators
         const hasCategoryCompleted = this.checkIfCategoryWasCreated();
         
-        console.log('💡 Category was completed:', hasCategoryCompleted);
         
         if (hasCategoryCompleted || formWasSubmitted) {
-            console.log('✅ Category completion was successful - proceeding with walkthrough');
             this.completeCategoryCompletionStep(step);
         } else {
-            console.log('❌ Category completion was not successful - showing reminder');
             this.handleIncompleteCategoryCompletion(step);
         }
     }
 
     handleIncompleteCategoryCompletion(step) {
-        console.log('⚠️ User closed modal without completing category');
         
         // Re-enable automatic modal listeners
         this.isHandlingCategoryCompletion = false;
@@ -3544,7 +3330,6 @@ class BudgetWalkthrough {
     }
 
     completeCategoryCompletionStep(step) {
-        console.log('🎉 Completing category completion step');
         
         // Re-enable automatic modal listeners
         this.isHandlingCategoryCompletion = false;
@@ -3559,7 +3344,6 @@ class BudgetWalkthrough {
     }
 
     monitorCategoryCreationSuccess(step) {
-        console.log('🔍 Monitoring category creation success');
         
         let successDetected = false;
         
@@ -3569,13 +3353,11 @@ class BudgetWalkthrough {
             // Check if modal closed (success indicator)
             const modal = document.getElementById('addCategoryModal');
             if (!modal || modal.style.display === 'none' || getComputedStyle(modal).display === 'none') {
-                console.log('✅ Category modal closed - checking for success indicators');
                 
                 // Check for success snackbar
                 const snackbar = document.getElementById('snackbar');
                 if (snackbar && snackbar.classList.contains('show') && 
                     (snackbar.textContent.includes('created') || snackbar.textContent.includes('added') || snackbar.textContent.includes('success'))) {
-                    console.log('✅ Success snackbar detected');
                     successDetected = true;
                     this.completeCategoryCreationStep(step);
                     return;
@@ -3584,7 +3366,6 @@ class BudgetWalkthrough {
                 // Check if categories were updated
                 setTimeout(() => {
                     if (!successDetected && this.checkIfCategoryWasCreated()) {
-                        console.log('✅ Category creation confirmed via page check');
                         successDetected = true;
                         this.completeCategoryCreationStep(step);
                     }
@@ -3596,7 +3377,6 @@ class BudgetWalkthrough {
             const snackbar = document.getElementById('snackbar');
             if (snackbar && snackbar.classList.contains('show') && 
                 (snackbar.textContent.includes('created') || snackbar.textContent.includes('added') || snackbar.textContent.includes('success'))) {
-                console.log('✅ Success snackbar detected while modal open');
                 successDetected = true;
                 this.completeCategoryCreationStep(step);
                 return;
@@ -3611,7 +3391,6 @@ class BudgetWalkthrough {
     }
 
     completeCategoryStep(step) {
-        console.log('🎉 Completing category completion step');
         
         // Update the UI to show successful category creation
         this.updateTooltipForCategorySuccess();
@@ -3642,12 +3421,10 @@ class BudgetWalkthrough {
     }
 
     monitorTemplateSelection(modal) {
-        console.log('👀 Monitoring template selection for completion validation...');
         
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.target === modal && modal.style.display === 'none') {
-                    console.log('✅ Template modal closed, checking if template was applied');
                     observer.disconnect();
                     
                     // Use the new completion checking logic
@@ -3667,7 +3444,6 @@ class BudgetWalkthrough {
         const templateCards = document.querySelectorAll('.template-card');
         templateCards.forEach(card => {
             card.addEventListener('click', () => {
-                console.log('✅ Template card clicked');
                 // The template application monitoring will be handled by handleTemplateSelectionStep
             }, { once: true });
         });
@@ -3679,12 +3455,10 @@ class BudgetWalkthrough {
     }
 
     monitorForCategoryModal() {
-        console.log('👀 Monitoring for category modal opening...');
         
         const checkForModal = () => {
             const modal = document.getElementById('addCategoryModal');
             if (modal && modal.style.display === 'flex') {
-                console.log('✅ Category modal opened, cleaning up tooltip and advancing step');
                 
                 // Set transitioning flag to prevent duplicate actions
                 this.isTransitioning = true;
@@ -3695,7 +3469,6 @@ class BudgetWalkthrough {
                 // Complete the create_categories step and advance to form filling
                 setTimeout(() => {
                     this.completeStep('create_categories').then(() => {
-                        console.log('✅ Advanced to fill_category_form step, modal is ready for guidance');
                         this.isTransitioning = false; // Reset flag
                         // Give more time for the modal to be fully rendered before showing next step
                         setTimeout(() => {
@@ -3732,7 +3505,6 @@ document.addEventListener('DOMContentLoaded', () => {
             nameInput.dispatchEvent(new Event('change', { bubbles: true }));
             nameInput.dispatchEvent(new Event('keyup', { bubbles: true }));
             
-            console.log('✅ Auto-filled Transportation category');
         }
     };
     
@@ -3745,7 +3517,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Trigger change event
             typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
             
-            console.log('✅ Auto-selected Needs category type');
         }
     };
     
@@ -3759,7 +3530,6 @@ document.addEventListener('DOMContentLoaded', () => {
             budgetInput.dispatchEvent(new Event('input', { bubbles: true }));
             budgetInput.dispatchEvent(new Event('change', { bubbles: true }));
             
-            console.log('✅ Auto-filled suggested budget of ₵300');
         }
     };
     

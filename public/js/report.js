@@ -16,18 +16,15 @@ class FinancialReportApp {
     }
 
     async init() {
-        console.log('Report: Initializing report app');
         
         // Initialize loading screen with report-specific message
         if (window.LoadingScreen) {
-            console.log('Report: Creating LoadingScreen');
             this.budgetlyLoader = new LoadingScreen();
             
             // Customize the loading message for reports
             const loadingMessage = this.budgetlyLoader.loadingElement.querySelector('.loading-message p');
             if (loadingMessage) {
                 loadingMessage.innerHTML = 'Generating your report<span class="loading-dots-text">...</span>';
-                console.log('Report: Loading message customized');
             }
         } else {
             console.error('Report: LoadingScreen class not available');
@@ -1562,13 +1559,10 @@ window.FinancialReportApp = FinancialReportApp;
 // Test function for loading screen (can be called from browser console)
 window.testReportLoadingScreen = function(duration = 3000) {
     if (window.budgetlyLoader) {
-        console.log('Testing report loading screen for', duration, 'ms');
         window.budgetlyLoader.show();
         setTimeout(() => {
             window.budgetlyLoader.hide();
-            console.log('Report loading screen test complete');
         }, duration);
     } else {
-        console.log('Loading screen not available');
     }
 };

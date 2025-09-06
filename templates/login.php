@@ -1112,7 +1112,6 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent default form submission
             
-            console.log('Login form submitted');
             
             const submitBtn = document.querySelector('.submit-btn');
             if (submitBtn) {
@@ -1202,20 +1201,15 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
 
         // Handle URL parameters for notifications
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Login: DOMContentLoaded fired');
-            console.log('Login: LoadingScreen available?', typeof window.LoadingScreen);
             
             // Initialize loading screen
             if (window.LoadingScreen) {
-                console.log('Login: Creating LoadingScreen');
                 window.budgetlyLoader = new LoadingScreen();
-                console.log('Login: LoadingScreen created', window.budgetlyLoader);
                 
                 // Customize the loading message for login
                 const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
                 if (loadingMessage) {
                     loadingMessage.innerHTML = 'Signing you in<span class="loading-dots-text">...</span>';
-                    console.log('Login: Loading message customized');
                 } else {
                     console.error('Login: Could not find loading message element');
                 }
@@ -1244,33 +1238,27 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
         // Test function for loading screen (can be called from browser console)
         window.testLoginLoadingScreen = function(duration = 3000) {
             if (window.budgetlyLoader) {
-                console.log('Testing login loading screen for', duration, 'ms');
                 window.budgetlyLoader.show();
                 setTimeout(() => {
                     window.budgetlyLoader.hide();
-                    console.log('Login loading screen test complete');
                 }, duration);
             } else {
-                console.log('Loading screen not available');
             }
         };
 
         // Test function for snackbar (can be called from browser console)
         window.testLoginSnackbar = function(message = 'Test notification', type = 'success') {
             showSnackbar(message, type);
-            console.log(`Showing ${type} snackbar: "${message}"`);
         };
 
         // Emergency function to hide loading screen (can be called from browser console)
         window.hideLoadingScreen = function() {
             if (window.budgetlyLoader) {
                 window.budgetlyLoader.hide();
-                console.log('Loading screen forcefully hidden');
             } else {
                 const loadingScreen = document.getElementById('loadingScreen');
                 if (loadingScreen) {
                     loadingScreen.style.display = 'none';
-                    console.log('Loading screen element hidden');
                 }
             }
         };

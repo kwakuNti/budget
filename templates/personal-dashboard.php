@@ -1820,20 +1820,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Enhanced Dashboard JavaScript
         // Wait for loading.js to be available
         function initializeDashboard() {
-            console.log('Dashboard: Initializing dashboard');
-            console.log('Dashboard: LoadingScreen available?', typeof window.LoadingScreen);
             
             // Initialize loading screen with dashboard-specific message
             if (window.LoadingScreen) {
-                console.log('Dashboard: Creating LoadingScreen');
                 window.budgetlyLoader = new LoadingScreen();
-                console.log('Dashboard: LoadingScreen created', window.budgetlyLoader);
                 
                 // Customize the loading message for dashboard
                 const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
                 if (loadingMessage) {
                     loadingMessage.innerHTML = 'Loading your dashboard<span class="loading-dots-text">...</span>';
-                    console.log('Dashboard: Loading message customized');
                 } else {
                     console.error('Dashboard: Could not find loading message element');
                 }
@@ -1843,7 +1838,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Show initial loading for data fetch
             if (window.budgetlyLoader) {
-                console.log('Dashboard: Showing loading screen');
                 window.budgetlyLoader.show();
             } else {
                 console.error('Dashboard: budgetlyLoader not available');
@@ -1861,17 +1855,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard: DOMContentLoaded fired');
             
             // Enhanced loading screen availability check
             function checkLoadingScreen(attempts = 0) {
                 const maxAttempts = 10;
                 
                 if (window.LoadingScreen) {
-                    console.log('Dashboard: LoadingScreen found after', attempts, 'attempts');
                     initializeDashboard();
                 } else if (attempts < maxAttempts) {
-                    console.log('Dashboard: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
                     setTimeout(() => checkLoadingScreen(attempts + 1), 50);
                 } else {
                     console.error('Dashboard: LoadingScreen still not available after', maxAttempts, 'attempts');
@@ -3309,14 +3300,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Test function for loading screen (can be called from browser console)
         window.testDashboardLoadingScreen = function(duration = 3000) {
             if (window.budgetlyLoader) {
-                console.log('Testing dashboard loading screen for', duration, 'ms');
                 window.budgetlyLoader.show();
                 setTimeout(() => {
                     window.budgetlyLoader.hide();
-                    console.log('Dashboard loading screen test complete');
                 }, duration);
             } else {
-                console.log('Loading screen not available');
             }
         };
     </script>
@@ -3391,14 +3379,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Test function for loading screen (can be called from browser console)
         window.testDashboardLoadingScreen = function(duration = 3000) {
             if (window.budgetlyLoader) {
-                console.log('Testing dashboard loading screen for', duration, 'ms');
                 window.budgetlyLoader.show();
                 setTimeout(() => {
                     window.budgetlyLoader.hide();
-                    console.log('Dashboard loading screen test complete');
                 }, duration);
             } else {
-                console.log('Loading screen not available');
             }
         };
 
@@ -3406,9 +3391,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         window.hideLoadingScreen = function() {
             if (window.budgetlyLoader) {
                 window.budgetlyLoader.hide();
-                console.log('Loading screen forcefully hidden');
             } else {
-                console.log('Loading screen not available');
             }
         };
 

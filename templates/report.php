@@ -503,18 +503,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
     <script>
         // Enhanced Report Page Initialization
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Report: DOMContentLoaded fired');
             
             // Enhanced loading screen availability check
             function checkLoadingScreen(attempts = 0) {
                 const maxAttempts = 10;
                 
                 if (window.LoadingScreen) {
-                    console.log('Report: LoadingScreen found after', attempts, 'attempts');
                     // Initialize the report app
                     window.reportApp = new FinancialReportApp();
                 } else if (attempts < maxAttempts) {
-                    console.log('Report: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
                     setTimeout(() => checkLoadingScreen(attempts + 1), 50);
                 } else {
                     console.error('Report: LoadingScreen still not available after', maxAttempts, 'attempts');

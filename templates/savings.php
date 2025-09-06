@@ -1770,20 +1770,15 @@ function renderChallenges(challenges) {
 // Enhanced Savings Page JavaScript
 // Wait for loading.js to be available
 function initializeSavings() {
-    console.log('Savings: Initializing savings page');
-    console.log('Savings: LoadingScreen available?', typeof window.LoadingScreen);
     
     // Initialize loading screen with savings-specific message
     if (window.LoadingScreen) {
-        console.log('Savings: Creating LoadingScreen');
         window.budgetlyLoader = new LoadingScreen();
-        console.log('Savings: LoadingScreen created', window.budgetlyLoader);
         
         // Customize the loading message for savings
         const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
         if (loadingMessage) {
             loadingMessage.innerHTML = 'Loading your savings<span class="loading-dots-text">...</span>';
-            console.log('Savings: Loading message customized');
         } else {
             console.error('Savings: Could not find loading message element');
         }
@@ -1793,7 +1788,6 @@ function initializeSavings() {
 
     // Show initial loading for data fetch
     if (window.budgetlyLoader) {
-        console.log('Savings: Showing loading screen');
         window.budgetlyLoader.show();
     } else {
         console.error('Savings: budgetlyLoader not available');
@@ -1804,17 +1798,14 @@ function initializeSavings() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Savings: DOMContentLoaded fired');
     
     // Enhanced loading screen availability check
     function checkLoadingScreen(attempts = 0) {
         const maxAttempts = 10;
         
         if (window.LoadingScreen) {
-            console.log('Savings: LoadingScreen found after', attempts, 'attempts');
             initializeSavings();
         } else if (attempts < maxAttempts) {
-            console.log('Savings: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
             setTimeout(() => checkLoadingScreen(attempts + 1), 50);
         } else {
             console.error('Savings: LoadingScreen still not available after', maxAttempts, 'attempts');
@@ -1855,10 +1846,8 @@ function loadSavingsData() {
         'loadAutoSaveConfig'
     ];
     
-    console.log('Savings: Loading page functions...');
     functionsToLoad.forEach(funcName => {
         if (typeof window[funcName] === 'function') {
-            console.log(`Savings: Loading ${funcName}...`);
             window[funcName]();
         } else {
             console.warn(`Savings: Function ${funcName} not found, skipping`);
@@ -3002,7 +2991,6 @@ class SavingsManager {
         
         // Debug: Log all form data
         for (let [key, value] of formData.entries()) {
-            console.log(`  ${key}: "${value}" (type: ${typeof value}, length: ${value.length})`);
         }
         
         // Special focus on goal_type
@@ -3013,7 +3001,6 @@ class SavingsManager {
         if (goalTypeSelect) {
             for (let i = 0; i < goalTypeSelect.options.length; i++) {
                 const option = goalTypeSelect.options[i];
-                console.log(`    ${i}: value="${option.value}", text="${option.text}"`);
             }
         }
         
@@ -3278,7 +3265,6 @@ async function loadGoalTypes() {
             
             // Debug: List all loaded goal types
             data.goal_types.forEach((goalType, index) => {
-                console.log(`  ${index}: value="${goalType.value}", display="${goalType.display}"`);
             });
         } else {
             console.error('Failed to load goal types:', data.message);
@@ -3824,14 +3810,11 @@ function showSnackbar(message, type = 'info') {
 // Test function for loading screen (can be called from browser console)
 window.testLoadingScreen = function(duration = 3000) {
     if (window.budgetlyLoader) {
-        console.log('Testing loading screen for', duration, 'ms');
         window.budgetlyLoader.show();
         setTimeout(() => {
             window.budgetlyLoader.hide();
-            console.log('Loading screen test complete');
         }, duration);
     } else {
-        console.log('Loading screen not available');
     }
 };
 

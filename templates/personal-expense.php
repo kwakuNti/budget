@@ -734,20 +734,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Enhanced Personal Expense Page JavaScript
         // Wait for loading.js to be available
         function initializeExpense() {
-            console.log('Expense: Initializing expense page');
-            console.log('Expense: LoadingScreen available?', typeof window.LoadingScreen);
             
             // Initialize loading screen with expense-specific message
             if (window.LoadingScreen) {
-                console.log('Expense: Creating LoadingScreen');
                 window.budgetlyLoader = new LoadingScreen();
-                console.log('Expense: LoadingScreen created', window.budgetlyLoader);
                 
                 // Customize the loading message for expenses
                 const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
                 if (loadingMessage) {
                     loadingMessage.innerHTML = 'Loading your expenses<span class="loading-dots-text">...</span>';
-                    console.log('Expense: Loading message customized');
                 } else {
                     console.error('Expense: Could not find loading message element');
                 }
@@ -757,7 +752,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Show initial loading for data fetch
             if (window.budgetlyLoader) {
-                console.log('Expense: Showing loading screen');
                 window.budgetlyLoader.show();
             } else {
                 console.error('Expense: budgetlyLoader not available');
@@ -768,17 +762,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Expense: DOMContentLoaded fired');
             
             // Enhanced loading screen availability check
             function checkLoadingScreen(attempts = 0) {
                 const maxAttempts = 10;
                 
                 if (window.LoadingScreen) {
-                    console.log('Expense: LoadingScreen found after', attempts, 'attempts');
                     initializeExpense();
                 } else if (attempts < maxAttempts) {
-                    console.log('Expense: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
                     setTimeout(() => checkLoadingScreen(attempts + 1), 50);
                 } else {
                     console.error('Expense: LoadingScreen still not available after', maxAttempts, 'attempts');
@@ -824,10 +815,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 'initializeCharts'
             ];
             
-            console.log('Expense: Loading page functions...');
             functionsToLoad.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
-                    console.log(`Expense: Loading ${funcName}...`);
                     window[funcName]();
                 } else {
                     console.warn(`Expense: Function ${funcName} not found, skipping`);
@@ -1733,14 +1722,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Test function for loading screen (can be called from browser console)
         window.testExpenseLoadingScreen = function(duration = 3000) {
             if (window.budgetlyLoader) {
-                console.log('Testing expense loading screen for', duration, 'ms');
                 window.budgetlyLoader.show();
                 setTimeout(() => {
                     window.budgetlyLoader.hide();
-                    console.log('Expense loading screen test complete');
                 }, duration);
             } else {
-                console.log('Loading screen not available');
             }
         };
     </script>

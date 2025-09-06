@@ -54,7 +54,6 @@ function populateDashboardWithData(data) {
             logoUserName.textContent = data.user.first_name || 'Personal';
         }
     } else {
-        console.log('No user data found');
     }
     
     // Update salary information

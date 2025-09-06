@@ -852,20 +852,15 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         // Enhanced Budget Page JavaScript
         // Wait for loading.js to be available
         function initializeBudget() {
-            console.log('Budget: Initializing budget page');
-            console.log('Budget: LoadingScreen available?', typeof window.LoadingScreen);
             
             // Initialize loading screen with budget-specific message
             if (window.LoadingScreen) {
-                console.log('Budget: Creating LoadingScreen');
                 window.budgetlyLoader = new LoadingScreen();
-                console.log('Budget: LoadingScreen created', window.budgetlyLoader);
                 
                 // Customize the loading message for budget
                 const loadingMessage = window.budgetlyLoader.loadingElement.querySelector('.loading-message p');
                 if (loadingMessage) {
                     loadingMessage.innerHTML = 'Loading your budget<span class="loading-dots-text">...</span>';
-                    console.log('Budget: Loading message customized');
                 } else {
                     console.error('Budget: Could not find loading message element');
                 }
@@ -875,7 +870,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
 
             // Show initial loading for data fetch
             if (window.budgetlyLoader) {
-                console.log('Budget: Showing loading screen');
                 window.budgetlyLoader.show();
             } else {
                 console.error('Budget: budgetlyLoader not available');
@@ -893,17 +887,14 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Budget: DOMContentLoaded fired');
             
             // Enhanced loading screen availability check
             function checkLoadingScreen(attempts = 0) {
                 const maxAttempts = 10;
                 
                 if (window.LoadingScreen) {
-                    console.log('Budget: LoadingScreen found after', attempts, 'attempts');
                     initializeBudget();
                 } else if (attempts < maxAttempts) {
-                    console.log('Budget: LoadingScreen not ready, attempt', attempts + 1, 'of', maxAttempts);
                     setTimeout(() => checkLoadingScreen(attempts + 1), 50);
                 } else {
                     console.error('Budget: LoadingScreen still not available after', maxAttempts, 'attempts');
@@ -922,7 +913,6 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
             }
 
             // Add your existing budget data loading logic here
-            console.log('Budget: Loading budget data...');
             
             // Load budget template data if available
             const functionsToLoad = [
@@ -930,10 +920,8 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 'loadExpenseCategories'
             ];
             
-            console.log('Budget: Loading page functions...');
             functionsToLoad.forEach(funcName => {
                 if (typeof window[funcName] === 'function') {
-                    console.log(`Budget: Loading ${funcName}...`);
                     window[funcName]();
                 } else {
                     console.warn(`Budget: Function ${funcName} not found, skipping`);

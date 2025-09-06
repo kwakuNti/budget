@@ -978,7 +978,6 @@ setInterval(async function() {
                 updateStatsDisplay();
             }
         } catch (error) {
-            console.log('Auto-refresh failed:', error);
         }
     }
 }, 30000); // 30 seconds
@@ -1111,7 +1110,6 @@ async function checkForUpdates() {
             }
         }
     } catch (error) {
-        console.log('Update check failed:', error);
     }
 }
 
@@ -1296,4 +1294,3 @@ function initializeMemberSearch() {
     });
 }
 
-console.log('MoMo JavaScript loaded successfully - COMPLETE VERSION');

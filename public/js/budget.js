@@ -2718,13 +2718,10 @@ window.goToSavingsPage = function() {
 // Test function for loading screen (can be called from browser console)
 window.testBudgetLoadingScreen = function(duration = 3000) {
     if (window.budgetlyLoader) {
-        console.log('Testing budget loading screen for', duration, 'ms');
         window.budgetlyLoader.show();
         setTimeout(() => {
             window.budgetlyLoader.hide();
-            console.log('Budget loading screen test complete');
         }, duration);
     } else {
-        console.log('Loading screen not available');
     }
 };
