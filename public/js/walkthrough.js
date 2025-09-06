@@ -667,6 +667,9 @@ class BudgetWalkthrough {
         } else if (step.step_name === 'setup_budget') {
             console.log('💰 Setting up budget step monitoring');
             this.setupBudgetStepMonitoring(targetElement, step);
+        } else if (step.step_name === 'create_categories') {
+            console.log('🏗️ Setting up category creation monitoring');
+            this.setupCategoryCreationMonitoring(targetElement, step);
         } else if (step.step_name === 'fill_category_form') {
             console.log('📝 Setting up category form fill handler');
             this.handleCategoryFormFill(step);
@@ -1753,6 +1756,26 @@ class BudgetWalkthrough {
         }
     }
 
+    restartStep(stepName) {
+        console.log('🔄 Restarting step:', stepName);
+        
+        // Clean up any existing UI
+        this.cleanup();
+        
+        // Set the current step back to the specified step
+        this.currentStep = stepName;
+        
+        // Clear any step-in-progress flags
+        if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('currentWalkthroughStep', stepName);
+        }
+        
+        // Restart the walkthrough from this step
+        setTimeout(() => {
+            this.startWalkthrough();
+        }, 500);
+    }
+
     waitForCategoryModalAndContinue(nextStep) {
         console.log('⏳ Waiting for category modal to be ready for step:', nextStep);
         
@@ -2419,6 +2442,27 @@ class BudgetWalkthrough {
         document.head.appendChild(styles);
     }
 
+    setupCategoryCreationMonitoring(targetElement, step) {
+        console.log('🏗️ Setting up category creation monitoring (like salary setup)');
+        
+        // Monitor for the category modal to actually open after user clicks
+        const checkForCategoryModal = () => {
+            const modal = document.getElementById('addCategoryModal');
+            if (modal && (modal.style.display === 'flex' || modal.classList.contains('show'))) {
+                console.log('🎉 Category modal opened - user clicked the button!');
+                // Modal opened successfully, proceed to next step
+                this.completeStep(step.step_name);
+                return; // Stop monitoring
+            }
+            
+            // Continue monitoring for click
+            setTimeout(checkForCategoryModal, 100);
+        };
+        
+        // Start monitoring
+        setTimeout(checkForCategoryModal, 100);
+    }
+
     // Category Creation Handlers
     handleCategoryCreationStep(step) {
         console.log('🏗️ Handling category creation step');
@@ -2437,8 +2481,22 @@ class BudgetWalkthrough {
     handleCategoryFormFill(step) {
         console.log('📝 Handling category form fill step');
         
+        // Check if modal is actually open first
+        const modal = document.getElementById('addCategoryModal');
+        if (!modal || (modal.style.display !== 'flex' && !modal.classList.contains('show'))) {
+            console.log('❌ Category modal not open - restarting previous step');
+            this.restartStep('create_categories');
+            return;
+        }
+        
         // Wait a moment for modal to be fully rendered
         setTimeout(() => {
+            // Double-check modal is still open
+            if (!modal || (modal.style.display !== 'flex' && !modal.classList.contains('show'))) {
+                console.log('❌ Category modal closed during form setup - restarting');
+                this.restartStep('create_categories');
+                return;
+            }
             // Check if modal is open and log debug info
             const modal = document.getElementById('addCategoryModal');
             console.log('🔍 Modal found:', !!modal);
@@ -2677,8 +2735,22 @@ class BudgetWalkthrough {
     handleBudgetSetting(step) {
         console.log('💰 Handling budget setting step');
         
+        // Check if modal is actually open first
+        const modal = document.getElementById('addCategoryModal');
+        if (!modal || (modal.style.display !== 'flex' && !modal.classList.contains('show'))) {
+            console.log('❌ Category modal not open for budget setting - restarting previous step');
+            this.restartStep('create_categories');
+            return;
+        }
+        
         // Wait for modal to be ready
         setTimeout(() => {
+            // Double-check modal is still open
+            if (!modal || (modal.style.display !== 'flex' && !modal.classList.contains('show'))) {
+                console.log('❌ Category modal closed during budget setup - restarting');
+                this.restartStep('create_categories');
+                return;
+            }
             // Suggest a budget amount but let user set it
             const budgetInput = document.querySelector('#addCategoryModal input[name="budget_limit"]');
             
