@@ -837,40 +837,36 @@ class BudgetWalkthrough {
         const checkForSuccess = () => {
             if (successDetected) return;
             
-            // Check if modal is closed (success indicator)
-            const modal = document.getElementById('budgetTemplateModal');
-            if (!modal || modal.style.display === 'none' || !modal.classList.contains('show')) {
-                console.log('✅ Template modal closed - checking if template was applied');
-                
-                // Double-check by looking for success snackbar
-                const snackbar = document.getElementById('snackbar');
-                if (snackbar && snackbar.classList.contains('show') && 
-                    (snackbar.textContent.includes('applied') || snackbar.textContent.includes('Template'))) {
-                    console.log('✅ Success snackbar detected for template');
-                    successDetected = true;
-                    this.completeTemplateStep(step);
-                    return;
-                }
-                
-                // Check if budget data was updated (alternative success check)
-                setTimeout(() => {
-                    // If we reach here, assume template was applied successfully
-                    if (!successDetected) {
-                        console.log('✅ Assuming template was applied based on modal closure');
-                        successDetected = true;
-                        this.completeTemplateStep(step);
-                    }
-                }, 1000);
+            // First check for success snackbar (most reliable)
+            const snackbar = document.getElementById('snackbar');
+            if (snackbar && snackbar.classList.contains('show') && 
+                (snackbar.textContent.includes('applied') || snackbar.textContent.includes('Template') || snackbar.textContent.includes('saved'))) {
+                console.log('✅ Success snackbar detected for template application');
+                successDetected = true;
+                this.completeTemplateStep(step);
                 return;
             }
             
-            // Check for success snackbar
-            const snackbar = document.getElementById('snackbar');
-            if (snackbar && snackbar.classList.contains('show') && 
-                (snackbar.textContent.includes('applied') || snackbar.textContent.includes('success'))) {
-                console.log('✅ Success snackbar detected');
-                successDetected = true;
-                this.completeTemplateStep(step);
+            // Check if modal is closed (might indicate success)
+            const modal = document.getElementById('budgetTemplateModal');
+            if (!modal || modal.style.display === 'none' || modal.style.display === '') {
+                console.log('✅ Template modal closed - verifying if template was actually applied');
+                
+                // Wait a bit longer and double-check if template was applied
+                setTimeout(() => {
+                    if (!successDetected) {
+                        const templateApplied = this.checkIfTemplateWasApplied();
+                        if (templateApplied) {
+                            console.log('✅ Template application confirmed');
+                            successDetected = true;
+                            this.completeTemplateStep(step);
+                        } else {
+                            console.log('❌ Template not applied, continuing to monitor...');
+                            // Continue monitoring or show reminder
+                            setTimeout(checkForSuccess, 500);
+                        }
+                    }
+                }, 1500); // Give more time for any async operations
                 return;
             }
             
@@ -885,19 +881,23 @@ class BudgetWalkthrough {
     checkTemplateCompletionOnModalClose(step, templateWasSelected) {
         console.log('🔍 Checking if template was actually completed...', { templateWasSelected });
         
-        // Check if any template allocation exists in the page or data
-        // This is a simple check - you might want to make an API call here for more accuracy
-        const hasTemplateApplied = this.checkIfTemplateWasApplied();
-        
-        console.log('💡 Template was applied:', hasTemplateApplied);
-        
-        if (hasTemplateApplied || templateWasSelected) {
-            console.log('✅ Template was completed - proceeding with walkthrough');
-            this.completeTemplateStep(step);
-        } else {
-            console.log('❌ Template was not completed - showing reminder');
-            this.handleIncompleteTemplateSelection(step);
-        }
+        // Give a moment for any success indicators to appear
+        setTimeout(() => {
+            // Check if any template allocation exists in the page or data
+            const hasTemplateApplied = this.checkIfTemplateWasApplied();
+            
+            console.log('💡 Template was applied:', hasTemplateApplied);
+            console.log('💡 Template was selected:', templateWasSelected);
+            
+            // Only consider it complete if template was actually applied (not just selected)
+            if (hasTemplateApplied) {
+                console.log('✅ Template was completed - proceeding with walkthrough');
+                this.completeTemplateStep(step);
+            } else {
+                console.log('❌ Template was not completed - showing reminder');
+                this.handleIncompleteTemplateSelection(step);
+            }
+        }, 1000); // Wait for any success messages or state changes
     }
 
     checkIfTemplateWasApplied() {
@@ -917,9 +917,24 @@ class BudgetWalkthrough {
             console.log('Could not check budget data:', e);
         }
         
-        // Fallback: assume template was applied if modal was interacted with
-        // In a production environment, you'd want to make an API call here
-        return true;
+        // Check for template preview or applied template indication
+        const templatePreview = document.getElementById('templatePreview');
+        if (templatePreview && templatePreview.style.display !== 'none' && templatePreview.innerHTML.trim()) {
+            console.log('Found template preview, checking content');
+            return templatePreview.innerHTML.includes('Apply This Template') || templatePreview.innerHTML.includes('applied');
+        }
+        
+        // More strict check - look for success messages
+        const snackbar = document.getElementById('snackbar');
+        if (snackbar && snackbar.classList.contains('show') && 
+            (snackbar.textContent.includes('applied') || snackbar.textContent.includes('Template'))) {
+            console.log('Found template success message');
+            return true;
+        }
+        
+        // Don't assume template was applied if modal was just interacted with
+        console.log('No clear indication template was applied');
+        return false;
     }
 
     handleIncompleteTemplateSelection(step) {
@@ -2614,12 +2629,14 @@ class BudgetWalkthrough {
     handleCategoryCreationStep(step) {
         console.log('🏗️ Handling category creation step');
         
-        // Disable automatic modal listeners during category creation
-        this.isHandlingCategoryCreation = true;
+        // The modal is already open since this is called from the periodic checker
+        // We should complete this step and move to the next one (fill_category_form)
+        console.log('✅ Category modal is open, completing create_categories step');
         
-        // Don't temporarily hide walkthrough for category steps - we want to provide guidance
-        // Set up monitoring for actual category form submission
-        this.monitorCategoryModalInteraction(step);
+        // Complete the step immediately since the modal is open
+        setTimeout(() => {
+            this.completeStep(step.step_name);
+        }, 500); // Small delay to ensure modal is fully rendered
     }
 
     monitorCategoryModalInteraction(step) {
