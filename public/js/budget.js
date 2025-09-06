@@ -1793,7 +1793,7 @@ function createCategorySection(type, typeInfo, totals, categories) {
         <div class="category-content">
             ${type === 'savings' ? (categories.length > 0 ? createSavingsCategoryTable(categories) : createSavingsMessage(totals)) : createCategoryTable(categories)}
             ${type !== 'savings' ? `<button class="add-item-btn" onclick="showAddCategoryModal('${type}')">+ Add Category</button>` : 
-              (categories.length > 0 ? '<div class="savings-actions" style="margin-top: 1rem;"><a href="savings.php" class="btn-primary">Manage All Goals</a></div>' : '<div class="savings-actions"><a href="savings.php" class="btn-primary">Create Your First Goal</a></div>')}
+              (categories.length > 0 ? '<div class="savings-actions" style="margin-top: 1rem;"><a href="savings.php" class="btn-primary">Manage All Goals</a></div>' : '<div class="savings-actions"><a href="savings" class="btn-primary">Create Your First Goal</a></div>')}
         </div>
     `;
     
