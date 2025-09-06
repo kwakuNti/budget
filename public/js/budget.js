@@ -2370,7 +2370,7 @@ function addExpenseToCategory(categoryId, categoryName) {
 function viewCategoryExpenses(categoryId, categoryName) {
     // Navigate to the personal expense page with the category pre-selected
     // You can modify this to open a modal instead if preferred
-    const url = `../personal-expense.php?category=${categoryId}&name=${encodeURIComponent(categoryName)}`;
+    const url = `../personal-expense?category=${categoryId}&name=${encodeURIComponent(categoryName)}`;
     window.location.href = url;
 }
 

@@ -195,7 +195,7 @@ function getDashboardInsights($conn, $user_id) {
             'title' => 'Budget Alert!',
             'message' => "You've spent {$spending_ratio}% of your monthly income. Consider reducing discretionary expenses.",
             'action' => 'Review Expenses',
-            'link' => 'personal-expense.php'
+            'link' => 'personal-expense'
         ];
     } elseif ($spending_ratio < 50) {
         $insights[] = [
