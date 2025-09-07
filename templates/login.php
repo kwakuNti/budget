@@ -903,7 +903,7 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
                             <label for="rememberMe" class="checkbox-label">Remember for 30 days</label>
                         </div>
 
-                        <a href="#" class="forgot-link" onclick="showForgotPassword()">
+                        <a href="#" class="forgot-link" onclick="showForgotPassword(); return false;">
                             Forgot password?
                         </a>
                     </div>
@@ -1034,7 +1034,15 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
 
         // Modal functionality
         function showForgotPassword() {
-            document.getElementById('forgotPasswordModal').style.display = 'block';
+            console.log('showForgotPassword called');
+            const modal = document.getElementById('forgotPasswordModal');
+            console.log('Modal element:', modal);
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('Modal display set to block');
+            } else {
+                console.log('Modal element not found!');
+            }
         }
 
         function closeForgotPassword() {
