@@ -756,170 +756,22 @@
 
 /* Responsive Design Improvements */
 @media (max-width: 768px) {
-    /* Enhanced Mobile Layout */
-    .budget-container {
-        padding: 10px;
-        margin: 0;
-    }
-
-    .budget-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .budget-card {
-        padding: 16px;
-        margin-bottom: 10px;
-    }
-
-    .budget-item {
-        padding: 12px;
-        margin-bottom: 8px;
-    }
-
-    .budget-item-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .budget-item-details {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .budget-amount {
-        font-size: 1.1rem;
-    }
-
-    .budget-progress {
-        height: 6px;
-        margin: 8px 0;
-    }
-
-    /* Modal improvements */
-    .modal-container {
-        width: 95%;
-        max-width: 95%;
-        margin: 5% auto;
-        padding: 0;
-    }
-
-    .modal-header {
-        padding: 16px;
-    }
-
-    .modal-body {
-        padding: 16px;
-    }
-
-    .modal-footer {
-        padding: 16px;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .btn {
-        width: 100%;
-        margin-bottom: 8px;
-    }
-
-    /* Form improvements */
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .form-group {
-        margin-bottom: 16px;
-    }
-
-    .form-control {
-        padding: 12px;
-        font-size: 1rem;
-    }
-
-    /* Color and icon selectors */
     .color-selector,
     .icon-selector {
         justify-content: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .color-option,
-    .icon-option {
-        width: 35px;
-        height: 35px;
-        margin: 4px;
     }
     
-    /* Loading and empty states */
     .loading-state,
     .empty-state {
-        padding: 30px 16px;
+        padding: 40px 16px;
     }
     
     .empty-icon {
-        font-size: 2.5rem;
+        font-size: 36px;
     }
     
     .empty-state h3 {
-        font-size: 1.2rem;
-    }
-
-    .empty-state p {
-        font-size: 0.9rem;
-    }
-
-    /* Budget overview cards */
-    .budget-overview {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .overview-card {
-        padding: 16px;
-    }
-
-    .overview-card h3 {
-        font-size: 0.9rem;
-    }
-
-    .overview-amount {
-        font-size: 1.3rem;
-    }
-
-    /* Action buttons */
-    .action-buttons {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .action-btn {
-        width: 100%;
-        padding: 12px;
-        font-size: 0.9rem;
-    }
-
-    /* Charts and visualizations */
-    .chart-container {
-        height: 200px;
-        padding: 10px;
-    }
-
-    /* Tables */
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    .table {
-        font-size: 0.85rem;
-    }
-
-    .table th,
-    .table td {
-        padding: 8px 4px;
+        font-size: 20px;
     }
 }
 

@@ -72,11 +72,11 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                     echo strtoupper(substr($user_first_name, 0, 1) . substr($_SESSION['last_name'] ?? '', 0, 1)); 
                 ?></div>
                 <div class="user-dropdown" id="userDropdown">
-                    <!-- <a href="profile.php">Profile Settings</a> -->
-                    <!-- <a href="income-sources.php">Income Sources</a> -->
-                    <!-- <a href="categories.php">Categories</a> -->
+                    <a href="savings">Savings</a>
+                    <a href="personal-expense"> Expense </a>
+                    <a href="budgets">Budget</a>
                     <!-- <hr> -->
-                    <!-- <a href="family-dashboard.php">Switch to Family</a> -->
+                    <a href="salary">Salary</a>
                     <a href="../actions/signout.php">Logout</a>
                 </div>
             </div>
