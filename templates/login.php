@@ -1034,16 +1034,22 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
 
         // Modal functionality
         function showForgotPassword() {
-            console.log('showForgotPassword called');
             const modal = document.getElementById('forgotPasswordModal');
-            console.log('Modal element:', modal);
             if (modal) {
                 modal.style.display = 'block';
                 modal.style.zIndex = '10001'; // Ensure it's above everything
-                modal.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Temporary red background for testing
-                console.log('Modal display set to block');
-            } else {
-                console.log('Modal element not found!');
+                // Remove any conflicting styles
+                modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                
+                // Also ensure the modal content is visible
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.opacity = '1';
+                    modalContent.style.transform = 'translateY(0)';
+                    modalContent.style.visibility = 'visible';
+                }
             }
         }
 
