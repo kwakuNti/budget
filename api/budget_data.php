@@ -4,6 +4,11 @@ require_once '../config/connection.php';
 
 header('Content-Type: application/json');
 
+// Enable error logging for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'User not authenticated']);
@@ -11,6 +16,9 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
+
+// Debug: Log the user ID
+error_log("Budget Data API: Loading data for user ID: " . $userId);
 
 try {
     // Get current budget allocation
@@ -108,36 +116,40 @@ try {
     $totalVariance = $totalPlanned - $totalActual;
     $budgetPerformance = $totalPlanned > 0 ? round(($totalActual / $totalPlanned) * 100, 1) : 0;
 
-    // Get savings categories (goals) with their contributions
+    // Get savings categories (goals) with their contributions - FIXED APPROACH
+    // First, get all active personal goals regardless of budget category linkage
     $stmt = $conn->prepare("
         SELECT 
-            bc.id,
-            bc.name,
-            bc.category_type,
-            bc.icon,
-            bc.color,
-            bc.budget_limit,
             pg.id as goal_id,
+            pg.goal_name,
             pg.current_amount,
             pg.target_amount,
-            pg.auto_save_enabled,
-            pg.save_amount,
+            COALESCE(pg.auto_save_enabled, 0) as auto_save_enabled,
+            COALESCE(pg.save_amount, 0) as save_amount,
+            bc.id as category_id,
+            bc.name as category_name,
+            bc.icon,
+            bc.color,
             COALESCE(SUM(pgc.amount), 0) as actual_contributed,
             COUNT(pgc.id) as contribution_count
-        FROM budget_categories bc
-        LEFT JOIN personal_goals pg ON bc.id = pg.budget_category_id AND pg.user_id = ?
+        FROM personal_goals pg
+        LEFT JOIN budget_categories bc ON pg.budget_category_id = bc.id
         LEFT JOIN personal_goal_contributions pgc ON pg.id = pgc.goal_id 
             AND MONTH(pgc.contribution_date) = MONTH(CURRENT_DATE())
             AND YEAR(pgc.contribution_date) = YEAR(CURRENT_DATE())
-        WHERE bc.user_id = ? AND bc.is_active = TRUE
-            AND bc.category_type = 'savings'
-        GROUP BY bc.id, bc.name, bc.category_type, bc.icon, bc.color, bc.budget_limit, 
-                 pg.id, pg.current_amount, pg.target_amount, pg.auto_save_enabled, pg.save_amount
-        ORDER BY bc.name
+        WHERE pg.user_id = ? 
+            AND pg.is_completed = 0
+            AND COALESCE(pg.status, 'active') = 'active'
+        GROUP BY pg.id, pg.goal_name, pg.current_amount, pg.target_amount, 
+                 pg.auto_save_enabled, pg.save_amount, bc.id, bc.name, bc.icon, bc.color
+        ORDER BY pg.goal_name
     ");
-    $stmt->bind_param("ii", $userId, $userId);
+    $stmt->bind_param("i", $userId);
     $stmt->execute();
     $savingsResult = $stmt->get_result();
+    
+    // Debug: Log savings query results
+    error_log("Budget Data API: Savings query found " . $savingsResult->num_rows . " rows");
     
     $savingsCategories = [];
     $totalActualSavings = 0;
@@ -151,12 +163,19 @@ try {
         // Use auto-save amount as monthly planned if available, otherwise don't set a monthly target
         $monthlyPlanned = $autoSaveAmount > 0 ? $autoSaveAmount : 0;
         
+        // Use goal name if available, otherwise fallback to category name
+        $displayName = $row['goal_name'] ?? $row['category_name'] ?? 'Savings Goal';
+        
+        // Use default savings styling if category data is missing
+        $icon = $row['icon'] ?? 'piggy-bank';
+        $color = $row['color'] ?? '#10b981';
+        
         $savingsCategories[] = [
-            'id' => intval($row['id']),
-            'name' => $row['name'],
-            'category_type' => $row['category_type'],
-            'icon' => $row['icon'],
-            'color' => $row['color'],
+            'id' => intval($row['category_id'] ?? $row['goal_id']), // Use category_id if available, otherwise goal_id
+            'name' => $displayName,
+            'category_type' => 'savings',
+            'icon' => $icon,
+            'color' => $color,
             'budget_limit' => $monthlyPlanned,
             'actual_spent' => $actualContributed, // Using 'spent' for consistency, but it's actually saved
             'transaction_count' => intval($row['contribution_count']),
@@ -172,6 +191,138 @@ try {
         
         $totalActualSavings += $actualContributed;
         $totalPlannedSavings += $monthlyPlanned;
+        
+        // Debug: Log each savings category being processed
+        error_log("Budget Data API: Processing savings goal - " . $displayName . " (Auto-save: ₵" . $autoSaveAmount . ", Contributed: ₵" . $actualContributed . ")");
+    }
+    
+    // Debug: Log final savings totals
+    error_log("Budget Data API: Total savings categories: " . count($savingsCategories));
+    error_log("Budget Data API: Total actual savings: ₵" . $totalActualSavings);
+    error_log("Budget Data API: Total planned savings: ₵" . $totalPlannedSavings);
+
+    // ENHANCEMENT: Ensure all goals without budget categories get the shared "General Savings" category
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as orphaned_goals 
+        FROM personal_goals 
+        WHERE user_id = ? 
+        AND (budget_category_id IS NULL OR budget_category_id = 0)
+        AND is_completed = 0
+        AND COALESCE(status, 'active') = 'active'
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $orphanedResult = $stmt->get_result()->fetch_assoc();
+    
+    if ($orphanedResult['orphaned_goals'] > 0) {
+        // Check if General Savings category exists
+        $stmt = $conn->prepare("
+            SELECT id FROM budget_categories 
+            WHERE user_id = ? AND name = 'General Savings' AND category_type = 'savings'
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $generalCategory = $stmt->get_result()->fetch_assoc();
+        
+        if (!$generalCategory) {
+            // Create the General Savings category
+            $stmt = $conn->prepare("
+                INSERT INTO budget_categories 
+                (user_id, name, category_type, icon, color, budget_limit, is_active) 
+                VALUES (?, 'General Savings', 'savings', 'piggy-bank', '#10b981', 0, 1)
+            ");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $categoryId = $conn->insert_id;
+        } else {
+            $categoryId = $generalCategory['id'];
+        }
+        
+        // Link orphaned goals to the General Savings category
+        $stmt = $conn->prepare("
+            UPDATE personal_goals 
+            SET budget_category_id = ? 
+            WHERE user_id = ? 
+            AND (budget_category_id IS NULL OR budget_category_id = 0)
+            AND is_completed = 0
+            AND COALESCE(status, 'active') = 'active'
+        ");
+        $stmt->bind_param("ii", $categoryId, $userId);
+        $stmt->execute();
+        
+        // Re-run the savings query to get the updated data
+        $stmt = $conn->prepare("
+            SELECT 
+                pg.id as goal_id,
+                pg.goal_name,
+                pg.current_amount,
+                pg.target_amount,
+                COALESCE(pg.auto_save_enabled, 0) as auto_save_enabled,
+                COALESCE(pg.save_amount, 0) as save_amount,
+                bc.id as category_id,
+                bc.name as category_name,
+                bc.icon,
+                bc.color,
+                COALESCE(SUM(pgc.amount), 0) as actual_contributed,
+                COUNT(pgc.id) as contribution_count
+            FROM personal_goals pg
+            LEFT JOIN budget_categories bc ON pg.budget_category_id = bc.id
+            LEFT JOIN personal_goal_contributions pgc ON pg.id = pgc.goal_id 
+                AND MONTH(pgc.contribution_date) = MONTH(CURRENT_DATE())
+                AND YEAR(pgc.contribution_date) = YEAR(CURRENT_DATE())
+            WHERE pg.user_id = ? 
+                AND pg.is_completed = 0
+                AND COALESCE(pg.status, 'active') = 'active'
+            GROUP BY pg.id, pg.goal_name, pg.current_amount, pg.target_amount, 
+                     pg.auto_save_enabled, pg.save_amount, bc.id, bc.name, bc.icon, bc.color
+            ORDER BY pg.goal_name
+        ");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $savingsResult = $stmt->get_result();
+        
+        // Reset and rebuild savings categories array
+        $savingsCategories = [];
+        $totalActualSavings = 0;
+        $totalPlannedSavings = 0;
+        
+        while ($row = $savingsResult->fetch_assoc()) {
+            $actualContributed = floatval($row['actual_contributed']);
+            $autoSaveAmount = floatval($row['save_amount'] ?? 0);
+            $targetAmount = floatval($row['target_amount'] ?? 0);
+            
+            // Use auto-save amount as monthly planned if available, otherwise don't set a monthly target
+            $monthlyPlanned = $autoSaveAmount > 0 ? $autoSaveAmount : 0;
+            
+            // Use goal name if available, otherwise fallback to category name
+            $displayName = $row['goal_name'] ?? $row['category_name'] ?? 'Savings Goal';
+            
+            // Use default savings styling if category data is missing
+            $icon = $row['icon'] ?? 'piggy-bank';
+            $color = $row['color'] ?? '#10b981';
+            
+            $savingsCategories[] = [
+                'id' => intval($row['category_id'] ?? $row['goal_id']), // Use category_id if available, otherwise goal_id
+                'name' => $displayName,
+                'category_type' => 'savings',
+                'icon' => $icon,
+                'color' => $color,
+                'budget_limit' => $monthlyPlanned,
+                'actual_spent' => $actualContributed, // Using 'spent' for consistency, but it's actually saved
+                'transaction_count' => intval($row['contribution_count']),
+                'variance' => $monthlyPlanned - $actualContributed,
+                'progress_percentage' => $monthlyPlanned > 0 ? 
+                    min(100, ($actualContributed / $monthlyPlanned) * 100) : 0,
+                'goal_id' => $row['goal_id'],
+                'current_amount' => floatval($row['current_amount'] ?? 0),
+                'target_amount' => $targetAmount,
+                'auto_save_enabled' => boolval($row['auto_save_enabled'] ?? false),
+                'auto_save_amount' => $autoSaveAmount
+            ];
+            
+            $totalActualSavings += $actualContributed;
+            $totalPlannedSavings += $monthlyPlanned;
+        }
     }
 
     // Get total actual savings from goal contributions (not expenses)
@@ -230,8 +381,16 @@ try {
             'remaining_budget' => $totalPlanned - $totalActual,
             'available_balance' => $totalMonthlyIncome - $totalActual - $actualSavings, // Corrected calculation
             'income_utilization' => $totalMonthlyIncome > 0 ? round(($totalPlanned / $totalMonthlyIncome) * 100, 1) : 0
+        ],
+        'debug_info' => [
+            'user_id' => $userId,
+            'savings_categories_count' => count($savingsCategories),
+            'orphaned_goals_processed' => isset($orphanedResult) ? $orphanedResult['orphaned_goals'] : 0
         ]
     ]);
+    
+    // Debug: Log final output
+    error_log("Budget Data API: Returning " . count($categoriesByType['savings']) . " savings categories in response");
 
 } catch (Exception $e) {
     echo json_encode([
