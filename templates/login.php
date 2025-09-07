@@ -1039,6 +1039,8 @@ $showTimeoutMessage = isset($_GET['timeout']) && $_GET['timeout'] == '1';
             console.log('Modal element:', modal);
             if (modal) {
                 modal.style.display = 'block';
+                modal.style.zIndex = '10001'; // Ensure it's above everything
+                modal.style.backgroundColor = 'rgba(255, 0, 0, 0.8)'; // Temporary red background for testing
                 console.log('Modal display set to block');
             } else {
                 console.log('Modal element not found!');
