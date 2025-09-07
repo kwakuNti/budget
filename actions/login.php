@@ -368,7 +368,7 @@ try {
         // Updated routing logic based on user type (not hardcoded email)
         if ($user['user_type'] === 'family') {
             debugLog("Redirecting family user to family dashboard");
-            redirectWithMessage("/dashboard", "success", $welcomeMessage);
+            redirectWithMessage("/family-dashboard", "success", $welcomeMessage);
         } else {
             debugLog("Redirecting personal user to personal dashboard");
             redirectWithMessage("/personal-dashboard", "success", $welcomeMessage);

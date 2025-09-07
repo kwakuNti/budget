@@ -9,10 +9,10 @@ session_start();
 
 if (isset($_SESSION['user_id']) && isset($_SESSION['family_id'])) {
     // User is logged in, redirect to dashboard
-    header("Location: templates/personal-dashboard.php");
+    header("Location: templates/personal-dashboard");
 } else {
     // User not logged in, redirect to login
-    header("Location: templates/login.php");
+    header("Location: templates/login");
 }
 exit();
 ?>
