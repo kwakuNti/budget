@@ -51,7 +51,7 @@ $growthMessage = $growthRate > 0
 
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="dashboard" class="nav-link">
+                <a href="family-dashboard" class="nav-link">
                     <span class="nav-icon">🏠</span>
                     <span>Dashboard</span>
                 </a>
