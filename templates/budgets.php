@@ -155,19 +155,7 @@ $user_full_name = $_SESSION['full_name'] ?? 'User';
                 </div>
             </section>
 
-            <!-- Budget Period Selector -->
-            <section class="budget-controls">
-                <div class="period-selector">
-                    <label>Budget Period:</label>
-                    <select id="budgetPeriodSelector">
-                        <option value="">Loading periods...</option>
-                    </select>
-                    <span id="currentPeriodDisplay" class="current-period">
-                        <?php echo date('F Y'); ?>
-                    </span>
-                </div>
 
-            </section>
 
             <!-- Main Budget Categories -->
             <section class="budget-categories">
